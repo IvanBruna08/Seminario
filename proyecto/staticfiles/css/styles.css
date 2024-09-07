@@ -1,0 +1,232 @@
+/* Estilo de la barra de navegación */
+.navbar {
+    background-color: #05a505; /* Verde oscuro */
+    overflow: hidden;
+    height: 50px; /* Ajusta la altura */
+    display: flex;
+    justify-content: flex-start; /* Alinea los elementos a la izquierda */
+    align-items: center; /* Centra verticalmente los elementos */
+    padding: 0 20px; /* Espaciado interno a los lados */
+}
+
+/* Estilo para los enlaces de la barra de navegación */
+.navbar a, .dropdown .dropbtn {
+    color: white;
+    text-align: center;
+    padding: 14px 16px; /* Ajusta el espaciado interno */
+    text-decoration: none;
+    font-size: 18px;
+    white-space: nowrap; /* Evita que el texto se quiebre en varias líneas */
+    line-height: 50px; /* Alinea verticalmente con la altura de la barra */
+}
+.navbar a:hover, .dropdown-content a:hover {
+    background-color: #66BB6A; /* Verde más oscuro */
+    color: white; /* Color del texto para buen contraste */
+}
+
+
+/* Estilo para el botón del dropdown */
+.dropdown .dropbtn {
+    background-color: transparent; /* Asegura que el fondo no sea blanco */
+    border: none; /* Sin borde */
+    cursor: pointer; /* Cambia el cursor al pasar sobre el botón */
+    color: white; /* Asegura que el texto del botón sea blanco */
+}
+
+/* Estilo para el contenido del dropdown */
+.dropdown-content {
+    display: none;
+    position: absolute; /* Asegura que el contenido se posicione sobre otros elementos */
+    background-color: #81C784; /* Verde más claro, sugiriendo frescura y vitalidad */
+    min-width: 160px;
+    box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+    z-index: 1000; /* Asegura que el contenido del dropdown esté sobre otros elementos */
+    top: 50px; /* Alinea justo debajo de la barra */
+}
+
+/* Estilo para los enlaces dentro del dropdown */
+.dropdown-content a {
+    color: black; /* Color del texto */
+    padding: 12px 16px;
+    text-decoration: none;
+    display: inline-block; /* Muestra los elementos en línea horizontalmente */
+}
+.dropdown-content a:hover {
+    background-color: #66BB6A; /* Verde más oscuro */
+    color: white; /* Color del texto para buen contraste */
+}
+/* Cambios de color en el botón del dropdown al pasar el mouse */
+.dropdown:hover .dropdown-content {
+    display: block;
+}
+
+.dropdown:hover .dropbtn {
+    background-color: #66BB6A; /* Verde más claro al pasar el mouse */
+}
+
+.dropdown-content li a:hover {
+    background-color: #f1f1f1;
+}
+
+/* Para asegurar la alineación en dispositivos móviles */
+.navbar ul {
+    display: flex;
+    list-style-type: none;
+    margin: 0;
+    padding: 0;
+}
+
+.navbar li {
+    margin: 0;
+}
+
+
+
+/* Estilo para el cuerpo de la página */
+body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+    background-color: #F5F5F5; /* Color de fondo suave */
+}
+
+/* Estilo para el contenedor principal */
+/* Estilo para el contenedor principal del cuerpo */
+.container {
+    max-width: 1200px; /* Ancho máximo del contenedor */
+    margin: 20px auto; /* Centra el contenedor en la página y añade espaciado superior e inferior */
+    padding: 20px; /* Espaciado interno */
+    background-color: #f9f9f9; /* Color de fondo ligero para el contenedor */
+    border-radius: 8px; /* Bordes redondeados para un estilo más suave */
+    box-shadow: 0 0 15px rgba(0,0,0,0.1); /* Sombra ligera para profundidad */
+}
+
+/* Estilo para los encabezados en el contenedor */
+.container h1 {
+    font-size: 28px; /* Tamaño del texto del encabezado */
+    margin-bottom: 20px; /* Espaciado inferior */
+}
+
+/* Estilo para los párrafos en el contenedor */
+.container p {
+    font-size: 16px; /* Tamaño del texto del párrafo */
+    line-height: 1.6; /* Altura de línea para mejor legibilidad */
+    margin-bottom: 15px; /* Espaciado inferior */
+}
+
+/* Ajustes generales para asegurar que el contenido no se desborde */
+body {
+    margin: 0; /* Quita el margen predeterminado */
+    font-family: Arial, sans-serif; /* Fuente general */
+    background-color: #e0f2f1; /* Color de fondo general */
+    color: #333; /* Color del texto */
+}
+
+/* Estilo para el formulario */
+form {
+    max-width: 600px; /* Ancho máximo del formulario */
+    margin: 0 auto; /* Centra el formulario en la página */
+    padding: 20px; /* Espaciado interno del formulario */
+    box-shadow: 0 0 10px rgba(0,0,0,0.1); /* Añade una sombra ligera para profundidad */
+}
+
+/* Estilo para los campos de texto en el formulario */
+form input[type="text"], form input[type="number"], form input[type="date"], form textarea {
+    width: 100%; /* Ancho completo del contenedor del formulario */
+    max-width: 100%; /* Ajusta el ancho al contenedor */
+    padding: 8px; /* Espaciado interno */
+    font-size: 14px; /* Tamaño del texto */
+    margin-bottom: 15px; /* Espaciado inferior */
+    box-sizing: border-box; /* Incluye el padding en el ancho total */
+}
+
+/* Estilo para el botón del formulario */
+form button {
+    
+    background-color: #05a505; /* Verde oscuro */
+    color: white;
+    border: none;
+    cursor: pointer; /* Cambia el cursor al pasar sobre el botón */
+    padding: 15px;
+    font-size: 16px;
+    margin-top: 10px; /* Espaciado superior */
+    width: auto; /* Ajusta el ancho del botón a su contenido */
+    max-width: 200px; /* Ancho máximo del botón */
+    text-align: center; /* Centra el texto del botón */
+    
+}
+
+/* Cambios de color al pasar el mouse sobre el botón del formulario */
+form button:hover {
+    background-color: #66BB6A; /* Verde más oscuro */
+}
+/* Estilo para las listas en el formulario */
+form ul {
+    list-style-type: none; /* Elimina los puntos de la lista */
+    padding: 0;
+    margin: 0;
+}
+
+/* Estilo para los elementos de la lista en el formulario */
+form li {
+    margin-bottom: 10px; /* Espaciado entre los elementos de la lista */
+}
+
+/* Estilo para las listas desplegables en el formulario */
+form select {
+    width: auto; /* Ajusta el ancho al contenido de la lista desplegable */
+    max-width: 300px; /* Ancho máximo de la lista desplegable */
+    padding: 8px; /* Espaciado interno */
+    font-size: 16px; /* Tamaño del texto */
+}
+
+/* Estilo para el ListView */
+.listview {
+    background-color: #FFFFFF; /* Fondo blanco */
+    border-radius: 8px; /* Bordes redondeados */
+    padding: 20px;
+    box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1); /* Sombra sutil */
+    margin-top: 20px;
+}
+
+/* Estilo para los elementos de la lista en el ListView */
+.listview ul {
+    list-style-type: none; /* Elimina viñetas */
+    padding: 0;
+    margin: 0;
+}
+
+.listview li {
+    padding: 10px;
+    border-bottom: 1px solid #ddd; /* Línea separadora */
+}
+
+.listview li:last-child {
+    border-bottom: none; /* Elimina la línea para el último elemento */
+}
+/* Estilo para la tabla */
+table {
+    width: 100%; /* Asegura que la tabla ocupe todo el ancho disponible */
+    border-collapse: collapse; /* Quita los bordes dobles entre celdas */
+    margin-top: 20px; /* Espaciado superior para separar la tabla del contenido superior */
+}
+
+/* Estilo para los encabezados de la tabla */
+th {
+    background-color: #05a505; /* Verde oscuro */
+    color: white; /* Texto en blanco */
+    padding: 10px; /* Espaciado interno */
+    text-align: center; /* Centra el texto */
+}
+
+/* Estilo para las celdas de la tabla */
+td {
+    padding: 10px; /* Espaciado interno */
+    text-align: center; /* Centra el texto */
+    border-bottom: 1px solid #ddd; /* Línea separadora */
+}
+
+/* Estilo para la fila de la tabla sin datos */
+td[colspan="7"] {
+    text-align: center; /* Centra el texto en la fila sin datos */
+}

@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Inicio - Plataforma de Seguimiento de Productos Agrícolas</title>
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'css/styles.css' %}">
+</head>
+<body>
+    <div class="navbar">
+        <ul>
+            <a href="{% url 'home' %}">Inicio</a>
+            <li class="dropdown">
+                <button class="dropbtn">Cosecha</button>
+                <div class="dropdown-content">    
+                    <a href="{% url 'marcar_transportado' %}">Marcar Transportado</a>
+                    <a href="{% url 'acceso_trabajador' 'cosecha' %}">Registrar Cosecha</a>    
+                </div>
+            </li>
+            <a href="{% url 'acceso_trabajador' 'transporte' %}">Transporte</a>
+            <a href="{% url 'detalle_cosecha' %}">Detalle</a>
+            <a href="{% url 'cliente' %}">Cliente</a>
+        </ul>
+    </div>
+    <div class="container">
+        <h1>Bienvenido a la Plataforma de Seguimiento de Productos Agrícolas</h1>
+        <p>En nuestra plataforma, puedes gestionar y seguir el estado de tus productos agrícolas de manera eficiente y transparente.</p>
+        <p>Utiliza el menú superior para navegar entre las diferentes secciones de la plataforma.</p>
+    </div>
+</body>
+</html>
+
+

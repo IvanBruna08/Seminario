@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Marcar Como Transportado</title>
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'css/styles.css' %}">
+</head>
+<body>
+    <h1>Marcar Cosecha Como Transportada</h1>
+    <table>
+        <thead>
+            <tr>
+                <th>ID de la Cosecha</th>
+                <th>Nombre del Producto</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for cosecha in cosechas %}
+                <tr>
+                    <td>{{ cosecha.id }}</td>
+                    <td>{{ cosecha.nombre_producto }}</td>
+                </tr>
+            {% empty %}
+                <tr>
+                    <td colspan="2">No hay cosechas pendientes de transporte.</td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <h2>Marcar Cosecha</h2>
+    <form method="post" action="{% url 'marcar_transportado_accion' %}">
+        {% csrf_token %}
+        <label for="id_cosecha">Seleccionar Cosecha:</label>
+        <select name="id_cosecha" id="id_cosecha">
+            {% for cosecha in cosechas %}
+                <option value="{{ cosecha.id }}">{{ cosecha.id }} - {{ cosecha.nombre_producto }}</option>
+            {% endfor %}
+        </select>
+        <button type="submit">Marcar Como Transportado</button>
+    </form>
+</body>
+</html>

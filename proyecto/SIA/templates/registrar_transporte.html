@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Registrar Transporte</title>
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'css/styles.css' %}"> <!-- Asegúrate de que la ruta sea correcta -->
+</head>
+<body>
+
+<div class="navbar">
+    <a href="/">Inicio</a>
+    <a href="/productos/">Productos</a>
+    <a href="/transporte/">Transporte</a>
+    <a href="/contacto/">Contacto</a>
+</div>
+
+<div class="container">
+    <h1>Registrar Transporte</h1>
+
+    <form method="POST">
+        {% csrf_token %}
+        <label for="productoSelect">Selecciona una cosecha para transportar:</label>
+        <select id="productoSelect" name="id_cosecha" required>
+            <option value="">-- Selecciona una cosecha --</option>
+            {% for producto in productos_transportados %}
+            <option value="{{ producto.id }}">{{ producto.nombre_producto }} (ID: {{ producto.id }})</option>
+            {% endfor %}
+        </select>
+
+        <label for="fecha">Fecha:</label>
+        <input type="date" id="fecha" name="fecha" required>  <!-- Cambiado a 'fecha' -->
+
+        <label for="destino">Destino:</label>
+        <input type="text" id="destino" name="destino" required>  <!-- Cambiado a 'destino' -->
+
+        <label for="transportista">Transportista:</label>
+        <input type="text" id="transportista" name="transportista" required>  <!-- Cambiado a 'transportista' -->
+
+        <button type="submit">Registrar Transporte</button>
+    </form>
+</div>
+
+</body>
+</html>
+
