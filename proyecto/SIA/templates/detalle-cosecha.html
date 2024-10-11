@@ -16,12 +16,12 @@
     </script>
 </head>
 <body>
-    <div class="container">
-        <h1>Detalle de Cosecha</h1>
+    <div class="container detalleC">
+        <h1 class="detalleC-title">Detalle de Cosecha</h1>
 
         <!-- Formulario para seleccionar la cosecha -->
-        <label for="cosecha_id">Seleccione un ID de Cosecha:</label>
-        <select name="cosecha_id" id="cosecha_id" onchange="redirectToDetail()">
+        <label for="cosecha_id" class="detalleC-label">Seleccione un ID de Cosecha:</label>
+        <select name="cosecha_id" id="cosecha_id" class="detalleC-select" onchange="redirectToDetail()">
             <option value="">-- Seleccionar --</option>
             {% for id in cosecha_ids %}
                 <option value="{{ id }}">{{ id }}</option>
@@ -30,23 +30,58 @@
 
         <!-- Detalles de la cosecha -->
         {% if id_cosecha %}
-            <h2>Detalles de la Cosecha ID: {{ id_cosecha }}</h2>
-            <ul>
-                <li><strong>ID de Cosecha:</strong> {{ id_cosecha }}</li>
-                <li><strong>Producto:</strong> {{ producto }}</li>
-                <li><strong>Fecha de Cosecha:</strong> {{ fecha_cosecha }}</li>
-                <li><strong>Ubicación:</strong> {{ ubicacion }}</li>
-                <li><strong>Cantidad del Lote:</strong> {{ cantidad_lote }}</li>
-                <li><strong>Cantidad de Agua Usada:</strong> {{ cantidad_agua }}</li>
-                <li><strong>Pesticidas y Fertilizantes:</strong> {{ pesticidas_fertilizantes }}</li>
-                <li><strong>Prácticas de Cultivo:</strong> {{ practicas_cultivo }}</li>
-                <li><strong>¿Transportada?:</strong> {{ transportada }}</li>
-            </ul>
+            <h2 class="detalleC-subtitle">Detalles de la Cosecha ID: {{ id_cosecha }}</h2>
+            <table class="detalleC-table">
+                <thead>
+                    <tr>
+                        <th>Campo</th>
+                        <th>Valor</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>ID de Cosecha</td>
+                        <td>{{ id_cosecha }}</td>
+                    </tr>
+                    <tr>
+                        <td>Producto</td>
+                        <td>{{ producto }}</td>
+                    </tr>
+                    <tr>
+                        <td>Fecha de Cosecha</td>
+                        <td>{{ fecha_cosecha }}</td>
+                    </tr>
+                    <tr>
+                        <td>Ubicación</td>
+                        <td>{{ ubicacion }}</td>
+                    </tr>
+                    <tr>
+                        <td>Cantidad del Lote</td>
+                        <td>{{ cantidad_lote }}</td>
+                    </tr>
+                    <tr>
+                        <td>Cantidad de Agua Usada</td>
+                        <td>{{ cantidad_agua }}</td>
+                    </tr>
+                    <tr>
+                        <td>Pesticidas y Fertilizantes</td>
+                        <td>{{ pesticidas_fertilizantes }}</td>
+                    </tr>
+                    <tr>
+                        <td>Prácticas de Cultivo</td>
+                        <td>{{ practicas_cultivo }}</td>
+                    </tr>
+                    <tr>
+                        <td>¿Transportada?</td>
+                        <td>{{ transportada }}</td>
+                    </tr>
+                </tbody>
+            </table>
         {% else %}
-            <p>No se encontró la cosecha especificada.</p>
+            <p class="detalleC-noresult">No se encontró la cosecha especificada.</p>
         {% endif %}
 
-        <a href="{% url 'home' %}">Volver a Inicio</a>
+        <a href="{% url 'cosecha' %}" class="detalleC-backlink">Volver a Inicio</a>
     </div>
 </body>
 </html>

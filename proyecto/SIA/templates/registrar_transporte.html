@@ -5,43 +5,39 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Registrar Transporte</title>
     {% load static %}
-    <link rel="stylesheet" href="{% static 'css/styles.css' %}"> <!-- Asegúrate de que la ruta sea correcta -->
+    <link rel="stylesheet" href="{% static 'css/styles.css' %}">
 </head>
 <body>
 
-<div class="navbar">
-    <a href="/">Inicio</a>
-    <a href="/productos/">Productos</a>
-    <a href="/transporte/">Transporte</a>
-    <a href="/contacto/">Contacto</a>
-</div>
+<div class="container-registrarC">
+    <h1 class="titulo-registrarC">Registrar Transporte</h1>
 
-<div class="container">
-    <h1>Registrar Transporte</h1>
-
-    <form method="POST">
+    <form method="POST" class="form-registrarC">
         {% csrf_token %}
-        <label for="productoSelect">Selecciona una cosecha para transportar:</label>
-        <select id="productoSelect" name="id_cosecha" required>
+        
+        <label for="productoSelect" class="label-registrarC">Selecciona una cosecha para transportar:</label>
+        <select id="productoSelect" name="id_cosecha" class="input-registrarC" required>
             <option value="">-- Selecciona una cosecha --</option>
             {% for producto in productos_transportados %}
             <option value="{{ producto.id }}">{{ producto.nombre_producto }} (ID: {{ producto.id }})</option>
             {% endfor %}
         </select>
 
-        <label for="fecha">Fecha:</label>
-        <input type="date" id="fecha" name="fecha" required>  <!-- Cambiado a 'fecha' -->
+        <label for="fecha" class="label-registrarC">Fecha:</label>
+        <input type="date" id="fecha" name="fecha" class="input-registrarC" required>
 
-        <label for="destino">Destino:</label>
-        <input type="text" id="destino" name="destino" required>  <!-- Cambiado a 'destino' -->
+        <label for="destino" class="label-registrarC">Destino:</label>
+        <input type="text" id="destino" name="destino" class="input-registrarC" required>
 
-        <label for="transportista">Transportista:</label>
-        <input type="text" id="transportista" name="transportista" required>  <!-- Cambiado a 'transportista' -->
+        <label for="transportista" class="label-registrarC">Transportista:</label>
+        <input type="text" id="transportista" name="transportista" class="input-registrarC" required>
 
-        <button type="submit">Registrar Transporte</button>
+        <button type="submit" class="btn-registrarC">Registrar Transporte</button>
     </form>
+    <a href="{% url 'transporte' %}" class="link-home">Regresar</a>
 </div>
 
 </body>
 </html>
+
 

@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ingreso Trabajador</title>
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'css/styles.css' %}">
+</head>
+<body>
+    <div class="container-ingreso">
+        <h1 class="title-ingreso">Ingreso Trabajador</h1>
+        <form method="post" class="form-ingreso">
+            {% csrf_token %}
+            <label for="direccion" class="label-ingreso">Dirección de Billetera:</label>
+            <input type="text" id="direccion" name="direccion" class="input-ingreso" required>
+            <button type="submit" class="btn-ingreso">Ingresar</button>
+        </form>
+        <a class="btn-ingreso" href="{% url 'home' %}" role="button" >Inicio</a>
+    </div>
+</body>
+</html>
+

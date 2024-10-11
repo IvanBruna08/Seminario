@@ -1,0 +1,12 @@
+<form method="POST" action="{% url 'finalizar_entrega' %}">
+    {% csrf_token %}
+    <h2>Finalizar Entrega</h2>
+    
+    <label for="peso_final">Peso Final (kg):</label>
+    <input type="number" id="peso_final" name="peso_final" required step="0.01" placeholder="Ingrese el peso final">
+
+    <input type="hidden" id="latitude_final" name="latitude_final" value="{{ latitude_final }}">
+    <input type="hidden" id="longitude_final" name="longitude_final" value="{{ longitude_final }}">
+
+    <button type="submit">Finalizar Entrega</button>
+</form>

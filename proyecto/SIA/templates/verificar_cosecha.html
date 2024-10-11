@@ -1,12 +1,31 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <title>Detalles de Cosecha</title>
-</head>
-<body>
-    <h1>Detalles de la Cosecha</h1>
-    <p><strong>ID:</strong> {{ cosecha.id }}</p>
-    <p><strong>Producto:</strong> {{ cosecha.producto }}</p>
-    <!-- Más detalles de la cosecha -->
-</body>
-</html>
+{% extends "base.html" %}
+
+{% block content %}
+  <h1>Detalles de la Cosecha</h1>
+  <p><strong>ID:</strong> {{ cosecha.id }}</p>
+  <p><strong>Producto:</strong> {{ cosecha.producto }}</p>
+  <p><strong>Fecha:</strong> {{ cosecha.fecha_cosecha }}</p>
+  <p><strong>Ubicación:</strong> {{ cosecha.ubicacion }}</p>
+  <p><strong>Cantidad Lote:</strong> {{ cosecha.cantidad_lote }}</p>
+  <p><strong>Cantidad Agua:</strong> {{ cosecha.cantidad_agua }}</p>
+  <p><strong>Pesticidas/Fertilizantes:</strong> {{ cosecha.pesticidas_fertilizantes }}</p>
+  <p><strong>Prácticas de Cultivo:</strong> {{ cosecha.practicas_cultivo }}</p>
+  <p><strong>Transportado:</strong> 
+    {% if cosecha.transportado %}
+      Sí
+    {% else %}
+      No
+    {% endif %}
+  </p>
+
+  <!-- Mostrar el QR Code -->
+  {% if cosecha.qr_code %}
+    <img src="{{ cosecha.qr_code.url }}" alt="QR Code">
+  {% endif %}
+
+  <!-- Botón para empezar el envío -->
+  <form method="post">
+    {% csrf_token %}
+    <button type="submit" name="start_shipping">Empezar Envío</button>
+  </form>
+{% endblock %}

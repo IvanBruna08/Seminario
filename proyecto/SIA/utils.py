@@ -1,19 +1,19 @@
 from web3 import Web3
-from django.conf import settings
+from django.conf import settings 
 import os
 import json
-from .models import Cosecha
+import requests
+import urllib.parse
 from django.core.files.base import ContentFile
 from io import BytesIO
 import qrcode
 
 def get_web3():
-    infura_url = "https://sepolia.infura.io/v3/5cf427c2915a449ca23fbaa62461efba"
-    web3 = Web3(Web3.HTTPProvider(infura_url))
+    web3 = Web3(Web3.HTTPProvider("HTTP://127.0.0.1:7545"))
     if not web3.is_connected():
         raise ConnectionError("No se pudo conectar a la red de Ethereum.")
     return web3
-
+'''''''''
 def get_cosecha_contract():
     web3 = get_web3()
     json_file_path = os.path.join(settings.BASE_DIR, "SIA", "static", "contract", "Cosecha.json")
@@ -22,7 +22,7 @@ def get_cosecha_contract():
         with open(json_file_path) as file:
             contract_json = json.load(file)
             contract_abi = contract_json['abi']
-            contract_address = contract_json['networks']['11155111']['address']
+            contract_address = contract_json['networks']['5777']['address']
             return web3.eth.contract(address=contract_address, abi=contract_abi)
     except FileNotFoundError:
         print(f"Error: No se encontró el archivo {json_file_path}.")
@@ -42,8 +42,8 @@ def get_transporte_contract():
         with open(json_file_path) as file:
             contract_json = json.load(file)
             contract_abi = contract_json['abi']
-            contract_address = contract_json['networks']['11155111']['address']
-            print(f"Dirección del contrato de transporte cargada: {contract_address}")
+            contract_address = contract_json['networks']['5777']['address']
+            print(f"Dirección del contrato de transporte cargada: {contract_address}")  # Imprime la dirección del contrato
             return web3.eth.contract(address=contract_address, abi=contract_abi)
     except FileNotFoundError:
         print(f"Error: No se encontró el archivo {json_file_path}.")
@@ -58,12 +58,12 @@ def get_transporte_contract():
 def load_cosecha_contract():
     with open(os.path.join(settings.BASE_DIR, 'SIA', 'static', 'contract', 'Cosecha.json')) as f:
         contract_data = json.load(f)
-    return contract_data['abi'], contract_data['networks']['11155111']['address']
+    return contract_data['abi'], contract_data['networks']['5777']['address']
 
 def load_transporte_contract():
     with open(os.path.join(settings.BASE_DIR, 'SIA', 'static', 'contract', 'TransportContract.json')) as f:
         contract_data = json.load(f)
-    return contract_data['abi'], contract_data['networks']['11155111']['address']
+    return contract_data['abi'], contract_data['networks']['5777']['address']
 def sync_cosechas():
     contract = get_cosecha_contract()
     cosecha_counter = contract.functions.cosechaCounter().call()
@@ -92,7 +92,7 @@ def sync_cosechas():
 
 def generar_codigo_qr(cosecha):
     # Generar la URL dinámica para verificar la cosecha
-    qr_url = f"{settings.SITE_URL}/cosecha/{cosecha.id}/verificar"
+    qr_url = f"https://759a-152-174-145-176.ngrok-free.app/cosecha/{cosecha.id}/verificar"
     
     # Crear los datos del QR con la URL
     data = (
@@ -128,3 +128,32 @@ def generar_codigo_qr(cosecha):
     qr_content = ContentFile(qr_io.getvalue(), name=f'qr_cosecha_{cosecha.id}.png')
     
     return qr_content
+'''''
+import requests
+
+def get_coordinates(address):
+    url = "https://us1.locationiq.com/v1/search.php"
+    params = {
+        'key': 'pk.9354bd3dfb21f2189825cae5914748b0',  # Reemplaza con tu token de LocationIQ
+        'q': address,
+        'format': 'json',
+        'limit': 1
+    }
+
+    try:
+        response = requests.get(url, params=params)
+        response.raise_for_status()
+        data = response.json()
+
+        if data:
+            best_match = data[0]
+            # Asegúrate de usar '.' como separador decimal
+            latitude = float(best_match['lat'].replace(',', '.'))
+            longitude = float(best_match['lon'].replace(',', '.'))
+            return latitude, longitude
+        
+        return None, None
+
+    except requests.RequestException as e:
+        print(f"Error al obtener las coordenadas: {e}")
+        return None, None

@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Registrar Recepción</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/4.5.2/css/bootstrap.min.css">
+    {% load static %}
+    <style>
+        body {
+            margin: 20px;
+        }
+    </style>
+    <!-- Asegúrate de que jQuery esté cargado antes de tu script -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script> <!-- Agregar jQuery -->
+</head>
+<body>
+    <div class="container">
+        <h1>Registrar Recepción</h1>
+
+        <div class="card mt-3">
+            <div class="card-body">
+                <h4 class="card-title">Detalles del Pallet</h4>
+                <p><strong>ID del Pallet:</strong> {{ pallet.id }}</p>
+                <p><strong>Producto:</strong> {{ pallet.producto }}</p>
+                <p><strong>Cantidad:</strong> {{ pallet.cantidad }}</p>
+                <p><strong>Peso:</strong> {{ pallet.peso }}</p>
+                <p><strong>Fecha de Envío:</strong> {{ envio_pallet.fecha_inicio }}</p>
+            </div>
+        </div>
+
+        <div class="mt-4">
+            <h4>Actualizar Estado de Recepción</h4>
+            <form method="post" action="{% url 'registrar_recepcion' pallet.id %}" id="recepcionForm">
+                {% csrf_token %}
+                {{ form.as_p }} 
+                <button type="submit" class="btn btn-secondary mt-2">Confirmar Cambios</button>
+            </form>
+            <!-- Botón para finalizar la entrega -->
+            <button id="endDelivery" class="end-btn btn btn-danger">Finalizar Entrega</button>
+
+            <!-- Formulario para finalizar la entrega (oculto) -->
+            <form id="endDeliveryForm" method="POST" action="{% url 'finalizar_entrega' pallet.id %}" style="display: none;">
+                {% csrf_token %}
+                <input type="hidden" name="latitude" id="ruta_final_latitude"> <!-- Cambiar a latitude -->
+                <input type="hidden" name="longitude" id="ruta_final_longitude"> <!-- Cambiar a longitude -->
+                <input type="hidden" name="envio_id" id="envio_id" value="{{ envio_pallet.id }}">
+                <input type="hidden" id="id_pallet" value="{{ pallet.id }}">
+                <input type="hidden" name="coordenadasTransporte" id="coordenadasTransporte"> <!-- Agregar este campo para coordenadas -->
+            </form>
+        </div>
+    </div>
+
+    <!-- Asegúrate de que tu script se cargue al final del body -->
+    <script src="{% static 'java/transporte_caja.js' %}"></script> <!-- Ruta del archivo JavaScript -->
+    <script>
+        $(document).ready(function() {
+            // Asignar el evento al botón "Finalizar Entrega"
+            $('#endDelivery').on('click', function() {
+                console.log("Función finalizarEntrega llamada");
+                // Aquí puedes llamar a la función que desees
+                finalizarEntrega();
+            });
+        });
+    </script>
+</body>
+</html>
+

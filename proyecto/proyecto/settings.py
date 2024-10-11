@@ -24,10 +24,10 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = 'django-insecure-wdde=xn(#)8^itqgy%oxt%@p8$4fi!=5i^_5k0wok&4db^wtcu'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = False
+DEBUG = True
 # Obtener el nombre de la aplicación desde la variable de entorno
-APP_NAME = os.environ.get("FLY_APP_NAME", "mi-proyecto")
-ALLOWED_HOSTS  = [f"{APP_NAME}.fly.dev", "127.0.0.1", "localhost"]
+ALLOWED_HOSTS  = ['http://127.0.0.1:8000','miapp.com', 'www.miapp.com','rutamapa', 'localhost','127.0.0.1', '98eb-152-174-157-104.ngrok-free.app']
+CSRF_TRUSTED_ORIGINS = ['https://example.com','https://miapp.com','https://98eb-152-174-157-104.ngrok-free.app','http://127.0.0.1:8000']
 
 
 # Application definition
@@ -44,13 +44,13 @@ INSTALLED_APPS = [
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
-    "whitenoise.middleware.WhiteNoiseMiddleware",
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    #'SIA.middleware.AreaTrabajadorMiddleware'
 ]
 
 ROOT_URLCONF = 'proyecto.urls'
@@ -66,6 +66,7 @@ TEMPLATES = [
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
+                'SIA.context_processors.mapbox_data'
             ],
         },
     },
@@ -76,14 +77,18 @@ WSGI_APPLICATION = 'proyecto.wsgi.application'
 
 # Database
 # https://docs.djangoproject.com/en/5.1/ref/settings/#databases
-import dj_database_url
 
 DATABASES = {
-    'default': dj_database_url.config(
-        conn_max_age=600,
-        conn_health_checks=True,
-    ),
+    'default': {
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': 'proyectosia',  # Reemplaza con el nombre de tu base de datos
+        'USER': 'postgres',      # Reemplaza con tu nombre de usuario de PostgreSQL
+        'PASSWORD': 'proyecto123',  # Reemplaza con tu contraseña
+        'HOST': 'localhost',       # O la dirección IP del servidor si no está en localhost
+        'PORT': '5432',            # Puerto por defecto de PostgreSQL
+    }
 }
+
 
 # Password validation
 # https://docs.djangoproject.com/en/5.1/ref/settings/#auth-password-validators
@@ -102,14 +107,12 @@ AUTH_PASSWORD_VALIDATORS = [
         'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',
     },
 ]
-
-
 # Internationalization
 # https://docs.djangoproject.com/en/5.1/topics/i18n/
 
-LANGUAGE_CODE = 'en-us'
+LANGUAGE_CODE = 'es-CL'
 
-TIME_ZONE = 'UTC'
+TIME_ZONE = 'America/Santiago'
 
 USE_I18N = True
 
@@ -121,8 +124,13 @@ USE_TZ = True
 
 STATIC_URL = '/static/'
 MEDIA_URL = '/media/'
+MAPBOX_USER = 'ivab98'
+MAPBOX_ACCESS_TOKEN = 'pk.eyJ1IjoiaXZhYjk4IiwiYSI6ImNtMHlucDFnZjBxazkybXBsYzFzZ2RqYjYifQ.y_8e142Ci56mQPgGZ04Nuw'
+
+# settings.py
+SESSION_ENGINE = 'django.contrib.sessions.backends.db'  # Guarda sesiones en la base de datos
+
 # URL base del sitio
-SITE_URL = 'http://example.com'  # Reemplaza con tu URL base
 
 # Directorio donde se recopilan archivos estáticos para producción (opcional)
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')

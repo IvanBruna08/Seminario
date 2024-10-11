@@ -1,0 +1,7 @@
+<h1>Crear Pallet para {{ usuario_data.nombre }}</h1>
+
+<form method="POST">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <button type="submit">Crear Pallet</button>
+</form>

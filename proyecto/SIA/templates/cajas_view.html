@@ -1,0 +1,53 @@
+<form method="get" action="{% url 'cajas_view' %}">
+    <label for="recepcion_select">Selecciona un empaque:</label>
+    <select id="recepcion_select" name="recepcion_id" onchange="this.form.submit()">
+        <option value="">Todos los empaques</option>
+        {% for recepcion in recepciones %}
+            <option value="{{ recepcion.id }}" {% if recepcion == selected_recepcion %}selected{% endif %}>
+                Recepcion {{ recepcion.id }}
+            </option>
+        {% endfor %}
+    </select>
+</form>
+
+<h2>Cajas de la recepcion seleccionado:</h2>
+<table>
+    <thead>
+        <tr>
+            <th>ID Caja</th>
+            <th>Cliente</th>
+            <th>Tipo Caja</th>
+            <th>Peso Caja</th>
+            <th>QR</th>
+            <th>Fecha Caja</th>  <!-- Agregamos el encabezado para la fecha -->
+        </tr>
+    </thead>
+    <tbody>
+        {% for caja in cajas %}
+            <tr>
+                <td>{{ caja.id }}</td>
+                <td>{{ caja.cliente }}</td>
+                <td>{{ caja.tipo_caja }}</td>
+                <td>{{ caja.peso_caja }}</td>
+                <td>
+                    {% if caja.qr_caja %}
+                        <img src="{{ caja.qr_caja.url }}" alt="QR de la caja">
+                    {% else %}
+                        No disponible
+                    {% endif %}
+                </td>
+                <td>
+                    <td>
+                        {% if caja.fecha_caja %}
+                            {{ caja.fecha_caja|date:"D d M Y H:i:s" }}
+                        {% else %}
+                            No hay Fecha Ingresada
+                        {% endif %}
+                    </td>
+                    
+                </td>
+            </tr>
+        {% endfor %}
+    </tbody>
+    
+</table>

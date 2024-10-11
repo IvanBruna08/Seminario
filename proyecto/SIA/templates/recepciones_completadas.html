@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Recepciones Completadas</title>
+</head>
+<body>
+    <h1>Recepciones Completadas</h1>
+    <table>
+        <thead>
+            <tr>
+                <th>ID Recepción</th>
+                <th>Fecha</th>
+                <th>Estado</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for recepcion in recepciones %}
+            <tr>
+                <td>{{ recepcion.id }}</td>
+                <td>{{ recepcion.fecha_recepcion }}</td>
+                <td>{{ recepcion.estado_recepcion }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    <a href="{% url 'crear_empaque' %}">Crear Empaque</a>
+    <a href="{% url 'distribuir_caja' %}">Distribuir Caja</a>
+</body>
+</html>

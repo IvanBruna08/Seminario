@@ -1,0 +1,34 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Mi Aplicación{% endblock %}</title>
+    <link rel="stylesheet" href="{% static 'css/styles.css' %}">
+</head>
+<body>
+    <header>
+        <h1>Mi Aplicación</h1>
+        <nav>
+            <ul>
+                <li><a href="{% url 'home' %}">Inicio</a></li>
+                <li><a href="{% url 'registrar_cosecha' %}">Registrar Cosecha</a></li>
+                <li><a href="{% url 'transporte' %}">Transporte</a></li>
+                <li><a href="{% url 'cliente' %}">Cliente</a></li>
+                <li><a href="{% url 'ingreso_trabajador' %}">Acceso Trabajador</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <main>
+        {% block content %}
+        <!-- Contenido específico de cada página se coloca aquí -->
+        {% endblock %}
+    </main>
+
+    <footer>
+        <p>&copy; 2024 Mi Aplicación. Todos los derechos reservados.</p>
+    </footer>
+</body>
+</html>

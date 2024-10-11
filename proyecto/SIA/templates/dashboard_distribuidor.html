@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Dashboard Distribuidor</title>
+</head>
+<body>
+    <h1>Dashboard Distribuidor</h1>
+    <ul>
+        <li><a href="{% url 'recepciones_completadas' %}">Pallet Recepcionado</a></li>
+        <li><a href="{% url 'crear_empaque' %}">Crear Empaque</a></li>
+        <li><a href="{% url 'distribuir_caja' %}">Distribuir Caja</a></li>
+        <li><a href="{% url 'cajas_view' %}">Caja Lista</a></li>
+        <a href="{% url 'custom_logout' %}" class="btn-logout-cosecha">Salir</a>
+    </ul>
+</body>
+</html>

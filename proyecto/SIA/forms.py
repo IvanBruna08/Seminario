@@ -1,33 +1,162 @@
 from django import forms
+from .models import Predio, Transporte,Distribuidor, Cliente,Pallet, EnvioPallet, Recepcion, Caja,Pago, EnvioCaja , DistribuidorPallet
 
-class CosechaForm(forms.Form):
-    producto = forms.CharField(label='Producto', max_length=100)
-    fecha_cosecha = forms.DateField(label='Fecha de Cosecha', widget=forms.DateInput(attrs={'type': 'date'}))
-    ubicacion = forms.CharField(label='Ubicación', max_length=255)
-    cantidad_lote = forms.IntegerField(label='Cantidad del Lote(Kg)')
-    cantidad_agua = forms.IntegerField(label='Cantidad de Agua (litros)')
-    pesticidas_fertilizantes = forms.CharField(label='Pesticidas y Fertilizantes', widget=forms.Textarea)
-    practicas_cultivo = forms.CharField(label='Prácticas de Cultivo', widget=forms.Textarea)
+class CustomLoginForm(forms.Form):
+    rut = forms.CharField(max_length=100, widget=forms.TextInput(attrs={'placeholder': 'RUT'}))
+    password = forms.CharField(widget=forms.PasswordInput(attrs={'placeholder': 'Contraseña'}))
 
-class MarcarTransportadoForm(forms.Form):
-    id_cosecha = forms.IntegerField(label='ID de la cosecha')
+    def clean(self):
+        rut = self.cleaned_data.get('rut')
+        password = self.cleaned_data.get('password')
 
-class RegistroTransporteForm(forms.Form):
-    fecha = forms.DateField(label='Fecha')
-    destino = forms.CharField(label='Destino')
-    transportista = forms.CharField(label='Transportista')
-    id_cosecha = forms.IntegerField(label='ID de la Cosecha', required=True)  # Campo para el ID de la 
+        if not rut or not password:
+            raise forms.ValidationError('RUT y contraseña son requeridos.')
 
-class ActualizarEstadoTransporteForm(forms.Form):
-    id = forms.IntegerField(label='ID del Transporte')
-    status = forms.ChoiceField(
-        choices=[
-            (0, 'En Camino'),
-            (1, 'Entregado'),
-            (2, 'Retrasado')
-        ],
-        label='Estado'
-    ) 
+        user_found = False
+        for model in [Cliente, Predio, Transporte, Distribuidor]:
+            try:
+                user = model.objects.get(rut=rut)
+                if user.password == password:  # Compara directamente
+                    self.user = user
+                    self.user_type = model.__name__.lower()
+                    user_found = True
+                    break
+            except model.DoesNotExist:
+                continue
+        
+        if not user_found:
+            raise forms.ValidationError('Credenciales incorrectas.')
 
-class PlacaForm(forms.Form):
-    placa = forms.CharField(max_length=100, label='Placa del Auto')
+        return self.cleaned_data
+
+class TransporteForm(forms.ModelForm):
+    class Meta:
+        model = Transporte
+        fields = ['nombre', 'auto', 'patente', 'rut','password', 'billetera']
+class PredioForm(forms.ModelForm):
+    class Meta:
+        model = Predio
+        fields = ['nombre', 'direccion', 'billetera','rut','password']
+class DistribuidorForm(forms.ModelForm):
+    class Meta:
+        model = Distribuidor
+        fields = ['nombre', 'direccion', 'billetera','rut','password']
+
+
+class ClienteForm(forms.ModelForm):
+    class Meta:
+        model = Cliente
+        fields = ['nombre', 'tipo_cliente', 'direccion', 'billetera','rut','password']
+
+class PalletForm(forms.ModelForm):
+    class Meta:
+        model = Pallet
+        fields = ['lugar', 'producto', 'clasificacion', 'fecha_cosecha', 'cantidad', 'peso', 'precio_venta']
+        widgets = {
+            'fecha_cosecha': forms.DateInput(attrs={'type': 'date'}),
+            'cantidad': forms.NumberInput(attrs={'step': 'any'}),
+            'peso': forms.NumberInput(attrs={'step': 'any'}),
+            'precio_venta': forms.NumberInput(attrs={'step': 'any'})
+        }
+
+    def __init__(self, *args, **kwargs):
+        super(PalletForm, self).__init__(*args, **kwargs)
+        # Etiquetas personalizadas
+        self.fields['lugar'].label = "Lugar"
+        self.fields['producto'].label = "Producto"
+        self.fields['clasificacion'].label = "Clasificación"
+        self.fields['fecha_cosecha'].label = "Fecha de Cosecha"
+        self.fields['cantidad'].label = "Cantidad"
+        self.fields['peso'].label = "Peso"
+        self.fields['precio_venta'].label = "Precio de Venta"
+        
+
+class RecepcionForm(forms.ModelForm):
+    peso_recepcion = forms.DecimalField(
+        required=False,
+        widget=forms.NumberInput(attrs={'step': 'any'}),
+        label="Peso Final del Pallet (si hubo variación)"
+    )
+
+    class Meta:
+        model = Recepcion
+        fields = ['estado_recepcion', 'peso_recepcion']  # Incluir el campo de estado y peso final
+
+        widgets = {
+            'estado_recepcion': forms.Select()
+        }
+
+    def __init__(self, *args, **kwargs):
+        super(RecepcionForm, self).__init__(*args, **kwargs)
+        self.fields['estado_recepcion'].label = "Estado de Recepción"
+
+class DistribuidorPalletForm(forms.ModelForm):
+    class Meta:
+        model = DistribuidorPallet
+        fields = ['distribuidor', 'peso_enviado']
+        widgets = {
+            'peso_enviado': forms.NumberInput(attrs={'step': 'any', 'class': 'form-control'}),
+            'distribuidor': forms.Select(attrs={'class': 'form-control'}),
+        }
+
+    def __init__(self, *args, pallet=None, **kwargs):
+        super(DistribuidorPalletForm, self).__init__(*args, **kwargs)
+        self.pallet = pallet  # Guardar el empaque
+
+        self.fields['distribuidor'].label = "Seleccionar Distribuidor"
+        self.fields['peso_enviado'].label = "Peso de la Caja (kg)"
+        self.fields['distribuidor'].queryset = Distribuidor.objects.all()
+
+    def clean(self):
+        cleaned_data = super().clean()
+        peso_enviado = cleaned_data.get("peso_enviado")
+
+        if self.pallet and peso_enviado:
+            # Usar un valor por defecto de 0 si el peso_caja es None
+            peso_existente = sum(distribuidorpallet.peso_enviado or 0 for distribuidorpallet in DistirbuidorPallet.objects.filter(pallet=self.pallet))
+            if (peso_existente + peso_enviado) > self.pallet.peso_pallet:
+                self.add_error('peso_enviado', "El peso total para distribución excede el peso del pallet.")
+        return cleaned_data
+
+class CajaForm(forms.ModelForm):
+    class Meta:
+        model = Caja
+        fields = ['cliente', 'peso_caja', 'tipo_caja']
+        widgets = {
+            'peso_caja': forms.NumberInput(attrs={'step': 'any', 'class': 'form-control'}),
+            'cliente': forms.Select(attrs={'class': 'form-control'}),
+            'tipo_caja': forms.TextInput(attrs={'class': 'form-control'}),
+        }
+
+    def __init__(self, *args, recepcion=None, **kwargs):
+        super(CajaForm, self).__init__(*args, **kwargs)
+        self.recepcion = recepcion  # Guardar el empaque
+
+        self.fields['cliente'].label = "Seleccionar Cliente"
+        self.fields['peso_caja'].label = "Peso de la Caja (kg)"
+        self.fields['tipo_caja'].label = "Tipo de Caja"
+        self.fields['cliente'].queryset = Cliente.objects.all()
+
+    def clean(self):
+        cleaned_data = super().clean()
+        peso_caja = cleaned_data.get("peso_caja")
+
+        if self.recepcion and peso_caja:
+            # Usar un valor por defecto de 0 si el peso_caja es None
+            peso_existente = sum(caja.peso_caja or 0 for caja in Caja.objects.filter(recepcion=self.recepcion))
+            if (peso_existente + peso_caja) > self.recepcion.peso_recepcion:
+                self.add_error('peso_caja', "El peso total de las cajas excede el peso del pallet.")
+        return cleaned_data
+
+
+
+
+
+
+
+
+
+
+
+
+

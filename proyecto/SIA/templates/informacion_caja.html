@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Información del Pallet</title><a href="{% url 'custom_logout' %}" class="btn-logout-cosecha">Salir</a>
+    <link href='https://api.mapbox.com/mapbox-gl-js/v2.10.0/mapbox-gl.css' rel='stylesheet' />
+</head>
+<body>
+    <h1>Información de la Caja</h1>
+    <p><strong>ID Caja:</strong> {{ caja.id }}</p>
+    <p><strong>Fecha de Creación:</strong> {{ caja.fecha_caja }}</p>
+    <p><strong>Peso de la Caja (KG):</strong> {{ caja.peso_caja }}</p>
+    <p><strong>Tipo de Caja:</strong> {{ caja.tipo_caja }}</p>
+
+
+    <h2>Información del Pallet</h2>
+    <p><strong>Producto:</strong> {{ pallet.producto }}</p>
+    <p><strong>Clasificación:</strong> {{ pallet.clasificacion }}</p>
+    <p><strong>Lugar de Cosecha:</strong> {{ pallet.lugar }}</p>
+    <p><strong>Fecha Cosecha:</strong> {{ pallet.fecha_cosecha }}</p>
+
+
+    <h2>Información del Cliente</h2>
+    <p><strong>Nombre del cliente:</strong> {{ cliente.nombre }}</p>
+    <p><strong>Direccion del cliente:</strong> {{ cliente.direccion }}</p>
+    <h2>Ubicación Cliente</h2>
+
+    <!-- Mapa del Predio -->
+    <div id="map" data-latitude="{{ cliente.latitude }}" data-longitude="{{ cliente.longitude }}" style="height: 300px; width: 100%;"></div>
+
+    <!-- Script para mostrar el mapa con Mapbox -->
+    <script src="https://api.mapbox.com/mapbox-gl-js/v2.10.0/mapbox-gl.js"></script>
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            var mapElement = document.getElementById('map');
+            var latitude = parseFloat(mapElement.getAttribute('data-latitude').replace(',', '.'));
+            var longitude = parseFloat(mapElement.getAttribute('data-longitude').replace(',', '.'));
+
+            // Verifica las coordenadas en la consola
+            console.log("Latitud: ", latitude, "Longitud: ", longitude);
+
+            if (!isNaN(latitude) && !isNaN(longitude)) {
+                mapboxgl.accessToken = 'pk.eyJ1IjoiaXZhYjk4IiwiYSI6ImNtMHlwdGR4bTBxemYyc3EzeWlweTB4b3UifQ.SqDs4IzkxrtKlWqrbDfNXw';
+                var map = new mapboxgl.Map({
+                    container: 'map',
+                    style: 'mapbox://styles/mapbox/streets-v12',
+                    center: [longitude, latitude], // Mapbox usa [longitud, latitud]
+                    zoom: 13
+                });
+                new mapboxgl.Marker()
+                    .setLngLat([longitude, latitude]) // Primero longitud, luego latitud
+                    .addTo(map);
+            } else {
+                console.error("Las coordenadas no son válidas.");
+            }
+        });
+    </script>
+</body>
+</html>

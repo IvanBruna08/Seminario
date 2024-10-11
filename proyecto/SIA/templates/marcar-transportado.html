@@ -8,38 +8,50 @@
     <link rel="stylesheet" href="{% static 'css/styles.css' %}">
 </head>
 <body>
-    <h1>Marcar Cosecha Como Transportada</h1>
-    <table>
-        <thead>
-            <tr>
-                <th>ID de la Cosecha</th>
-                <th>Nombre del Producto</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for cosecha in cosechas %}
-                <tr>
-                    <td>{{ cosecha.id }}</td>
-                    <td>{{ cosecha.nombre_producto }}</td>
-                </tr>
-            {% empty %}
-                <tr>
-                    <td colspan="2">No hay cosechas pendientes de transporte.</td>
-                </tr>
-            {% endfor %}
-        </tbody>
-    </table>
+    <div class="container marcarT">
+        <h1 class="marcarT-title">Marcar Cosecha Como Transportada</h1>
 
-    <h2>Marcar Cosecha</h2>
-    <form method="post" action="{% url 'marcar_transportado_accion' %}">
-        {% csrf_token %}
-        <label for="id_cosecha">Seleccionar Cosecha:</label>
-        <select name="id_cosecha" id="id_cosecha">
-            {% for cosecha in cosechas %}
-                <option value="{{ cosecha.id }}">{{ cosecha.id }} - {{ cosecha.nombre_producto }}</option>
-            {% endfor %}
-        </select>
-        <button type="submit">Marcar Como Transportado</button>
-    </form>
+        <!-- Contenedor con scrollbar para la tabla de cosechas -->
+        <div class="marcarT-table-container">
+            <table class="marcarT-table">
+                <thead>
+                    <tr>
+                        <th>ID de la Cosecha</th>
+                        <th>Nombre del Producto</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for cosecha in cosechas %}
+                        <tr>
+                            <td>{{ cosecha.id }}</td>
+                            <td>{{ cosecha.nombre_producto }}</td>
+                        </tr>
+                    {% empty %}
+                        <tr>
+                            <td colspan="2">No hay cosechas pendientes de transporte.</td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Formulario para marcar cosecha como transportada -->
+        <h2 class="marcarT-subtitle">Marcar Cosecha</h2>
+        <form method="post" action="{% url 'marcar_transportado_accion' %}" class="marcarT-form">
+            {% csrf_token %}
+            <label for="id_cosecha" class="marcarT-label">Seleccionar Cosecha:</label>
+
+            <div class="marcarT-select-container">
+                <select name="id_cosecha" id="id_cosecha" class="marcarT-select">
+                    {% for cosecha in cosechas %}
+                        <option value="{{ cosecha.id }}">{{ cosecha.id }} - {{ cosecha.nombre_producto }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <button type="submit" class="marcarT-button">Marcar Como Transportado</button>
+        </form>
+    </div>
+    <a href="{% url 'cosecha' %}" class="detalleC-backlink">Volver a Inicio</a>
 </body>
 </html>

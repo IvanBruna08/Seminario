@@ -1,0 +1,14 @@
+
+<h2>Detalles de la Caja</h2>
+
+<p>ID de Caja: {{ caja.id }}</p>
+<p>El pallet fue realizado por el transportista: {{ transporte_pallet.nombre }}</p>
+<p>El paquete fue realizado por el transportista: {{ transporte_caja.nombre }}</p>
+<p>Estado: {{ envio_caja.estado_envio }}</p>
+<p>Precio: {{ precio_formateado }}</p>
+
+<form method="post">
+    {% csrf_token %}
+    <button type="submit">Confirmar Pago</button>
+</form>
+

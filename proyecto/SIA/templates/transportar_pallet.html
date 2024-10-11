@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Transportar Pallet</title>
+    
+    <!-- Importar Mapbox CSS y JS -->
+    <link href="https://api.mapbox.com/mapbox-gl-js/v2.9.1/mapbox-gl.css" rel="stylesheet" />
+    <script src="https://api.mapbox.com/mapbox-gl-js/v2.9.1/mapbox-gl.js"></script>
+
+    <!-- Importar jQuery -->
+    <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+
+    <!-- Estilos para el mapa -->
+    <style>
+        #map {
+            width: 100%;
+            height: 400px;
+            margin-top: 20px;
+        }
+    </style>
+    
+    {% load static %}
+</head>
+<body>
+    <h1>Transportar Pallet</h1>
+    <p><strong>ID del Pallet:</strong> {{ pallet.id }}</p>
+    <p><strong>Producto:</strong> {{ pallet.producto }}</p>
+    <p><strong>Cantidad:</strong> {{ pallet.cantidad }}</p>
+    <p><strong>Peso:</strong> {{ pallet.peso }}</p>
+
+    <h1>Destinos</h1>
+    <ul>
+        {% for distribucion in distribuidores_info %}
+            <li>
+                <strong>Distribuidor:</strong> {{ distribucion.distribuidor }}<br>
+                <strong>Peso Enviado:</strong> {{ distribucion.peso_enviado }} kg<br>
+            </li>
+        {% endfor %}
+    </ul>
+
+    <div class="buttons">
+        <button id="startDelivery" class="start-btn">Iniciar Entrega</button>
+    </div>
+
+    <div id="map"></div>
+
+    <form id="startDeliveryForm" method="POST" action="{% url 'iniciar_entrega' pallet.id %}" style="display:none;">
+        {% csrf_token %}
+        <input type="hidden" name="ruta_inicio_latitude" id="ruta_inicio_latitude">
+        <input type="hidden" name="ruta_inicio_longitude" id="ruta_inicio_longitude">
+        <input type="hidden" name="transporte_latitude" id="transporte_latitude">
+        <input type="hidden" name="transporte_longitude" id="transporte_longitude">
+        <input type="hidden" id="id_pallet" value="{{ pallet.id }}">
+    </form>
+
+    <script>
+        // Inicializar Mapbox con el token
+        mapboxgl.accessToken = 'pk.eyJ1IjoiaXZhYjk4IiwiYSI6ImNtMHlwdGR4bTBxemYyc3EzeWlweTB4b3UifQ.SqDs4IzkxrtKlWqrbDfNXw';
+
+        // Obtener coordenadas del origen (predio)
+        var latitudOrigen = parseFloat("{{ predio.latitude }}".replace(',', '.'));
+        var longitudOrigen = parseFloat("{{ predio.longitude }}".replace(',', '.'));
+
+        // Configurar el mapa centrado en el origen
+        var map = new mapboxgl.Map({
+            container: 'map',
+            style: 'mapbox://styles/mapbox/streets-v11',
+            center: [longitudOrigen, latitudOrigen],
+            zoom: 10
+        });
+
+        // Marcador para el origen (predio)
+        new mapboxgl.Marker({ color: 'green' })
+            .setLngLat([longitudOrigen, latitudOrigen])
+            .setPopup(new mapboxgl.Popup().setText('Origen: Predio'))
+            .addTo(map);
+
+        // Distribuidores - extraídos desde Django (controlar formato)
+        var distribuidores = [
+            {% for distribuidor in distribuidores_info %}
+                {
+                    nombre: "{{ distribuidor.distribuidor }}",
+                    latitud: parseFloat("{{ distribuidor.latitud }}".replace(',', '.')),
+                    longitud: parseFloat("{{ distribuidor.longitud }}".replace(',', '.'))
+                }{% if not forloop.last %},{% endif %}
+            {% endfor %}
+        ];
+
+        // Función para obtener la ruta desde Mapbox Directions API
+        async function getRoute(longOrigen, latOrigen, longDestino, latDestino) {
+            const url = `https://api.mapbox.com/directions/v5/mapbox/driving/${longOrigen},${latOrigen};${longDestino},${latDestino}?geometries=geojson&access_token=${mapboxgl.accessToken}`;
+            const response = await fetch(url);
+            if (response.ok) {
+                const data = await response.json();
+                const coordinates = data.routes[0].geometry.coordinates;
+                const duration = data.routes[0].duration; // en segundos
+                const distance = data.routes[0].distance; // en metros
+                return {
+                    coordinates: coordinates,
+                    duration: duration / 60, // convertir a minutos
+                    distance: distance / 1000 // convertir a kilómetros
+                };
+            } else {
+                throw new Error('Error en la obtención de la ruta');
+            }
+        }
+
+        // Mostrar las rutas entre el predio y los distribuidores
+        async function mostrarRutasOptimas(distribuidores, longOrigen, latOrigen) {
+            let origenActual = { longitud: longOrigen, latitud: latOrigen };
+
+            for (let i = 0; i < distribuidores.length; i++) {
+                let distribuidor = distribuidores[i];
+
+                // Añadir marcador para cada distribuidor
+                try {
+                    const rutaInfo = await getRoute(origenActual.longitud, origenActual.latitud, distribuidor.longitud, distribuidor.latitud);
+
+                    new mapboxgl.Marker({ color: 'red' })
+                        .setLngLat([distribuidor.longitud, distribuidor.latitud])
+                        .setPopup(new mapboxgl.Popup().setHTML(`Distribuidor: ${distribuidor.nombre}<br>Duración: ${rutaInfo.duration.toFixed(2)} minutos<br>Distancia: ${rutaInfo.distance.toFixed(2)} km`))
+                        .addTo(map);
+                    
+                    // Añadir la ruta al mapa
+                    map.addSource(`route-${i}`, {
+                        'type': 'geojson',
+                        'data': {
+                            'type': 'Feature',
+                            'geometry': {
+                                'type': 'LineString',
+                                'coordinates': rutaInfo.coordinates
+                            }
+                        }
+                    });
+
+                    map.addLayer({
+                        'id': `route-${i}`,
+                        'type': 'line',
+                        'source': `route-${i}`,
+                        'layout': {
+                            'line-join': 'round',
+                            'line-cap': 'round'
+                        },
+                        'paint': {
+                            'line-color': '#888',
+                            'line-width': 6
+                        }
+                    });
+
+                    // Actualizar el origen al distribuidor actual para la siguiente ruta
+                    origenActual = { longitud: distribuidor.longitud, latitud: distribuidor.latitud };
+
+                } catch (error) {
+                    console.error('Error al procesar la ruta: ', error);
+                }
+            }
+        }
+
+        // Mostrar las rutas
+        mostrarRutasOptimas(distribuidores, longitudOrigen, latitudOrigen);
+    </script>
+
+    <script>
+        // Verificar el estado del pallet y redirigir si está completado
+        function verificarEstadoPallet(palletId) {
+            $.ajax({
+                type: "GET",
+                url: '/verificar-pallet/',
+                data: { id: palletId },
+                success: function(response) {
+                    if (response.estado_envio === 'completado') {
+                        alert('El recorrido ha finalizado. Redirigiendo a login...');
+                        window.location.href = '/login';
+                    }
+                },
+                error: function(error) {
+                    console.error('Error al verificar el estado del pallet:', error);
+                }
+            });
+        }
+
+        // Verificar el estado del pallet cada 10 segundos
+        setInterval(function() {
+            verificarEstadoPallet("{{ pallet.id }}");
+        }, 10000);
+    </script>
+</body>
+</html>
+
+

@@ -1,15 +1,25 @@
+{% load static %}
 <!DOCTYPE html>
-<html lang="en">
+<html lang="es">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Contract Status</title>
+    <link rel="stylesheet" href="{% static 'css/styles.css' %}">
+    <title>Estado del Contrato</title>
 </head>
 <body>
-    <h1>Contract Status</h1>
-    <p>Contract Address: {{ contract_address }}</p>
-    <p>Total de Registros: {{ total_records }}</p>
-    <a href="{% url 'home' %}">Volver a Inicio</a>
+    <div class="container status">
+        <h1 class="status-title">Estado del Contrato</h1>
+
+        <div class="status-info">
+            <p><strong>Dirección del Contrato:</strong> {{ contract_address }}</p>
+            <p><strong>Total de Registros:</strong> {{ total_records }}</p>
+        </div>
+
+        <div class="status-actions">
+            <a href="{% url 'cosecha' %}" class="status-button">Volver a Inicio</a>
+        </div>
+    </div>
 </body>
 </html>
 

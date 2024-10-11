@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Distribuir Pallet</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-light bg-light">
+        <a class="navbar-brand" href="#">Distribución de Pallets</a>
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav">
+                <li class="nav-item">
+                    <a class="nav-link" href="{% url 'dashboard_predio' %}">Inicio</a>
+                </li>
+                <!-- Agrega más enlaces según sea necesario -->
+            </ul>
+        </div>
+    </nav>
+
+    <div class="container mt-4">
+        <h1>Distribuir Pallet</h1>
+        <form method="post" action="{% url 'distribuir_pallet' %}">
+            {% csrf_token %}
+
+            <!-- Seleccionar el Pallet -->
+            <div class="form-group">
+                <label for="pallet_id">Seleccionar Pallet:</label>
+                <select class="form-control" id="pallet_id" name="pallet_id" required>
+                    <option value="">Seleccione un pallet</option>
+                    {% for pallet in pallets %}
+                        <option value="{{ pallet.id }}">{{ pallet.producto }} - {{ pallet.peso }} kg</option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <!-- Ingresar cantidad de distribuidores -->
+            <div class="form-group">
+                <label for="cantidad_distribuidores">Cantidad de Distribuidores:</label>
+                <input type="number" class="form-control" id="cantidad_distribuidores" name="cantidad_distribuidores" min="1" required>
+            </div>
+
+            <!-- Contenedor para los formularios de distribuidores -->
+            <div id="distribuidores-container"></div>
+
+            <!-- Botón para agregar formularios de distribuidores -->
+            <button type="button" class="btn btn-primary" id="agregar-distribuidores">Agregar Distribuidores</button>
+            <br><br>
+
+            <!-- Botón para enviar el formulario -->
+            <button type="submit" class="btn btn-success">Distribuir Pallet</button>
+        </form>
+
+        <!-- Mostrar errores si existen -->
+        {% if errores %}
+            <div class="alert alert-danger mt-3">
+                <h4>Errores:</h4>
+                <ul>
+                    {% for error in errores %}
+                        <li>{{ error }}</li>
+                    {% endfor %}
+                </ul>
+            </div>
+        {% endif %}
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+    <script>
+        $(document).ready(function() {
+            let contadorDistribuidores = 0;
+
+            // Al hacer clic en "Agregar Distribuidores"
+            $('#agregar-distribuidores').click(function() {
+                const cantidadDistribuidores = parseInt($('#cantidad_distribuidores').val());
+
+                for (let i = 0; i < cantidadDistribuidores; i++) {
+                    contadorDistribuidores++;
+                    $('#distribuidores-container').append(`
+                        <div class="form-group">
+                            <h5>Distribuidor ${contadorDistribuidores}</h5>
+                            
+                            <!-- Seleccionar Distribuidor -->
+                                <label for="distribuidor_${contadorDistribuidores}">Seleccionar Distribuidor:</label>
+                                <select class="form-control" id="distribuidor_${contadorDistribuidores}" name="distribuidor_${contadorDistribuidores}-distribuidor" required>
+                                    <option value="">Seleccione un distribuidor</option>
+                                    {% for distribuidor in distribuidores %}
+                                        <option value="{{ distribuidor.id }}">{{ distribuidor.nombre }}</option>
+                                    {% endfor %}
+                                </select>
+
+                            <!-- Campo para peso del pallet asignado al distribuidor -->
+                            <label for="peso_pallet_${contadorDistribuidores}">Peso Asignado (kg):</label>
+                            <input type="number" step="any" class="form-control" id="peso_pallet_${contadorDistribuidores}" name="distribuidor_${contadorDistribuidores}-peso_enviado" required>
+                        </div>
+                    `);
+                }
+            });
+        });
+    </script>
+</body>
+</html>
+

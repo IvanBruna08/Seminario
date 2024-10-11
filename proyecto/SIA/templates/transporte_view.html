@@ -1,0 +1,12 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h1>Detalles del Transporte</h1>
+<p>ID del Transporte: {{ transporte.id }}</p>
+<button id="start-shipment">Empezar Envío</button>
+<div id="map" style="height: 500px; width: 100%;"></div>
+
+<script src="https://api.mapbox.com/mapbox-gl-js/v3.6.0/mapbox-gl.js"></script>
+<link href="https://api.mapbox.com/mapbox-gl-js/v3.6.0/mapbox-gl.css" rel="stylesheet" />
+<script src="{% static 'java/transporte_map.js' %}"></script>
+{% endblock %}

@@ -1,0 +1,16 @@
+
+
+{% block title %}Predio - Funciones del Trabajador:{{ nombre }}{% endblock %}
+{% block sidebar_links %}
+                <li><a href="{% url 'registrar_pallet' %}" class="sidebar-link">Registrar Pallet</a></li>
+                <li><a href="{% url 'distribuir_pallet' %}" class="sidebar-link">Distribuir Pallet</a></li>
+
+                <a href="{% url 'custom_logout' %}" class="btn-logout-cosecha">Salir</a>
+{% endblock %}
+
+{% block content %}
+<section class="intro-section-cosecha">
+    <h3>Sistema para Registro y Trazabilidad de Cosecha</h3>
+    <p>Utilice las funciones en el menú lateral para registrar, consultar y verificar el estado de la Pallets. Aquí se mostrará la información relacionada con los procesos que realice.</p>
+</section>
+{% endblock %}

@@ -1,232 +1,857 @@
-/* Estilo de la barra de navegación */
-.navbar {
-    background-color: #05a505; /* Verde oscuro */
-    overflow: hidden;
-    height: 50px; /* Ajusta la altura */
-    display: flex;
-    justify-content: flex-start; /* Alinea los elementos a la izquierda */
-    align-items: center; /* Centra verticalmente los elementos */
-    padding: 0 20px; /* Espaciado interno a los lados */
-}
-
-/* Estilo para los enlaces de la barra de navegación */
-.navbar a, .dropdown .dropbtn {
-    color: white;
-    text-align: center;
-    padding: 14px 16px; /* Ajusta el espaciado interno */
-    text-decoration: none;
-    font-size: 18px;
-    white-space: nowrap; /* Evita que el texto se quiebre en varias líneas */
-    line-height: 50px; /* Alinea verticalmente con la altura de la barra */
-}
-.navbar a:hover, .dropdown-content a:hover {
-    background-color: #66BB6A; /* Verde más oscuro */
-    color: white; /* Color del texto para buen contraste */
-}
-
-
-/* Estilo para el botón del dropdown */
-.dropdown .dropbtn {
-    background-color: transparent; /* Asegura que el fondo no sea blanco */
-    border: none; /* Sin borde */
-    cursor: pointer; /* Cambia el cursor al pasar sobre el botón */
-    color: white; /* Asegura que el texto del botón sea blanco */
-}
-
-/* Estilo para el contenido del dropdown */
-.dropdown-content {
-    display: none;
-    position: absolute; /* Asegura que el contenido se posicione sobre otros elementos */
-    background-color: #81C784; /* Verde más claro, sugiriendo frescura y vitalidad */
-    min-width: 160px;
-    box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
-    z-index: 1000; /* Asegura que el contenido del dropdown esté sobre otros elementos */
-    top: 50px; /* Alinea justo debajo de la barra */
-}
-
-/* Estilo para los enlaces dentro del dropdown */
-.dropdown-content a {
-    color: black; /* Color del texto */
-    padding: 12px 16px;
-    text-decoration: none;
-    display: inline-block; /* Muestra los elementos en línea horizontalmente */
-}
-.dropdown-content a:hover {
-    background-color: #66BB6A; /* Verde más oscuro */
-    color: white; /* Color del texto para buen contraste */
-}
-/* Cambios de color en el botón del dropdown al pasar el mouse */
-.dropdown:hover .dropdown-content {
-    display: block;
-}
-
-.dropdown:hover .dropbtn {
-    background-color: #66BB6A; /* Verde más claro al pasar el mouse */
-}
-
-.dropdown-content li a:hover {
-    background-color: #f1f1f1;
-}
-
-/* Para asegurar la alineación en dispositivos móviles */
-.navbar ul {
-    display: flex;
-    list-style-type: none;
-    margin: 0;
-    padding: 0;
-}
-
-.navbar li {
-    margin: 0;
-}
-
-
-
-/* Estilo para el cuerpo de la página */
+/* Estilos generales */
 body {
-    font-family: Arial, sans-serif;
+    font-family: 'Arial', sans-serif;
+    background-color: #F0F4C3; /* Verde claro suave */
     margin: 0;
     padding: 0;
-    background-color: #F5F5F5; /* Color de fondo suave */
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+    color: #2E7D32; /* Verde oscuro */
 }
 
-/* Estilo para el contenedor principal */
-/* Estilo para el contenedor principal del cuerpo */
-.container {
-    max-width: 1200px; /* Ancho máximo del contenedor */
-    margin: 20px auto; /* Centra el contenedor en la página y añade espaciado superior e inferior */
-    padding: 20px; /* Espaciado interno */
-    background-color: #f9f9f9; /* Color de fondo ligero para el contenedor */
-    border-radius: 8px; /* Bordes redondeados para un estilo más suave */
-    box-shadow: 0 0 15px rgba(0,0,0,0.1); /* Sombra ligera para profundidad */
-}
-
-/* Estilo para los encabezados en el contenedor */
-.container h1 {
-    font-size: 28px; /* Tamaño del texto del encabezado */
-    margin-bottom: 20px; /* Espaciado inferior */
-}
-
-/* Estilo para los párrafos en el contenedor */
-.container p {
-    font-size: 16px; /* Tamaño del texto del párrafo */
-    line-height: 1.6; /* Altura de línea para mejor legibilidad */
-    margin-bottom: 15px; /* Espaciado inferior */
-}
-
-/* Ajustes generales para asegurar que el contenido no se desborde */
-body {
-    margin: 0; /* Quita el margen predeterminado */
-    font-family: Arial, sans-serif; /* Fuente general */
-    background-color: #e0f2f1; /* Color de fondo general */
-    color: #333; /* Color del texto */
-}
-
-/* Estilo para el formulario */
-form {
-    max-width: 600px; /* Ancho máximo del formulario */
-    margin: 0 auto; /* Centra el formulario en la página */
-    padding: 20px; /* Espaciado interno del formulario */
-    box-shadow: 0 0 10px rgba(0,0,0,0.1); /* Añade una sombra ligera para profundidad */
-}
-
-/* Estilo para los campos de texto en el formulario */
-form input[type="text"], form input[type="number"], form input[type="date"], form textarea {
-    width: 100%; /* Ancho completo del contenedor del formulario */
-    max-width: 100%; /* Ajusta el ancho al contenedor */
-    padding: 8px; /* Espaciado interno */
-    font-size: 14px; /* Tamaño del texto */
-    margin-bottom: 15px; /* Espaciado inferior */
-    box-sizing: border-box; /* Incluye el padding en el ancho total */
-}
-
-/* Estilo para el botón del formulario */
-form button {
-    
-    background-color: #05a505; /* Verde oscuro */
-    color: white;
-    border: none;
-    cursor: pointer; /* Cambia el cursor al pasar sobre el botón */
-    padding: 15px;
-    font-size: 16px;
-    margin-top: 10px; /* Espaciado superior */
-    width: auto; /* Ajusta el ancho del botón a su contenido */
-    max-width: 200px; /* Ancho máximo del botón */
-    text-align: center; /* Centra el texto del botón */
-    
-}
-
-/* Cambios de color al pasar el mouse sobre el botón del formulario */
-form button:hover {
-    background-color: #66BB6A; /* Verde más oscuro */
-}
-/* Estilo para las listas en el formulario */
-form ul {
-    list-style-type: none; /* Elimina los puntos de la lista */
-    padding: 0;
-    margin: 0;
-}
-
-/* Estilo para los elementos de la lista en el formulario */
-form li {
-    margin-bottom: 10px; /* Espaciado entre los elementos de la lista */
-}
-
-/* Estilo para las listas desplegables en el formulario */
-form select {
-    width: auto; /* Ajusta el ancho al contenido de la lista desplegable */
-    max-width: 300px; /* Ancho máximo de la lista desplegable */
-    padding: 8px; /* Espaciado interno */
-    font-size: 16px; /* Tamaño del texto */
-}
-
-/* Estilo para el ListView */
-.listview {
-    background-color: #FFFFFF; /* Fondo blanco */
-    border-radius: 8px; /* Bordes redondeados */
-    padding: 20px;
-    box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1); /* Sombra sutil */
+table {
+    width: 100%;
+    border-collapse: collapse;
     margin-top: 20px;
 }
 
-/* Estilo para los elementos de la lista en el ListView */
-.listview ul {
-    list-style-type: none; /* Elimina viñetas */
+th, td {
+    padding: 12px;
+    text-align: left;
+    border-bottom: 1px solid #ddd;
+}
+
+th {
+    background-color: #66BB6A;
+    color: white;
+}
+
+tr:hover {
+    background-color: #f1f1f1;
+}
+
+/* Barra de navegación superior */
+.header {
+    background-color: #3C763D;
+    padding: 15px 20px;
+    font-family: 'Verdana', sans-serif;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    color: white;
+    box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+    width: 100%;
+    position: fixed;
+    top: 0;
+    left: 0;
+    z-index: 1000;
+}
+
+.header h2 {
+    flex-grow: 1;
+    text-align: center;
+    margin: 0;
+}
+
+.logout-form {
+    display: inline;
+    margin: 0;
+    padding: 0;
+    background-color: transparent;
+    border: none;
+}
+
+.btn-logout {
+    padding: 10px 20px;
+    background-color: #96dd96;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+    font-size: 1em;
+    margin-left: 20px;
+}
+
+.btn-logout:hover {
+    background-color: #96dd96;
+}
+
+/* Ajuste del contenido */
+.main-container {
+    display: flex;
+    flex-direction: column;
+    padding: 80px 20px 20px;
+    max-width: 1200px;
+    margin: 0 auto;
+    flex-grow: 1;
+    height: calc(100vh - 80px);
+    overflow: auto;
+}
+
+/* Barra lateral (sidebar) */
+.sidebar {
+    background-color: #A5D6A7;
+    padding: 15px;
+    width: 250px;
+    border-radius: 5px;
+    box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+    position: fixed;
+    top: 80px; /* Ajustado para coincidir con el header */
+    bottom: 0;
+    left: 0;
+}
+
+.sidebar a {
+    color: white;
+    text-decoration: none;
+    padding: 10px;
+    display: block;
+    border-radius: 5px;
+    transition: background-color 0.3s;
+}
+
+.sidebar a:hover {
+    background-color: #34495e;
+}
+
+.sidebar ul {
+    list-style: none;
     padding: 0;
     margin: 0;
 }
 
-.listview li {
+.sidebar li {
+    margin: 10px 0;
     padding: 10px;
-    border-bottom: 1px solid #ddd; /* Línea separadora */
+    cursor: pointer;
+    border-radius: 5px;
+    transition: background-color 0.3s ease;
 }
 
-.listview li:last-child {
-    border-bottom: none; /* Elimina la línea para el último elemento */
-}
-/* Estilo para la tabla */
-table {
-    width: 100%; /* Asegura que la tabla ocupe todo el ancho disponible */
-    border-collapse: collapse; /* Quita los bordes dobles entre celdas */
-    margin-top: 20px; /* Espaciado superior para separar la tabla del contenido superior */
+.sidebar li:hover {
+    background-color: #66BB6A;
+    color: white;
 }
 
-/* Estilo para los encabezados de la tabla */
-th {
-    background-color: #05a505; /* Verde oscuro */
-    color: white; /* Texto en blanco */
-    padding: 10px; /* Espaciado interno */
-    text-align: center; /* Centra el texto */
+/* Encabezados y párrafos */
+h1 {
+    font-size: 2.2em;
+    margin-bottom: 20px;
+    color: #388E3C;
 }
 
-/* Estilo para las celdas de la tabla */
-td {
-    padding: 10px; /* Espaciado interno */
-    text-align: center; /* Centra el texto */
-    border-bottom: 1px solid #ddd; /* Línea separadora */
+h3 {
+    font-size: 1.8em;
+    color: #2E7031;
 }
 
-/* Estilo para la fila de la tabla sin datos */
-td[colspan="7"] {
-    text-align: center; /* Centra el texto en la fila sin datos */
+p {
+    font-size: 16px;
+    margin-bottom: 20px;
+}
+
+/* Estilo para el formulario */
+.login-form {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.form-label {
+    font-size: 1.1em;
+    color: #2E7D32;
+    text-align: left;
+    margin-bottom: 5px;
+}
+
+.form-input {
+    padding: 10px;
+    border: 1px solid #B0BEC5;
+    border-radius: 5px;
+    font-size: 1em;
+    width: 100%;
+}
+
+/* Estilo para el botón */
+.btn-submit {
+    background-color: #66BB6A;
+    color: white;
+    padding: 12px 20px;
+    border: none;
+    border-radius: 5px;
+    font-size: 1.1em;
+    cursor: pointer;
+    transition: background-color 0.3s ease, transform 0.2s ease;
+    display: inline-block;
+}
+
+.btn-submit:hover {
+    background-color: #43A047;
+}
+
+.btn-submit:active {
+    background-color: #2E7D32;
+}
+
+/* Estilo general del formulario */
+form {
+    width: 100%;
+    max-width: 400px;
+    margin: 20px auto;
+    padding: 20px;
+    background-color: #f6f6f6;
+    border-radius: 10px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+}
+
+form label {
+    font-weight: bold;
+    display: block;
+    margin-bottom: 8px;
+}
+
+form input[type="text"],
+form input[type="email"],
+form input[type="number"],
+form textarea,
+form select {
+    width: 100%;
+    padding: 10px;
+    margin-bottom: 16px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    background-color: #fff;
+    font-size: 1em;
+}
+
+form input[type="submit"] {
+    width: 100%;
+    padding: 12px;
+    border: none;
+    border-radius: 5px;
+    background-color: #66BB6A;
+    color: white;
+    font-size: 1.1em;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+form input[type="submit"]:hover {
+    background-color: #57A95D;
+}
+
+form input:focus,
+form textarea:focus,
+form select:focus {
+    border-color: #66BB6A;
+    outline: none;
+    background-color: #f0f0f0;
+}
+
+
+
+/* Estilos para la barra de navegación superior */
+.header-home {
+    background-color: #2a5d34; /* Color de fondo verde */
+    color: #fff; /* Color del texto blanco */
+    padding: 15px;
+    text-align: center;
+    font-size: 1.5em;
+}
+
+/* Contenedor principal */
+.container-home {
+    padding: 20px;
+}
+
+/* Sección de introducción */
+.intro-home {
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+/* Contenedor de botones */
+.button-container-home {
+    display: flex;
+    justify-content: center;
+    gap: 15px;
+}
+
+/* Estilo de los botones */
+.boton-home {
+    display: inline-block;
+    padding: 10px 20px;
+    text-decoration: none;
+    color: #fff;
+    border-radius: 5px;
+    transition: background-color 0.3s ease;
+}
+
+.btn-trabajador {
+    background-color: #4CAF50; /* Verde */
+}
+
+.btn-trabajador:hover {
+    background-color: #45a049; /* Verde oscuro */
+}
+
+.btn-cliente {
+    background-color: #2196F3; /* Azul */
+}
+
+.btn-cliente:hover {
+    background-color: #0b7dda; /* Azul oscuro */
+}
+
+/* Estilos generales del contenedor */
+.container-ingreso {
+    max-width: 100%;
+    width: 800px; /* Ancho del contenedor, el doble del tamaño del formulario */
+    margin: 40px auto;
+    padding: 40px; /* Relleno para mayor espacio interno */
+    background-color: #ffffff; /* Blanco */
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    border: 1px solid #e1e1e1;
+    box-sizing: border-box; /* Asegura que el padding y el borde estén incluidos en el ancho */
+}
+
+/* Estilo del título */
+.title-ingreso {
+    text-align: center;
+    margin-bottom: 20px;
+    font-size: 2.5em;
+    color: #2c3e50; /* Azul oscuro */
+}
+
+/* Estilos para el formulario */
+.form-ingreso {
+    display: flex;
+    flex-direction: column;
+    gap: 20px; /* Espacio entre los elementos del formulario */
+    width: 100%; /* Asegura que el formulario ocupe todo el ancho del contenedor */
+    box-sizing: border-box; /* Asegura que el padding y el borde estén incluidos en el ancho */
+}
+
+/* Estilo de la etiqueta del formulario */
+.label-ingreso {
+    font-size: 1.1em;
+    color: #34495e; /* Gris oscuro */
+}
+
+/* Estilo del campo de entrada */
+.input-ingreso {
+    padding: 12px;
+    border: 1px solid #bdc3c7; /* Gris claro */
+    border-radius: 6px;
+    font-size: 1em;
+    color: #2c3e50;
+    width: 100%; /* Asegura que el campo ocupe todo el ancho del formulario */
+    box-sizing: border-box; /* Asegura que el padding y el borde estén incluidos en el ancho */
+}
+
+/* Estilo del botón de enviar */
+.btn-ingreso {
+    padding: 12px 20px;
+    border: none;
+    border-radius: 6px;
+    color: #fff;
+    background-color: #3498db; /* Azul brillante */
+    font-size: 1.1em;
+    cursor: pointer;
+    transition: background-color 0.3s ease, transform 0.3s ease;
+    font-weight: bold;
+    width: 100%; /* Asegura que el botón ocupe todo el ancho del formulario */
+    box-sizing: border-box; /* Asegura que el padding y el borde estén incluidos en el ancho */
+}
+
+.btn-ingreso:hover {
+    background-color: #2980b9; /* Azul oscuro */
+    transform: translateY(-2px);
+}
+
+
+/* Estilos para la barra de navegación superior */
+.header-cosecha {
+    background-color: #2a5d34; /* Color de fondo verde */
+    color: #fff; /* Color del texto blanco */
+    padding: 15px;
+}
+
+.nav-container-cosecha {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.welcome-message-cosecha {
+    font-size: 1.5em;
+}
+
+/* Estilo PARA LA PAGINA COSECHA */
+/* Estilo del botón de logout */
+.logout-button-cosecha {
+    margin-left: auto;
+}
+
+.btn-logout-cosecha {
+    display: inline-block;
+    padding: 10px 25px;
+    background-color: #e74c3c; /* Rojo brillante */
+    color: #fff;
+    text-decoration: none;
+    border-radius: 8px;
+    font-size: 1.1em;
+    font-weight: bold;
+    transition: background-color 0.3s ease, transform 0.3s ease, box-shadow 0.3s ease;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2); /* Sombra sutil */
+}
+
+.btn-logout-cosecha:hover {
+    background-color: #c0392b; /* Rojo oscuro */
+    transform: translateY(-2px);
+    box-shadow: 0 6px 8px rgba(0, 0, 0, 0.3); /* Sombra más intensa al pasar el cursor */
+}
+
+.btn-logout-cosecha:active {
+    background-color: #a93226; /* Rojo más oscuro al hacer clic */
+    transform: translateY(1px);
+}
+
+/* Estilos para el contenedor de registrar cosecha */
+.container-registrarC {
+    max-width: 100%;
+    width: 600px; /* Ancho del contenedor */
+    margin: 40px auto;
+    padding: 30px;
+    background-color: #f4f8f4; /* Color de fondo verde claro */
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    border: 1px solid #d1e0d5; /* Color de borde verde muy claro */
+    box-sizing: border-box; /* Asegura que el padding y el borde estén incluidos en el ancho */
+}
+
+/* Estilo del título */
+.title-registrarC {
+    text-align: center;
+    margin-bottom: 20px;
+    font-size: 2em;
+    color: #4a773c; /* Verde más oscuro */
+    font-family: 'Georgia', serif; /* Fuente serif para un toque más natural */
+}
+
+/* Estilos para el formulario de registro */
+.form-registrarC {
+    display: flex;
+    flex-direction: column;
+    gap: 20px; /* Espacio entre los elementos del formulario */
+}
+
+/* Estilo del botón de registrar */
+.btn-registrarC {
+    padding: 12px 25px;
+    border: none;
+    border-radius: 8px;
+    color: #fff;
+    background-color: #6dbf42; /* Verde hierba */
+    font-size: 1.2em;
+    font-weight: bold;
+    cursor: pointer;
+    transition: background-color 0.3s ease, transform 0.3s ease, box-shadow 0.3s ease;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2); /* Sombra sutil */
+    align-self: center; /* Centra el botón en el formulario */
+    text-transform: uppercase; /* Letras en mayúsculas */
+}
+
+.btn-registrarC:hover {
+    background-color: #5aa62d; /* Verde más oscuro */
+    transform: translateY(-2px);
+    box-shadow: 0 6px 8px rgba(0, 0, 0, 0.3); /* Sombra más intensa al pasar el cursor */
+}
+
+.btn-registrarC:active {
+    background-color: #4b8a2f; /* Verde aún más oscuro al hacer clic */
+    transform: translateY(1px);
+}
+
+/* Estilo del enlace a inicio */
+.link-home {
+    display: block;
+    text-align: center;
+    margin-top: 20px;
+    font-size: 1.1em;
+    color: #4a773c; /* Verde oscuro */
+    text-decoration: none;
+    transition: color 0.3s ease;
+    font-family: 'Georgia', serif; /* Fuente serif para un toque más natural */
+}
+
+.link-home:hover {
+    color: #356d2c; /* Verde más oscuro */
+}
+
+/* Estilos para el contenedor principal */
+.main-layout-cosecha {
+    display: flex;
+    max-width: 1200px;
+    margin: 20px auto;
+    gap: 20px;
+}
+
+/* Estilos para la barra lateral (sidebar) */
+.sidebar-cosecha {
+    width: 250px;
+    background-color: #f8f9fa; /* Gris claro */
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.sidebar-cosecha ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.sidebar-cosecha li {
+    margin-bottom: 10px;
+}
+
+.sidebar-link {
+    text-decoration: none;
+    color: #3498db; /* Azul brillante */
+    font-size: 1.1em;
+    display: block;
+    padding: 10px;
+    border-radius: 5px;
+    transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+.sidebar-link:hover {
+    background-color: #3498db; /* Azul brillante */
+    color: #fff;
+}
+
+/* Estilos para el contenido principal */
+.main-container-cosecha {
+    flex: 1;
+    padding: 20px;
+    background-color: #ffffff;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.intro-section-cosecha {
+    margin-bottom: 20px;
+}
+
+.intro-section-cosecha h3 {
+    font-size: 1.5em;
+    color: #2c3e50; /* Azul oscuro */
+}
+
+.intro-section-cosecha p {
+    font-size: 1em;
+    color: #34495e; /* Gris oscuro */
+}
+
+/* Contenedor principal */
+.detalleC {
+    max-width: 1200px;
+    margin: 80px auto 20px; /* Deja espacio para el header */
+    padding: 20px;
+    background-color: #F0F4C3; /* Fondo verde claro */
+    border-radius: 8px;
+    box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* Títulos */
+.detalleC-title {
+    font-size: 2.5em;
+    color: #2E7D32; /* Verde oscuro */
+    margin-bottom: 20px;
+    text-align: center;
+}
+
+.detalleC-subtitle {
+    font-size: 1.8em;
+    color: #388E3C;
+    margin-bottom: 15px;
+}
+
+/* Etiquetas y elementos del formulario */
+.detalleC-label {
+    font-size: 1.2em;
+    color: #2E7D32;
+}
+
+.detalleC-select {
+    padding: 10px;
+    font-size: 1em;
+    width: 100%;
+    border: 1px solid #B0BEC5;
+    border-radius: 5px;
+    margin-bottom: 20px;
+}
+
+/* Tabla de detalles */
+.detalleC-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 20px;
+}
+
+.detalleC-table th, .detalleC-table td {
+    padding: 12px 15px;
+    border: 1px solid #B0BEC5;
+    text-align: left;
+}
+
+.detalleC-table th {
+    background-color: #66BB6A; /* Verde vibrante */
+    color: white;
+}
+
+.detalleC-table td {
+    background-color: #FFFFFF;
+}
+
+/* Sin resultados */
+.detalleC-noresult {
+    font-size: 1.2em;
+    color: #D32F2F;
+    text-align: center;
+    margin-top: 20px;
+}
+
+/* Enlace para volver */
+.detalleC-backlink {
+    display: inline-block;
+    margin-top: 20px;
+    font-size: 1.2em;
+    color: #388E3C;
+    text-decoration: none;
+    border-bottom: 2px solid #388E3C;
+    transition: color 0.3s ease;
+}
+
+.detalleC-backlink:hover {
+    color: #2E7D32;
+}
+
+/* Contenedor principal */
+.marcarT {
+    max-width: 1200px;
+    margin: 80px auto 20px; /* Deja espacio para el header */
+    padding: 20px;
+    background-color: #F0F4C3; /* Fondo verde claro */
+    border-radius: 8px;
+    box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* Títulos */
+.marcarT-title {
+    font-size: 2.5em;
+    color: #2E7D32; /* Verde oscuro */
+    margin-bottom: 20px;
+    text-align: center;
+}
+
+.marcarT-subtitle {
+    font-size: 1.8em;
+    color: #388E3C;
+    margin-bottom: 15px;
+}
+
+/* Contenedor con scrollbar para la tabla */
+.marcarT-table-container {
+    max-height: 300px; /* Altura máxima del contenedor */
+    overflow-y: auto; /* Scroll vertical si la tabla es muy alta */
+    border: 1px solid #B0BEC5;
+    border-radius: 5px;
+    margin-bottom: 20px;
+}
+
+/* Tabla de cosechas */
+.marcarT-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.marcarT-table th, .marcarT-table td {
+    padding: 12px 15px;
+    border: 1px solid #B0BEC5;
+    text-align: left;
+}
+
+.marcarT-table th {
+    background-color: #66BB6A; /* Verde vibrante */
+    color: white;
+}
+
+.marcarT-table td {
+    background-color: #FFFFFF;
+}
+
+/* Estilo para el formulario */
+.marcarT-form {
+    margin-top: 20px;
+}
+
+.marcarT-label {
+    font-size: 1.2em;
+    color: #2E7D32;
+    display: block;
+    margin-bottom: 10px;
+}
+
+/* Contenedor del select */
+.marcarT-select-container {
+    max-height: 200px;
+    overflow-y: auto;
+    border: 1px solid #B0BEC5;
+    border-radius: 5px;
+    padding: 5px;
+}
+
+.marcarT-select {
+    width: 100%;
+    padding: 10px;
+    font-size: 1em;
+    border: none;
+    outline: none;
+}
+
+/* Botón para marcar como transportado */
+.marcarT-button {
+    background-color: #4CAF50; /* Verde */
+    color: white;
+    padding: 10px 20px;
+    font-size: 1.2em;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.marcarT-button:hover {
+    background-color: #388E3C;
+}
+
+/* Contenedor principal */
+.container.status {
+    max-width: 800px;
+    margin: 80px auto 20px;
+    padding: 20px;
+    background-color: #E8F5E9; /* Verde claro */
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    text-align: center;
+}
+
+/* Título principal */
+.status-title {
+    font-size: 2.5em;
+    color: #2E7D32; /* Verde oscuro */
+    margin-bottom: 20px;
+}
+
+/* Información del contrato */
+.status-info {
+    margin-bottom: 20px;
+    font-size: 1.2em;
+    color: #388E3C; /* Verde vibrante */
+}
+
+.status-info p {
+    margin: 10px 0;
+}
+
+/* Botón de acciones */
+.status-actions {
+    margin-top: 30px;
+}
+
+.status-button {
+    background-color: #4CAF50;
+    color: white;
+    padding: 10px 20px;
+    font-size: 1.2em;
+    text-decoration: none;
+    border-radius: 5px;
+    transition: background-color 0.3s ease;
+}
+
+.status-button:hover {
+    background-color: #388E3C;
+}
+
+
+
+
+
+
+
+/* Estilo responsive para pantallas pequeñas */
+@media (max-width: 1072px) {
+    .main-container {
+        padding: 80px 20px 20px;
+    }
+}
+
+@media (max-width: 991px) {
+    .sidebar {
+        display: none;
+    }
+
+    .content {
+        margin-left: 0;
+    }
+}
+
+@media (max-width: 767px) {
+    .header {
+        flex-direction: column;
+        align-items: flex-start;
+        padding: 10px;
+    }
+
+    .main-container {
+        padding: 60px 10px 10px;
+    }
+}
+
+@media (max-width: 320px) {
+    .header {
+        padding: 10px;
+    }
+
+    .main-container {
+        padding: 50px 10px 10px;
+    }
+
+    h1 {
+        font-size: 1.8em;
+    }
+
+    h3 {
+        font-size: 1.4em;
+    }
+
+    p {
+        font-size: 14px;
+    }
+
+    .btn-submit {
+        width: 100%;
+        padding: 10px;
+    }
+
+    .sidebar {
+        display: none;
+    }
 }

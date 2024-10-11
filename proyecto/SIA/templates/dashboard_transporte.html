@@ -1,0 +1,8 @@
+{% if request.session.user_id %}
+    <h1>Bienvenido, {{ nombre_usuario }}.</h1>
+    <a href="{% url 'custom_logout' %}" class="btn-logout-cosecha">Salir</a>
+    <section class="intro-section-cosecha">
+        <h3>Sistema para Registro y Trazabilidad de productos agricolas</h3>
+        <p>Porfavor de esperar el Pallet o Caja que transportara.</p>
+    </section>
+{% endif %}

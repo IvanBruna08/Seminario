@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Información del Pallet</title><a href="{% url 'custom_logout' %}" class="btn-logout-cosecha">Salir</a>
+    <link href='https://api.mapbox.com/mapbox-gl-js/v2.10.0/mapbox-gl.css' rel='stylesheet' />
+    <style>
+        table {
+            width: 40%; /* Asegura que la tabla use todo el ancho disponible */
+            border-collapse: collapse; /* Elimina el espacio entre bordes de celdas */
+            margin-top: 20px; /* Añade margen superior para separar la tabla del contenido anterior */
+        }
+        th, td {
+            border: 1px solid #dddddd; /* Añade un borde ligero a las celdas */
+            text-align: center; /* Centra el texto en las celdas */
+            padding: 12px; /* Añade relleno a las celdas para dar espacio */
+        }
+        th {
+            background-color: #f2f2f2; /* Añade un color de fondo a la fila del encabezado */
+        }
+        tr:nth-child(even) {
+            background-color: #f9f9f9; /* Alterna el color de fondo para filas pares */
+        }
+        tr:hover {
+            background-color: #f1f1f1; /* Añade un efecto hover a las filas */
+        }
+    </style>
+</head>
+<body>
+    <h1>Información del Pallet</h1>
+    <p><strong>ID del Pallet:</strong> {{ pallet.id }}</p>
+    <p><strong>ID del Pallet:</strong> {{ pallet.producto }}</p>
+    <p><strong>Fecha de Cosecha:</strong> {{ pallet.fecha_cosecha }}</p>
+
+    <h2>Información del Predio</h2>
+    <p><strong>Empresa del Predio:</strong> {{ predio.nombre }}</p>
+    <p><strong>Dirección del Predio:</strong> {{ predio.direccion }}</p>
+    <p><strong>Lugar de la cosecha:</strong> {{ pallet.lugar }}</p>
+
+    <h2>Distribución</h2>
+    <table>
+        <thead>
+            <tr>
+                <th>Distribuidor</th>
+                <th>Peso Enviado (kg)</th>
+                <th>Estado (kg)</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for distribucion in distribuciones %}
+                <tr>
+                    <td>{{ distribucion.distribuidor }}</td>
+                    <td>{{ distribucion.peso_enviado }}</td>
+                    <td>{{ distribucion.estado_pallet }}</td>
+                </tr>
+            {% empty %}
+                <tr>
+                    <td colspan="2">No hay distribuidores asignados.</td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+
+    <!-- Verificar las coordenadas -->
+    <p>Coordenadas del predio: Latitud: {{ predio.latitude }}, Longitud: {{ predio.longitude }}</p>
+
+    <!-- Mapa del Predio -->
+    <div id="map" data-latitude="{{ predio.latitude }}" data-longitude="{{ predio.longitude }}" style="height: 300px; width: 100%;"></div>
+
+    <!-- Script para mostrar el mapa con Mapbox -->
+    <script src="https://api.mapbox.com/mapbox-gl-js/v2.10.0/mapbox-gl.js"></script>
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            var mapElement = document.getElementById('map');
+            var latitude = parseFloat(mapElement.getAttribute('data-latitude').replace(',', '.'));
+            var longitude = parseFloat(mapElement.getAttribute('data-longitude').replace(',', '.'));
+
+            // Verifica las coordenadas en la consola
+            console.log("Latitud: ", latitude, "Longitud: ", longitude);
+
+            if (!isNaN(latitude) && !isNaN(longitude)) {
+                mapboxgl.accessToken = 'pk.eyJ1IjoiaXZhYjk4IiwiYSI6ImNtMHlwdGR4bTBxemYyc3EzeWlweTB4b3UifQ.SqDs4IzkxrtKlWqrbDfNXw';
+                var map = new mapboxgl.Map({
+                    container: 'map',
+                    style: 'mapbox://styles/mapbox/streets-v12',
+                    center: [longitude, latitude], // Mapbox usa [longitud, latitud]
+                    zoom: 13
+                });
+                new mapboxgl.Marker()
+                    .setLngLat([longitude, latitude]) // Primero longitud, luego latitud
+                    .setPopup(new mapboxgl.Popup().setText('Origen: Predio'))
+                    .addTo(map);
+            } else {
+                console.error("Las coordenadas no son válidas.");
+            }
+        });
+    </script>
+</body>
+</html>

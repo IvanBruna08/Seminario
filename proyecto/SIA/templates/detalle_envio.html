@@ -1,0 +1,10 @@
+<h2>Detalles del Envío</h2>
+<p>ID Recepción: {{ recepcion.id }}</p>
+<p>Pallet: {{ envio_pallet.pallet.id }}</p>
+<p>Peso Final: {{ envio_pallet.peso_final }} kg</p>
+
+<form method="POST">
+    {% csrf_token %}
+    {{ empaque_form.as_p }}  <!-- Renderizar el formulario de empaque -->
+    <button type="submit">Crear Empaque</button>
+</form>

@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Seleccionar Opción</title>
+</head>
+<body>
+    <h1>Selecciona una opción</h1>
+    <form method="post">
+        {% csrf_token %}
+        <input type="hidden" name="pallet_id" value="{{ pallet_id }}">
+        <button type="submit" name="opcion" value="predio">Ver Información de Pallet</button>
+        <button type="submit" name="opcion" value="transporte">Iniciar Envío</button>
+        <button type="submit" name="opcion" value="recepcion">Recepción y Empaque</button>
+    </form>
+</body>
+</html>
