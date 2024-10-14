@@ -1,4 +1,5 @@
 <form method="POST">
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
     {% csrf_token %}
     <label for="tipo_actor">Selecciona tu tipo de actor:</label>
     <select name="tipo_actor" id="tipo_actor" onchange="mostrarDescripcion()">

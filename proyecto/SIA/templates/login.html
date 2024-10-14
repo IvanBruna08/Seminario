@@ -1,20 +1,88 @@
 <!DOCTYPE html>
-<html>
+<html lang="es">
 <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <link href="https://fonts.googleapis.com/css?family=Ubuntu" rel="stylesheet">
+    <link rel="stylesheet" href="path/to/font-awesome/css/font-awesome.min.css">
     <title>Inicio de Sesión</title>
+    <style>
+        body {
+            font-family: 'Ubuntu', sans-serif;
+            background-color: #f7f7f7;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+        .main {
+            width: 350px;
+            padding: 40px;
+            background-color: #fff;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            border-radius: 10px;
+        }
+        .sign {
+            font-size: 24px;
+            font-weight: bold;
+            margin-bottom: 20px;
+            color: #333;
+        }
+        .form1 input {
+            width: 100%;
+            padding: 10px;
+            margin: 10px 0;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 16px;
+        }
+        .submit {
+            display: block;
+            width: 100%;
+            padding: 10px;
+            background-color: #007bff;
+            color: white;
+            text-align: center;
+            text-decoration: none;
+            border-radius: 5px;
+            margin-top: 10px;
+            font-size: 18px;
+        }
+        .submit:hover {
+            background-color: #0056b3;
+        }
+        .forgot {
+            text-align: center;
+            margin-top: 15px;
+        }
+        .forgot a {
+            color: #007bff;
+            text-decoration: none;
+        }
+        .forgot a:hover {
+            text-decoration: underline;
+        }
+        .error {
+            color: red;
+            text-align: center;
+        }
+    </style>
 </head>
 <body>
-    <h2>Inicio de Sesión</h2>
-    <form method="post">
-        {% csrf_token %}
-        {{ form.as_p }}
-        <button type="submit">Iniciar Sesión</button>
-        <a href="{% url 'registro_actores' %}" class="btn btn-primary">Registrate</a>
-        {% if error_message %}
-            <p style="color:red;">{{ error_message }}</p>
-        {% endif %}
-    </form>
+    <div class="main">
+        <p class="sign" align="center">Inicio de Sesión</p>
+        <form method="post" class="form1">
+            {% csrf_token %}
+            {{ form.as_p }}
+            <button type="submit" class="submit">Iniciar Sesión</button>
+            <a href="{% url 'registro_actores' %}" class="submit">Registrate</a>
+            {% if error_message %}
+                <p class="error">{{ error_message }}</p>
+            {% endif %}
+        </form>
+    </div>
 </body>
 </html>
-
 

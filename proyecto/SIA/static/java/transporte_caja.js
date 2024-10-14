@@ -144,6 +144,10 @@ function finalizarEntrega() {
                         alert(response.message);
                         // Aquí puedes agregar lógica para redirigir o actualizar la página
                         localStorage.removeItem('coordenadasTransporte');
+                        setTimeout(function() {
+                            window.location.href = '{% url "login" %}';  // URL de redirección al login
+                        }, 3000);  // Redirigir después de 3 segundos
+
                     } else {
                         alert(response.message);
                     }

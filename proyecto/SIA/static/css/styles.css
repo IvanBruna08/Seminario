@@ -1,7 +1,7 @@
 /* Estilos generales */
 body {
     font-family: 'Arial', sans-serif;
-    background-color: #F0F4C3; /* Verde claro suave */
+    background-color: #C8E6C9; /* Verde suave */
     margin: 0;
     padding: 0;
     display: flex;
@@ -33,7 +33,7 @@ tr:hover {
 
 /* Barra de navegación superior */
 .header {
-    background-color: #3C763D;
+    background-color: #3C763D; /* Verde oscuro */
     padding: 15px 20px;
     font-family: 'Verdana', sans-serif;
     display: flex;
@@ -64,7 +64,7 @@ tr:hover {
 
 .btn-logout {
     padding: 10px 20px;
-    background-color: #96dd96;
+    background-color: #96dd96; /* Verde claro */
     color: white;
     border: none;
     border-radius: 5px;
@@ -75,7 +75,7 @@ tr:hover {
 }
 
 .btn-logout:hover {
-    background-color: #96dd96;
+    background-color: #81c784; /* Un tono más oscuro del verde claro */
 }
 
 /* Ajuste del contenido */
@@ -92,7 +92,7 @@ tr:hover {
 
 /* Barra lateral (sidebar) */
 .sidebar {
-    background-color: #A5D6A7;
+    background-color: #A5D6A7; /* Verde claro para la barra lateral */
     padding: 15px;
     width: 250px;
     border-radius: 5px;
@@ -104,7 +104,7 @@ tr:hover {
 }
 
 .sidebar a {
-    color: white;
+    color: white; /* Texto blanco para enlaces */
     text-decoration: none;
     padding: 10px;
     display: block;
@@ -113,7 +113,7 @@ tr:hover {
 }
 
 .sidebar a:hover {
-    background-color: #34495e;
+    background-color: #66BB6A; /* Verde oscuro al pasar el mouse */
 }
 
 .sidebar ul {
@@ -131,7 +131,7 @@ tr:hover {
 }
 
 .sidebar li:hover {
-    background-color: #66BB6A;
+    background-color: #4CAF50; /* Un tono más oscuro del verde para los elementos de lista */
     color: white;
 }
 
@@ -139,12 +139,12 @@ tr:hover {
 h1 {
     font-size: 2.2em;
     margin-bottom: 20px;
-    color: #388E3C;
+    color: #388E3C; /* Verde medio */
 }
 
 h3 {
     font-size: 1.8em;
-    color: #2E7031;
+    color: #2E7031; /* Verde oscuro */
 }
 
 p {
@@ -161,14 +161,14 @@ p {
 
 .form-label {
     font-size: 1.1em;
-    color: #2E7D32;
+    color: #2E7D32; /* Verde oscuro */
     text-align: left;
     margin-bottom: 5px;
 }
 
 .form-input {
     padding: 10px;
-    border: 1px solid #B0BEC5;
+    border: 1px solid #B0BEC5; /* Color de borde gris claro */
     border-radius: 5px;
     font-size: 1em;
     width: 100%;
@@ -176,7 +176,7 @@ p {
 
 /* Estilo para el botón */
 .btn-submit {
-    background-color: #66BB6A;
+    background-color: #66BB6A; /* Verde claro para el botón */
     color: white;
     padding: 12px 20px;
     border: none;
@@ -188,11 +188,11 @@ p {
 }
 
 .btn-submit:hover {
-    background-color: #43A047;
+    background-color: #43A047; /* Verde más oscuro al pasar el mouse */
 }
 
 .btn-submit:active {
-    background-color: #2E7D32;
+    background-color: #2E7D32; /* Verde oscuro al hacer clic */
 }
 
 /* Estilo general del formulario */
@@ -201,7 +201,7 @@ form {
     max-width: 400px;
     margin: 20px auto;
     padding: 20px;
-    background-color: #f6f6f6;
+    background-color: #f6f6f6; /* Fondo gris claro */
     border-radius: 10px;
     box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
 }
@@ -220,9 +220,9 @@ form select {
     width: 100%;
     padding: 10px;
     margin-bottom: 16px;
-    border: 1px solid #ccc;
+    border: 1px solid #ccc; /* Borde gris claro */
     border-radius: 5px;
-    background-color: #fff;
+    background-color: #fff; /* Fondo blanco */
     font-size: 1em;
 }
 
@@ -231,7 +231,7 @@ form input[type="submit"] {
     padding: 12px;
     border: none;
     border-radius: 5px;
-    background-color: #66BB6A;
+    background-color: #66BB6A; /* Verde claro */
     color: white;
     font-size: 1.1em;
     cursor: pointer;
@@ -239,23 +239,21 @@ form input[type="submit"] {
 }
 
 form input[type="submit"]:hover {
-    background-color: #57A95D;
+    background-color: #57A95D; /* Verde un poco más oscuro */
 }
 
 form input:focus,
 form textarea:focus,
 form select:focus {
-    border-color: #66BB6A;
+    border-color: #66BB6A; /* Borde verde al enfocar */
     outline: none;
-    background-color: #f0f0f0;
+    background-color: #f0f0f0; /* Fondo gris claro al enfocar */
 }
-
-
 
 /* Estilos para la barra de navegación superior */
 .header-home {
-    background-color: #2a5d34; /* Color de fondo verde */
-    color: #fff; /* Color del texto blanco */
+    background-color: #2A5D34; /* Verde oscuro */
+    color: #fff; /* Texto blanco */
     padding: 15px;
     text-align: center;
     font-size: 1.5em;
@@ -284,7 +282,7 @@ form select:focus {
     display: inline-block;
     padding: 10px 20px;
     text-decoration: none;
-    color: #fff;
+    color: #fff; /* Texto blanco */
     border-radius: 5px;
     transition: background-color 0.3s ease;
 }
@@ -294,7 +292,7 @@ form select:focus {
 }
 
 .btn-trabajador:hover {
-    background-color: #45a049; /* Verde oscuro */
+    background-color: #45A049; /* Verde oscuro */
 }
 
 .btn-cliente {
@@ -302,7 +300,7 @@ form select:focus {
 }
 
 .btn-cliente:hover {
-    background-color: #0b7dda; /* Azul oscuro */
+    background-color: #0B7DDA; /* Azul oscuro */
 }
 
 /* Estilos generales del contenedor */
@@ -314,7 +312,7 @@ form select:focus {
     background-color: #ffffff; /* Blanco */
     border-radius: 10px;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-    border: 1px solid #e1e1e1;
+    border: 1px solid #e1e1e1; /* Borde gris claro */
     box-sizing: border-box; /* Asegura que el padding y el borde estén incluidos en el ancho */
 }
 
@@ -323,7 +321,7 @@ form select:focus {
     text-align: center;
     margin-bottom: 20px;
     font-size: 2.5em;
-    color: #2c3e50; /* Azul oscuro */
+    color: #2E7D32; /* Verde oscuro */
 }
 
 /* Estilos para el formulario */
@@ -338,16 +336,16 @@ form select:focus {
 /* Estilo de la etiqueta del formulario */
 .label-ingreso {
     font-size: 1.1em;
-    color: #34495e; /* Gris oscuro */
+    color: #2E7031; /* Verde intermedio */
 }
 
 /* Estilo del campo de entrada */
 .input-ingreso {
     padding: 12px;
-    border: 1px solid #bdc3c7; /* Gris claro */
+    border: 1px solid #B0BEC5; /* Gris claro */
     border-radius: 6px;
     font-size: 1em;
-    color: #2c3e50;
+    color: #2E7D32; /* Verde oscuro */
     width: 100%; /* Asegura que el campo ocupe todo el ancho del formulario */
     box-sizing: border-box; /* Asegura que el padding y el borde estén incluidos en el ancho */
 }
@@ -358,7 +356,7 @@ form select:focus {
     border: none;
     border-radius: 6px;
     color: #fff;
-    background-color: #3498db; /* Azul brillante */
+    background-color: #66BB6A; /* Verde claro */
     font-size: 1.1em;
     cursor: pointer;
     transition: background-color 0.3s ease, transform 0.3s ease;
@@ -368,7 +366,7 @@ form select:focus {
 }
 
 .btn-ingreso:hover {
-    background-color: #2980b9; /* Azul oscuro */
+    background-color: #57A95D; /* Verde un poco más oscuro */
     transform: translateY(-2px);
 }
 
@@ -392,16 +390,16 @@ form select:focus {
     font-size: 1.5em;
 }
 
-/* Estilo PARA LA PAGINA COSECHA */
-/* Estilo del botón de logout */
+/* Estilo para el botón de logout */
 .logout-button-cosecha {
     margin-left: auto;
 }
 
 .btn-logout-cosecha {
     display: inline-block;
+    width: 40px; /* Ancho del contenedor */
     padding: 10px 25px;
-    background-color: #e74c3c; /* Rojo brillante */
+    background-color: #D32F2F; /* Rojo más oscuro */
     color: #fff;
     text-decoration: none;
     border-radius: 8px;
@@ -412,13 +410,13 @@ form select:focus {
 }
 
 .btn-logout-cosecha:hover {
-    background-color: #c0392b; /* Rojo oscuro */
+    background-color: #C62828; /* Rojo oscuro */
     transform: translateY(-2px);
     box-shadow: 0 6px 8px rgba(0, 0, 0, 0.3); /* Sombra más intensa al pasar el cursor */
 }
 
 .btn-logout-cosecha:active {
-    background-color: #a93226; /* Rojo más oscuro al hacer clic */
+    background-color: #B71C1C; /* Rojo más oscuro al hacer clic */
     transform: translateY(1px);
 }
 
@@ -428,10 +426,10 @@ form select:focus {
     width: 600px; /* Ancho del contenedor */
     margin: 40px auto;
     padding: 30px;
-    background-color: #f4f8f4; /* Color de fondo verde claro */
+    background-color: #E8F5E9; /* Verde claro */
     border-radius: 10px;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-    border: 1px solid #d1e0d5; /* Color de borde verde muy claro */
+    border: 1px solid #C8E6C9; /* Verde muy claro */
     box-sizing: border-box; /* Asegura que el padding y el borde estén incluidos en el ancho */
 }
 
@@ -440,7 +438,7 @@ form select:focus {
     text-align: center;
     margin-bottom: 20px;
     font-size: 2em;
-    color: #4a773c; /* Verde más oscuro */
+    color: #2E7D32; /* Verde oscuro */
     font-family: 'Georgia', serif; /* Fuente serif para un toque más natural */
 }
 
@@ -457,7 +455,7 @@ form select:focus {
     border: none;
     border-radius: 8px;
     color: #fff;
-    background-color: #6dbf42; /* Verde hierba */
+    background-color: #66BB6A; /* Verde claro */
     font-size: 1.2em;
     font-weight: bold;
     cursor: pointer;
@@ -468,13 +466,13 @@ form select:focus {
 }
 
 .btn-registrarC:hover {
-    background-color: #5aa62d; /* Verde más oscuro */
+    background-color: #57A95D; /* Verde más oscuro */
     transform: translateY(-2px);
     box-shadow: 0 6px 8px rgba(0, 0, 0, 0.3); /* Sombra más intensa al pasar el cursor */
 }
 
 .btn-registrarC:active {
-    background-color: #4b8a2f; /* Verde aún más oscuro al hacer clic */
+    background-color: #388E3C; /* Verde aún más oscuro al hacer clic */
     transform: translateY(1px);
 }
 
@@ -484,14 +482,14 @@ form select:focus {
     text-align: center;
     margin-top: 20px;
     font-size: 1.1em;
-    color: #4a773c; /* Verde oscuro */
+    color: #388E3C; /* Verde oscuro */
     text-decoration: none;
     transition: color 0.3s ease;
     font-family: 'Georgia', serif; /* Fuente serif para un toque más natural */
 }
 
 .link-home:hover {
-    color: #356d2c; /* Verde más oscuro */
+    color: #2E7D32; /* Verde más oscuro */
 }
 
 /* Estilos para el contenedor principal */
@@ -505,7 +503,7 @@ form select:focus {
 /* Estilos para la barra lateral (sidebar) */
 .sidebar-cosecha {
     width: 250px;
-    background-color: #f8f9fa; /* Gris claro */
+    background-color: #E8F5E9; /* Verde claro */
     padding: 20px;
     border-radius: 8px;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
@@ -523,7 +521,7 @@ form select:focus {
 
 .sidebar-link {
     text-decoration: none;
-    color: #3498db; /* Azul brillante */
+    color: #388E3C; /* Verde oscuro */
     font-size: 1.1em;
     display: block;
     padding: 10px;
@@ -532,15 +530,15 @@ form select:focus {
 }
 
 .sidebar-link:hover {
-    background-color: #3498db; /* Azul brillante */
-    color: #fff;
+    background-color: #66BB6A; /* Verde más claro */
+    color: #fff; /* Color del texto blanco */
 }
 
 /* Estilos para el contenido principal */
 .main-container-cosecha {
     flex: 1;
     padding: 20px;
-    background-color: #ffffff;
+    background-color: #ffffff; /* Blanco */
     border-radius: 8px;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
 }
@@ -551,7 +549,7 @@ form select:focus {
 
 .intro-section-cosecha h3 {
     font-size: 1.5em;
-    color: #2c3e50; /* Azul oscuro */
+    color: #2E7D32; /* Verde oscuro */
 }
 
 .intro-section-cosecha p {
@@ -564,7 +562,7 @@ form select:focus {
     max-width: 1200px;
     margin: 80px auto 20px; /* Deja espacio para el header */
     padding: 20px;
-    background-color: #F0F4C3; /* Fondo verde claro */
+    background-color: #E8F5E9; /* Fondo verde claro */
     border-radius: 8px;
     box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
 }
@@ -572,28 +570,28 @@ form select:focus {
 /* Títulos */
 .detalleC-title {
     font-size: 2.5em;
-    color: #2E7D32; /* Verde oscuro */
+    color: #388E3C; /* Verde más oscuro */
     margin-bottom: 20px;
     text-align: center;
 }
 
 .detalleC-subtitle {
     font-size: 1.8em;
-    color: #388E3C;
+    color: #2E7D32; /* Verde oscuro */
     margin-bottom: 15px;
 }
 
 /* Etiquetas y elementos del formulario */
 .detalleC-label {
     font-size: 1.2em;
-    color: #2E7D32;
+    color: #2E7D32; /* Verde oscuro */
 }
 
 .detalleC-select {
     padding: 10px;
     font-size: 1em;
     width: 100%;
-    border: 1px solid #B0BEC5;
+    border: 1px solid #B0BEC5; /* Gris claro */
     border-radius: 5px;
     margin-bottom: 20px;
 }
@@ -605,25 +603,26 @@ form select:focus {
     margin-bottom: 20px;
 }
 
-.detalleC-table th, .detalleC-table td {
+.detalleC-table th,
+.detalleC-table td {
     padding: 12px 15px;
-    border: 1px solid #B0BEC5;
+    border: 1px solid #B0BEC5; /* Gris claro */
     text-align: left;
 }
 
 .detalleC-table th {
     background-color: #66BB6A; /* Verde vibrante */
-    color: white;
+    color: white; /* Color de texto blanco */
 }
 
 .detalleC-table td {
-    background-color: #FFFFFF;
+    background-color: #FFFFFF; /* Blanco */
 }
 
 /* Sin resultados */
 .detalleC-noresult {
     font-size: 1.2em;
-    color: #D32F2F;
+    color: #D32F2F; /* Rojo intenso para resaltar la ausencia de resultados */
     text-align: center;
     margin-top: 20px;
 }
@@ -633,14 +632,14 @@ form select:focus {
     display: inline-block;
     margin-top: 20px;
     font-size: 1.2em;
-    color: #388E3C;
+    color: #388E3C; /* Verde oscuro */
     text-decoration: none;
     border-bottom: 2px solid #388E3C;
     transition: color 0.3s ease;
 }
 
 .detalleC-backlink:hover {
-    color: #2E7D32;
+    color: #2E7D32; /* Verde más oscuro al pasar el cursor */
 }
 
 /* Contenedor principal */
@@ -648,7 +647,7 @@ form select:focus {
     max-width: 1200px;
     margin: 80px auto 20px; /* Deja espacio para el header */
     padding: 20px;
-    background-color: #F0F4C3; /* Fondo verde claro */
+    background-color: #E8F5E9; /* Fondo verde claro */
     border-radius: 8px;
     box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
 }
@@ -656,14 +655,14 @@ form select:focus {
 /* Títulos */
 .marcarT-title {
     font-size: 2.5em;
-    color: #2E7D32; /* Verde oscuro */
+    color: #388E3C; /* Verde más oscuro */
     margin-bottom: 20px;
     text-align: center;
 }
 
 .marcarT-subtitle {
     font-size: 1.8em;
-    color: #388E3C;
+    color: #2E7D32; /* Verde oscuro */
     margin-bottom: 15px;
 }
 
@@ -671,7 +670,7 @@ form select:focus {
 .marcarT-table-container {
     max-height: 300px; /* Altura máxima del contenedor */
     overflow-y: auto; /* Scroll vertical si la tabla es muy alta */
-    border: 1px solid #B0BEC5;
+    border: 1px solid #B0BEC5; /* Borde gris claro */
     border-radius: 5px;
     margin-bottom: 20px;
 }
@@ -682,19 +681,20 @@ form select:focus {
     border-collapse: collapse;
 }
 
-.marcarT-table th, .marcarT-table td {
+.marcarT-table th,
+.marcarT-table td {
     padding: 12px 15px;
-    border: 1px solid #B0BEC5;
+    border: 1px solid #B0BEC5; /* Borde gris claro */
     text-align: left;
 }
 
 .marcarT-table th {
     background-color: #66BB6A; /* Verde vibrante */
-    color: white;
+    color: white; /* Color de texto blanco */
 }
 
 .marcarT-table td {
-    background-color: #FFFFFF;
+    background-color: #FFFFFF; /* Blanco */
 }
 
 /* Estilo para el formulario */
@@ -704,16 +704,16 @@ form select:focus {
 
 .marcarT-label {
     font-size: 1.2em;
-    color: #2E7D32;
+    color: #2E7D32; /* Verde oscuro */
     display: block;
     margin-bottom: 10px;
 }
 
 /* Contenedor del select */
 .marcarT-select-container {
-    max-height: 200px;
-    overflow-y: auto;
-    border: 1px solid #B0BEC5;
+    max-height: 200px; /* Altura máxima del contenedor del select */
+    overflow-y: auto; /* Scroll vertical si el select es muy alto */
+    border: 1px solid #B0BEC5; /* Borde gris claro */
     border-radius: 5px;
     padding: 5px;
 }
@@ -722,8 +722,8 @@ form select:focus {
     width: 100%;
     padding: 10px;
     font-size: 1em;
-    border: none;
-    outline: none;
+    border: none; /* Sin borde */
+    outline: none; /* Sin contorno al enfocar */
 }
 
 /* Botón para marcar como transportado */
@@ -732,63 +732,124 @@ form select:focus {
     color: white;
     padding: 10px 20px;
     font-size: 1.2em;
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
-    transition: background-color 0.3s ease;
+    border: none; /* Sin borde */
+    border-radius: 5px; /* Bordes redondeados */
+    cursor: pointer; /* Cambia el cursor al pasar sobre el botón */
+    transition: background-color 0.3s ease; /* Transición suave al cambiar el color de fondo */
 }
 
 .marcarT-button:hover {
-    background-color: #388E3C;
+    background-color: #388E3C; /* Verde más oscuro al pasar el cursor */
 }
 
 /* Contenedor principal */
 .container.status {
-    max-width: 800px;
-    margin: 80px auto 20px;
+    max-width: 800px; /* Ancho máximo del contenedor */
+    margin: 80px auto 20px; /* Centra el contenedor y deja espacio en la parte superior */
     padding: 20px;
-    background-color: #E8F5E9; /* Verde claro */
-    border-radius: 8px;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-    text-align: center;
+    background-color: #E8F5E9; /* Fondo verde claro */
+    border-radius: 8px; /* Bordes redondeados */
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Sombra sutil */
+    text-align: center; /* Centra el texto */
 }
 
 /* Título principal */
 .status-title {
-    font-size: 2.5em;
+    font-size: 2.5em; /* Tamaño del título */
     color: #2E7D32; /* Verde oscuro */
-    margin-bottom: 20px;
+    margin-bottom: 20px; /* Espacio debajo del título */
 }
 
 /* Información del contrato */
 .status-info {
-    margin-bottom: 20px;
-    font-size: 1.2em;
+    margin-bottom: 20px; /* Espacio debajo de la información */
+    font-size: 1.2em; /* Tamaño de la fuente */
     color: #388E3C; /* Verde vibrante */
 }
 
 .status-info p {
-    margin: 10px 0;
+    margin: 10px 0; /* Espacio arriba y abajo de los párrafos */
 }
 
 /* Botón de acciones */
 .status-actions {
-    margin-top: 30px;
+    margin-top: 30px; /* Espacio encima del contenedor de acciones */
 }
 
 .status-button {
-    background-color: #4CAF50;
-    color: white;
-    padding: 10px 20px;
-    font-size: 1.2em;
-    text-decoration: none;
-    border-radius: 5px;
-    transition: background-color 0.3s ease;
+    background-color: #4CAF50; /* Verde */
+    color: white; /* Color del texto */
+    padding: 10px 20px; /* Espaciado interior */
+    font-size: 1.2em; /* Tamaño de la fuente */
+    text-decoration: none; /* Sin subrayado */
+    border-radius: 5px; /* Bordes redondeados */
+    transition: background-color 0.3s ease; /* Transición suave al cambiar el color de fondo */
 }
 
 .status-button:hover {
-    background-color: #388E3C;
+    background-color: #388E3C; /* Verde más oscuro al pasar el cursor */
 }
+
+/* Estilo responsive para pantallas pequeñas */
+@media (max-width: 1072px) {
+    .main-container {
+        padding: 80px 20px 20px; /* Espaciado ajustado en la parte superior y lateral */
+    }
+}
+
+@media (max-width: 991px) {
+    .sidebar {
+        display: none; /* Oculta la barra lateral */
+    }
+
+    .content {
+        margin-left: 0; /* Elimina el margen izquierdo */
+    }
+}
+
+@media (max-width: 767px) {
+    .header {
+        flex-direction: column; /* Cambia la dirección de la flexbox a columna */
+        align-items: flex-start; /* Alinea los elementos a la izquierda */
+        padding: 10px; /* Ajusta el espaciado */
+    }
+
+    .main-container {
+        padding: 60px 10px 10px; /* Espaciado ajustado */
+    }
+}
+
+@media (max-width: 320px) {
+    .header {
+        padding: 10px; /* Espaciado en el header */
+    }
+
+    .main-container {
+        padding: 50px 10px 10px; /* Espaciado ajustado */
+    }
+
+    h1 {
+        font-size: 1.8em; /* Tamaño de h1 reducido */
+    }
+
+    h3 {
+        font-size: 1.4em; /* Tamaño de h3 reducido */
+    }
+
+    p {
+        font-size: 14px; /* Tamaño de párrafo reducido */
+    }
+
+    .btn-submit {
+        width: 100%; /* Ancho completo para el botón de envío */
+        padding: 10px; /* Espaciado interior */
+    }
+
+    .sidebar {
+        display: none; /* Oculta la barra lateral */
+    }
+}
+
 
 
 

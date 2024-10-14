@@ -1,16 +1,95 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Predio - Funciones del Trabajador: {{ nombre }}{% endblock %}</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <style>
+        /* Estilos personalizados */
+        body {
+            display: flex;
+            min-height: 100vh;
+            flex-direction: column;
+        }
+        .wrapper {
+            display: flex;
+            flex: 1;
+        }
+        .sidebar {
+            width: 250px;
+            background-color: #343a40;
+            padding: 15px;
+            height: 100vh;
+        }
+        .sidebar a {
+            color: white;
+            display: block;
+            padding: 10px 15px;
+            margin-bottom: 10px;
+            text-decoration: none;
+            border-radius: 4px;
+            transition: background-color 0.3s ease;
+        }
+        .sidebar a:hover {
+            background-color: #495057;
+        }
+        .btn-logout-cosecha {
+            background-color: #dc3545;
+            color: white;
+            padding: 10px 15px;
+            text-align: center;
+            display: block;
+            border-radius: 4px;
+            margin-top: 20px;
+            text-decoration: none;
+        }
+        .content {
+            flex: 1;
+            padding: 20px;
+        }
+        .intro-section-cosecha h3 {
+            margin-bottom: 20px;
+            font-size: 1.8rem;
+        }
+        .intro-section-cosecha p {
+            font-size: 1.2rem;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>Predio - Funciones del Trabajador: {{ nombre }}</h1>
+    </header>
 
+    <div class="wrapper">
+        <!-- Menú lateral -->
+        <nav class="sidebar">
+            <h5 class="text-white">Menú de Opciones</h5>
+            <ul class="list-unstyled">
+                {% block sidebar_links %}
+                    <li><a href="{% url 'registrar_pallet' %}" class="sidebar-link">Registrar Pallet</a></li>
+                    <li><a href="{% url 'distribuir_pallet' %}" class="sidebar-link">Distribuir Pallet</a></li>
+                    <li><a href="{% url 'pallet_view' %}" class="sidebar-link">Ver Pallet</a></li>
+                {% endblock %}
+            </ul>
+            <a href="{% url 'custom_logout' %}" class="btn-logout-cosecha">Salir</a>
+        </nav>
 
-{% block title %}Predio - Funciones del Trabajador:{{ nombre }}{% endblock %}
-{% block sidebar_links %}
-                <li><a href="{% url 'registrar_pallet' %}" class="sidebar-link">Registrar Pallet</a></li>
-                <li><a href="{% url 'distribuir_pallet' %}" class="sidebar-link">Distribuir Pallet</a></li>
+        <!-- Contenido principal -->
+        <div class="content">
+            {% block content %}
+            <section class="intro-section-cosecha">
+                <h3>Sistema para Registro y Trazabilidad de Cosecha</h3>
+                <p>Utilice las funciones en el menú lateral para registrar, consultar y verificar el estado de los pallets. Aquí se mostrará la información relacionada con los procesos que realice.</p>
+            </section>
+            {% endblock %}
+        </div>
+    </div>
 
-                <a href="{% url 'custom_logout' %}" class="btn-logout-cosecha">Salir</a>
-{% endblock %}
-
-{% block content %}
-<section class="intro-section-cosecha">
-    <h3>Sistema para Registro y Trazabilidad de Cosecha</h3>
-    <p>Utilice las funciones en el menú lateral para registrar, consultar y verificar el estado de la Pallets. Aquí se mostrará la información relacionada con los procesos que realice.</p>
-</section>
-{% endblock %}
+    <!-- Scripts de Bootstrap -->
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.2/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+</body>
+</html>

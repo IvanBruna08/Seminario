@@ -287,6 +287,14 @@ def iniciar_entrega(request, pallet_id):
             # Obtener el objeto de transporte y pallet
             transporte = get_object_or_404(Transporte, id=request.session.get('user_id'))
             pallet = get_object_or_404(Pallet, id=pallet_id)
+            # Obtener todos los registros de DistribuidorPallet asociados al pallet
+            distribuidores_pallet = DistribuidorPallet.objects.filter(pallet_id=pallet_id)
+
+            if not distribuidores_pallet.exists():
+                return JsonResponse({'success': False, 'message': 'No hay distribuidores asociados a este pallet'})
+
+            # Actualizar el estado de cada distribuidor a 'en_proceso'
+            distribuidores_pallet.update(estado_pallet='en_proceso')
 
             # Crear un nuevo registro de EnvioPallet
             envio = EnvioPallet.objects.create(
@@ -299,7 +307,7 @@ def iniciar_entrega(request, pallet_id):
             )
 
             # Actualizar el estado del pallet a 'En Proceso'
-            pallet.estado_envio = 'en_proceso'
+            pallet.estado_envio = 'en_ruta'
             pallet.save()
 
             return JsonResponse({'success': True, 'envio_id': envio.id, 'pallet_id': pallet.id})
@@ -379,7 +387,6 @@ def finalizar_entrega(request, pallet_id):
             pallet.save()
 
             return JsonResponse({'success': True, 'message': 'Entrega finalizada con éxito.'})
-            return redirect('login')  # O podrías mostrar un mensaje de error
 
         except ValueError as e:
             # Captura errores de conversión a float
@@ -397,16 +404,15 @@ def finalizar_entrega(request, pallet_id):
     return JsonResponse({'success': False, 'message': 'Método no permitido.'})
 
 def verificar_pallet(request):
-    if request.method == "GET":
-        pallet_id = request.GET.get('id')  # Obtener el ID del pallet de la solicitud
+    pallet_id = request.GET.get('id')  # Obtener el ID del pallet desde la solicitud
+    # Obtener todos los DistribuidorPallet asociados a ese pallet
+    distribuidor_pallets = DistribuidorPallet.objects.filter(pallet_id=pallet_id)
+    
+    # Verificar si todos los DistribuidorPallet tienen 'completado' en estado_pallet
+    completados = all(dp.estado_pallet == 'completado' for dp in distribuidor_pallets)
 
-        try:
-            pallet = Pallet.objects.get(id=pallet_id)  # Buscar el pallet por ID
-            return JsonResponse({'estado_envio': pallet.estado_envio})  # Devolver el estado del pallet en formato JSON
-        except Pallet.DoesNotExist:
-            return JsonResponse({'error': 'Pallet no encontrado.'}, status=404)
-
-    return JsonResponse({'error': 'Método no permitido.'}, status=405)
+    # Enviar una respuesta indicando si el pallet está completamente completado
+    return JsonResponse({'completado': completados})
 
 @login_required_for_model(Transporte)
 def transportar_pallet(request, pallet_id):
@@ -468,6 +474,7 @@ def registrar_recepcion(request, pallet_id):
 
     # Obtener el objeto del distribuidor basado en el ID
     distribuidor = get_object_or_404(Distribuidor, id=distribuidor_id)
+    dp = get_object_or_404(DistribuidorPallet, distribuidor=distribuidor_id, pallet = pallet_id)
 
     if request.method == 'POST':
         form = RecepcionForm(request.POST)
@@ -476,14 +483,22 @@ def registrar_recepcion(request, pallet_id):
             recepcion = form.save(commit=False)
             recepcion.envio_pallet = envio_pallet  # Asignar el EnvioPallet
             recepcion.distribuidor = distribuidor  # Asignar el distribuidor
-            recepcion.peso_ingresado = recepcion.peso_final
+            recepcion.peso_ingresado = recepcion.peso_recepcion
             recepcion.save()  # Guardar la recepción en la base de datos
+            distribuidores_pallet = DistribuidorPallet.objects.filter(
+                pallet=pallet_id,
+                distribuidor=distribuidor_id
+            )
+
+            # Actualizar el campo estado_envio de todos esos registros a 'completado'
+            distribuidores_pallet.update(estado_pallet='completado')
+
             return redirect('registrar_recepcion', pallet_id=pallet_id)  # Redirigir a la misma página
 
     else:
         form = RecepcionForm()
 
-    return render(request, 'registrar_recepcion.html', {'pallet': pallet, 'envio_pallet': envio_pallet, 'form': form})
+    return render(request, 'registrar_recepcion.html', {'pallet': pallet, 'envio_pallet': envio_pallet,'dp': dp , 'form': form})
 
 
 # MOSTRAR INFORMACION DEL PALLET PARA PREDIO
@@ -518,8 +533,9 @@ def calcular_distancia(lat1, lon1, lat2, lon2):
 # VIEWS PARA EMPAQUE
 @login_required_for_model(Distribuidor)
 def recepciones_completadas(request):
+    distribuidor_id = request.session.get('user_id')  # Suponiendo que user_id es el ID del distribuidor
     """Vista para mostrar todas las recepciones completadas."""
-    recepciones = Recepcion.objects.filter(estado_recepcion='completado')  # Obtener recepciones confirmadas
+    recepciones = Recepcion.objects.filter(estado_recepcion='completado',distribuidor = distribuidor_id)  # Obtener recepciones confirmadas
     return render(request, 'recepciones_completadas.html', {'recepciones': recepciones})
 
 @login_required_for_model(Distribuidor)
@@ -554,7 +570,8 @@ def crear_empaque(request):
 
 @login_required_for_model(Distribuidor)
 def distribuir_caja(request):
-    recepciones = Recepcion.objects.all()
+    distribuidor_id = request.session.get('user_id')
+    recepciones = Recepcion.objects.filter(distribuidor=distribuidor_id)
     recepcion = None
     clientes = Cliente.objects.all()
     errores = []
@@ -565,30 +582,42 @@ def distribuir_caja(request):
             recepcion = get_object_or_404(Recepcion, id=recepcion_id)
             cantidad_cajas = int(request.POST.get('cantidad_cajas', 0))
             nuevas_cajas = []
+            pesos_asignados = []
 
             for i in range(1, cantidad_cajas + 1):
-                # Cambiar el acceso a los datos del formulario usando el prefijo
                 caja_form = CajaForm(request.POST, prefix=f'caja_{i}', recepcion=recepcion)
 
                 if caja_form.is_valid():
                     caja = caja_form.save(commit=False)
-                    caja.recepcion = recepcion  # Asignar el empaque seleccionado
-                    nuevas_cajas.append(caja)
+                    caja.recepcion = recepcion
+                    
+                    peso_enviado = float(request.POST.get(f'caja_{i}-peso_enviado', 0))
+                    
+                    if peso_enviado < 0:
+                        errores.append(f'El peso para la caja {i} no puede ser menor a 0.')
+                    elif peso_enviado > recepcion.peso_recepcion:
+                        errores.append(f'El peso para la caja {i} no puede ser mayor al peso de la recepción ({recepcion.peso_recepcion}).')
+                    else:
+                        pesos_asignados.append(peso_enviado)
+                        nuevas_cajas.append(caja)
                 else:
-                    errores.append(f"Error en la caja {i}: {caja_form.errors}")
+                    for field, field_errors in caja_form.errors.items():
+                        for error in field_errors:
+                            errores.append(f'Error en la caja {i}: {error}')
+
+            if not errores and sum(pesos_asignados) > recepcion.peso_recepcion:
+                errores.append(f'La suma de los pesos no puede ser mayor al peso total de la recepción ({recepcion.peso_recepcion}).')
 
             if not errores:
                 try:
                     with transaction.atomic():
                         for caja in nuevas_cajas:
-                            caja.save()  # Guarda cada caja
-                        
-
+                            caja.save()
                     return redirect('confirmation_page')
-
                 except ValueError as e:
                     errores.append(str(e))
-    recepciones = Recepcion.objects.filter(estado_recepcion='completado')  
+
+    recepciones = Recepcion.objects.filter(estado_recepcion='completado', distribuidor=distribuidor_id)  
     return render(request, 'distribuir_caja.html', {
         'recepciones': recepciones,
         'recepcion': recepcion,
@@ -596,12 +625,12 @@ def distribuir_caja(request):
         'errores': errores,
     })
 
-
 # lo mismo para pallet 
 @login_required_for_model(Predio)
 def distribuir_pallet(request):
     # Obtener todos los pallets disponibles
-    pallets = Pallet.objects.all()
+    predio_id = request.session.get('user_id')  # Suponiendo que user_id es el ID del distribuidor
+    pallets = Pallet.objects.filter(predio = predio_id)
     distribuidores = Distribuidor.objects.all()
     errores = []
     pallet = None
@@ -663,19 +692,38 @@ def distribuir_pallet(request):
         'errores': errores,
     })
 
+# lo mismo para pallet 
+@login_required_for_model(Distribuidor)
+def pallet_view(request):
+    """Vista para gestionar las cajas de un empaque específico o mostrar todas las cajas y empaques."""
+    
+    # Obtener el ID del empaque desde los parámetros GET
+    predio_id = request.session.get('user_id')  # Suponiendo que user_id es el ID del distribuidor
+    pallet_id = request.GET.get('pallet_id')  # Obtener el ID del empaque desde los parámetros GET
+    pallets = Pallet.objects.filter(predio = predio_id)  # Obtener todos los empaques
+    
+    if pallet_id:
+        # Si se selecciona un ID de empaque, filtrar las cajas asociadas a ese empaque
+        pallet = get_object_or_404(Pallet, id=pallet_id)
+        distribuidores = DistribuidorPallet.objects.filter(pallet=pallet)  # Obtener cajas asociadas al empaque
+    else:
+        pallet = None  # No se ha seleccionado ningún empaque
+        distribuidores = DistribuidorPallet.objects.all()  # Obtener todas las cajas si no se selecciona un empaque
 
-
-
-
-
+    return render(request, 'pallet_view.html', {
+        'pallets': pallets,  # Lista de empaques para seleccionar
+        'pallet': pallet,  # Empaque seleccionado (si hay alguno)
+        'distribuidores': distribuidores,  # Lista de cajas (todas o filtradas por empaque)
+    })
 
 @login_required_for_model(Distribuidor)
 def cajas_view(request):
     """Vista para gestionar las cajas de un empaque específico o mostrar todas las cajas y empaques."""
     
     # Obtener el ID del empaque desde los parámetros GET
+    distribuidor_id = request.session.get('user_id')  # Suponiendo que user_id es el ID del distribuidor
     recepcion_id = request.GET.get('recepcion_id')  # Obtener el ID del empaque desde los parámetros GET
-    recepciones = Recepcion.objects.all()  # Obtener todos los empaques
+    recepciones = Recepcion.objects.filter(distribuidor = distribuidor_id)  # Obtener todos los empaques
     
     if recepcion_id:
         # Si se selecciona un ID de empaque, filtrar las cajas asociadas a ese empaque

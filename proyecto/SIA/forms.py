@@ -1,5 +1,26 @@
 from django import forms
 from .models import Predio, Transporte,Distribuidor, Cliente,Pallet, EnvioPallet, Recepcion, Caja,Pago, EnvioCaja , DistribuidorPallet
+import sys
+from itertools import cycle
+ 
+def validar_rut(rut):
+	rut = rut.upper();
+	rut = rut.replace("-","")
+	rut = rut.replace(".","")
+	aux = rut[:-1]
+	dv = rut[-1:]
+ 
+	revertido = map(int, reversed(str(aux)))
+	factors = cycle(range(2,8))
+	s = sum(d * f for d, f in zip(revertido,factors))
+	res = (-s)%11
+ 
+	if str(res) == dv:
+		return True
+	elif dv=="K" and res==10:
+		return True
+	else:
+		return False
 
 class CustomLoginForm(forms.Form):
     rut = forms.CharField(max_length=100, widget=forms.TextInput(attrs={'placeholder': 'RUT'}))
@@ -33,20 +54,54 @@ class TransporteForm(forms.ModelForm):
     class Meta:
         model = Transporte
         fields = ['nombre', 'auto', 'patente', 'rut','password', 'billetera']
+        # Método para validar el RUT
+    def clean_rut(self):
+        rut = self.cleaned_data.get('rut')
+
+        if not validar_rut(rut):
+            raise forms.ValidationError('El RUT ingresado no es válido.')
+
+        return rut
+
 class PredioForm(forms.ModelForm):
     class Meta:
         model = Predio
         fields = ['nombre', 'direccion', 'billetera','rut','password']
+        # Método para validar el RUT
+    def clean_rut(self):
+        rut = self.cleaned_data.get('rut')
+
+        if not validar_rut(rut):
+            raise forms.ValidationError('El RUT ingresado no es válido.')
+
+        return rut
+
 class DistribuidorForm(forms.ModelForm):
     class Meta:
         model = Distribuidor
         fields = ['nombre', 'direccion', 'billetera','rut','password']
+        # Método para validar el RUT
+    def clean_rut(self):
+        rut = self.cleaned_data.get('rut')
+
+        if not validar_rut(rut):
+            raise forms.ValidationError('El RUT ingresado no es válido.')
+
+        return rut
 
 
 class ClienteForm(forms.ModelForm):
     class Meta:
         model = Cliente
         fields = ['nombre', 'tipo_cliente', 'direccion', 'billetera','rut','password']
+        # Método para validar el RUT
+    def clean_rut(self):
+        rut = self.cleaned_data.get('rut')
+
+        if not validar_rut(rut):
+            raise forms.ValidationError('El RUT ingresado no es válido.')
+
+        return rut
 
 class PalletForm(forms.ModelForm):
     class Meta:
@@ -140,6 +195,10 @@ class CajaForm(forms.ModelForm):
     def clean(self):
         cleaned_data = super().clean()
         peso_caja = cleaned_data.get("peso_caja")
+
+        # Validar que el peso_caja no sea menor a 0
+        if peso_caja is not None and peso_caja < 0:
+            self.add_error('peso_caja', "El peso de la caja no puede ser menor a 0.")
 
         if self.recepcion and peso_caja:
             # Usar un valor por defecto de 0 si el peso_caja es None

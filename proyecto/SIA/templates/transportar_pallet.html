@@ -161,16 +161,18 @@
         // Mostrar las rutas
         mostrarRutasOptimas(distribuidores, longitudOrigen, latitudOrigen);
     </script>
+    <script src="{% static 'java/transporte_caja.js' %}"></script>
 
     <script>
-        // Verificar el estado del pallet y redirigir si está completado
+        // Verificar el estado del pallet y redirigir si todos los distribuidorpallet están 'completados'
         function verificarEstadoPallet(palletId) {
             $.ajax({
                 type: "GET",
                 url: '/verificar-pallet/',
                 data: { id: palletId },
                 success: function(response) {
-                    if (response.estado_envio === 'completado') {
+                    // Si todos los DistribuidorPallet tienen el estado 'completado'
+                    if (response.completado) {
                         alert('El recorrido ha finalizado. Redirigiendo a login...');
                         window.location.href = '/login';
                     }
@@ -180,7 +182,7 @@
                 }
             });
         }
-
+    
         // Verificar el estado del pallet cada 10 segundos
         setInterval(function() {
             verificarEstadoPallet("{{ pallet.id }}");

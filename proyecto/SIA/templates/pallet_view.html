@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'css/styles.css' %}"> <!-- Asegúrate de tener el archivo CSS -->
+    <title>Información de Pallet</title>
+</head>
+<body>
+
+<div class="container">
+    <h1>Gestión de Pallets</h1>
+    
+    <form method="get" action="{% url 'pallet_view' %}" class="form-select">
+        <label for="pallet_select">Selecciona un Pallet:</label>
+        <select id="pallet_select" name="pallet_id" onchange="this.form.submit()">
+            <option value="">-- Selecciona un Pallet --</option>
+            {% for p in pallets %}
+                <option value="{{ p.id }}" {% if pallet and p.id == pallet.id %}selected{% endif %}>
+                    Pallet {{ p.id }}
+                </option>
+            {% endfor %}
+        </select>
+    </form>
+
+    {% if pallet %}
+        <div class="info-section">
+            <h2>Información del Pallet:</h2>
+            <table class="info-table">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Producto</th>
+                        <th>Clasificación</th>
+                        <th>Peso</th>
+                        <th>Fecha de Cosecha</th>
+                        <th>QR</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>{{ pallet.id }}</td>
+                        <td>{{ pallet.producto }}</td>
+                        <td>{{ pallet.clasificacion }}</td>
+                        <td>{{ pallet.peso }}</td>
+                        <td>{{ pallet.fecha_cosecha }}</td>
+                        <td>
+                            {% if pallet.qr_pallet %}
+                                <img src="{{ pallet.qr_pallet.url }}" alt="QR del Pallet" class="qr-image">
+                            {% else %}
+                                No disponible
+                            {% endif %}
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="info-section">
+            <h2>Distribuidores del Pallet seleccionado:</h2>
+            <table class="info-table">
+                <thead>
+                    <tr>
+                        <th>ID DistribuidorPallet</th>
+                        <th>Distribuidor</th>
+                        <th>Peso</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for distribuidor in distribuidores %}
+                        <tr>
+                            <td>{{ distribuidor.id }}</td>
+                            <td>{{ distribuidor.distribuidor }}</td>
+                            <td>{{ distribuidor.peso_enviado }}</td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    {% else %}
+        <div class="alert">
+            <p>Por favor, selecciona un pallet para ver la información.</p>
+        </div>
+    {% endif %}
+</div>
+
+</body>
+</html>

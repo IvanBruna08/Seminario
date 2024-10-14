@@ -29,7 +29,7 @@
                     <option value="">Seleccione un empaque</option>
                     {% for recepcion in recepciones %}
                         <option value="{{ recepcion.id }}">
-                            {{ recepcion.fecha_recepcion }} - {{ recepcion.cantidad_cajas }} cajas
+                           id: {{ recepcion.id }} - cajas distribuidas total: {{ recepcion.cantidad_cajas }} 
                         </option>
                     {% endfor %}
                 </select>
@@ -47,6 +47,7 @@
             <button type="submit" class="btn btn-success">Distribuir</button>
         </form>
 
+        <!-- Mostrar errores si existen -->
         {% if errores %}
             <div class="alert alert-danger mt-3">
                 <h4>Errores:</h4>

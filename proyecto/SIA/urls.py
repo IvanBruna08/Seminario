@@ -19,6 +19,7 @@ urlpatterns = [
     # FUNCIONES DE ACTORES
     path('registrar_pallet', views.crear_pallet, name='registrar_pallet'),
     path('distribuir_pallet', views.distribuir_pallet, name='distribuir_pallet'),
+    path('Pallets/', views.pallet_view, name='pallet_view'),
     path('informacion_pallet/<int:pallet_id>/', views.informacion_pallet, name='informacion_pallet'),
     path('recepcion/<int:pallet_id>/', views.registrar_recepcion, name='registrar_recepcion'),
     # Ruta para transportar pallet y cajas

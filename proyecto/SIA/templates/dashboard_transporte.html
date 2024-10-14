@@ -1,4 +1,6 @@
 {% if request.session.user_id %}
+{% load static %}
+    <link rel="stylesheet" href="{% static 'css/styles.css' %}"> <!-- Asegúrate de tener el archivo CSS -->
     <h1>Bienvenido, {{ nombre_usuario }}.</h1>
     <a href="{% url 'custom_logout' %}" class="btn-logout-cosecha">Salir</a>
     <section class="intro-section-cosecha">
