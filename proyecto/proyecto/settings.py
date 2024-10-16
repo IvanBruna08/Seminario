@@ -80,13 +80,8 @@ WSGI_APPLICATION = 'proyecto.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'proyectosia',  # Reemplaza con el nombre de tu base de datos
-        'USER': 'postgres',      # Reemplaza con tu nombre de usuario de PostgreSQL
-        'PASSWORD': 'proyecto123',  # Reemplaza con tu contraseña
-        'HOST': 'localhost',       # O la dirección IP del servidor si no está en localhost
-        'PORT': '5432',            # Puerto por defecto de PostgreSQL
-    }
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': BASE_DIR / 'db.sqlite3',}
 }
 
 
@@ -122,7 +117,11 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/5.1/howto/static-files/
 
-STATIC_URL = '/static/'
+STATIC_URL = '/staticfiles/'
+STATICFILES_DIRS = [
+    os.path.join(BASE_DIR, 'proyecto', 'staticfiles'),
+]
+
 MEDIA_URL = '/media/'
 MAPBOX_USER = 'ivab98'
 MAPBOX_ACCESS_TOKEN = 'pk.eyJ1IjoiaXZhYjk4IiwiYSI6ImNtMHlucDFnZjBxazkybXBsYzFzZ2RqYjYifQ.y_8e142Ci56mQPgGZ04Nuw'

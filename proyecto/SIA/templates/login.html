@@ -1,16 +1,19 @@
 <!DOCTYPE html>
 <html lang="es">
+    {% load static %}
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <link href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css?family=Ubuntu" rel="stylesheet">
-    <link rel="stylesheet" href="path/to/font-awesome/css/font-awesome.min.css">
     <title>Inicio de Sesión</title>
     <style>
         body {
-            font-family: 'Ubuntu', sans-serif;
-            background-color: #f7f7f7;
+            background-image: url("{% static 'images/tay.jpeg' %}");
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
             display: flex;
             justify-content: center;
             align-items: center;
@@ -28,7 +31,7 @@
             font-size: 24px;
             font-weight: bold;
             margin-bottom: 20px;
-            color: #333;
+            color: #2E7D32; /* Verde oscuro */
         }
         .form1 input {
             width: 100%;
@@ -42,7 +45,7 @@
             display: block;
             width: 100%;
             padding: 10px;
-            background-color: #007bff;
+            background-color: #4CAF50; /* Verde */
             color: white;
             text-align: center;
             text-decoration: none;
@@ -51,14 +54,14 @@
             font-size: 18px;
         }
         .submit:hover {
-            background-color: #0056b3;
+            background-color: #388E3C; /* Verde más oscuro */
         }
         .forgot {
             text-align: center;
             margin-top: 15px;
         }
         .forgot a {
-            color: #007bff;
+            color: #4CAF50; /* Verde */
             text-decoration: none;
         }
         .forgot a:hover {
@@ -73,6 +76,7 @@
 <body>
     <div class="main">
         <p class="sign" align="center">Inicio de Sesión</p>
+        <i class='bx bxs-user-circle' style='font-size: 50px; display: block; text-align: center; margin-bottom: 20px; color: #2E7D32;'></i>
         <form method="post" class="form1">
             {% csrf_token %}
             {{ form.as_p }}
@@ -85,4 +89,3 @@
     </div>
 </body>
 </html>
-
