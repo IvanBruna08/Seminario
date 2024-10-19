@@ -54,6 +54,7 @@ def cliente(request):
     })
 
 @login_required_for_model(Transporte)
+@csrf_exempt
 def transporte(request):
     # Obtener el estado de la entrega desde la sesión
     entrega_iniciada = request.session.get('entrega_iniciada', False)
@@ -75,6 +76,7 @@ def transporte(request):
     })
 
 @login_required_for_model(Distribuidor)
+@csrf_exempt
 def distribuidor(request):
     # Acceder a los datos del usuario directamente desde la sesión
     user_id = request.session.get('user_id')
@@ -87,6 +89,7 @@ def distribuidor(request):
     })
 
 @login_required_for_model(Predio)
+@csrf_exempt
 def predio(request):
     # Acceder a los datos del usuario directamente desde la sesión
     user_id = request.session.get('user_id')
@@ -139,6 +142,7 @@ def registrar_cliente(request):
         form = ClienteForm()
     return render(request, 'registrar_cliente.html', {'form': form})
 # LOGIN DE LOS ACTORES
+@csrf_exempt
 def registro_actores(request):
     if request.method == 'POST':
         tipo_actor = request.POST.get('tipo_actor')  # Obtener el tipo de actor seleccionado
@@ -153,6 +157,7 @@ def registro_actores(request):
         elif tipo_actor == 'transporte':
             return redirect('registrar_transportista')  # URL para el registro de transporte
     return render(request, 'registro_actores.html')
+@csrf_exempt
 def custom_login(request):
     error_message = None
     next_url = request.GET.get('next')  # Captura la URL de redirección

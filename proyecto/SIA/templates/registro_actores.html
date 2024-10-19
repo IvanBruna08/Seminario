@@ -1,25 +1,39 @@
 <form method="POST">
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <link href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css" rel="stylesheet">
     {% csrf_token %}
-    <label for="tipo_actor">Selecciona tu tipo de actor:</label>
-    <select name="tipo_actor" id="tipo_actor" onchange="mostrarDescripcion()">
-        <option value="">Seleccione...</option>
-        <option value="predio">Predio</option>
-        <option value="transporte">Transporte</option>
-        <option value="distribuidor">Distribuidor</option>
-        <option value="cliente">Cliente</option>
-    </select>
-    <button type="submit">Continuar</button>
+    
+    <label for="tipo_actor">Selecciona el tipo de usuario:</label>
+    <div style="display: flex; align-items: center;">
+        <select name="tipo_actor" id="tipo_actor" onchange="mostrarDescripcion()">
+            <option value="">Seleccione...</option>
+            <option value="predio">Predio</option>
+            <option value="transporte">Transporte</option>
+            <option value="distribuidor">Distribuidor</option>
+            <option value="cliente">Cliente</option>
+        </select>
+    </div>
+    
+    <div style="text-align: center; margin-top: 20px;">
+        <button type="submit" class="btn-submit">Continuar</button>
+    </div>
 </form>
 
-<div id="descripcion" style="margin-top: 20px;"></div>
+<!-- Recuadro para las descripciones -->
+<div id="descripcion" class="descripcion-box" style="margin-top: 20px; text-align: center; display: flex; align-items: center;">
+    <i class='bx bx-info-circle' style="color: black; font-size: 24px; margin-right: 10px;"></i>
+    <span id="texto-descripcion">Por favor selecciona un tipo de usuario.</span>
+</div>
 
 <script>
+    // Llama a la función para mostrar la descripción al cargar la página
+    mostrarDescripcion();
+
     function mostrarDescripcion() {
         const select = document.getElementById('tipo_actor');
         const descripcionDiv = document.getElementById('descripcion');
+        const textoDescripcion = document.getElementById('texto-descripcion');
         
-        // Descripciones personalizadas según los roles
         const descripciones = {
             predio: "El predio se encarga de registrar los pallets. Es el lugar donde se cosechan y preparan los productos para su distribución.",
             transporte: "El transporte distribuye pallets y cajas desde el predio hacia el centro de distribución o directamente a los clientes.",
@@ -28,6 +42,15 @@
         };
 
         const valorSeleccionado = select.value;
-        descripcionDiv.innerHTML = descripciones[valorSeleccionado] || "";
+        if (valorSeleccionado) {
+            textoDescripcion.innerHTML = descripciones[valorSeleccionado];
+            descripcionDiv.querySelector('i').style.display = "none"; // Ocultar ícono
+        } else {
+            textoDescripcion.innerHTML = "Por favor selecciona el tipo de usuario."; // Mensaje cuando no hay selección
+            descripcionDiv.querySelector('i').style.display = "inline"; // Mostrar ícono
+        }
     }
 </script>
+
+{% load static %}
+<link rel="stylesheet" href="{% static 'css/styles.css' %}">

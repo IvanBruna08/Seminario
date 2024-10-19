@@ -3,16 +3,17 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Distribuir Pallet</title>
+    <title>Distribuir Pallet </title>
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
 </head>
 <body>
-    <nav class="navbar navbar-expand-lg navbar-light bg-light">
-        <a class="navbar-brand" href="#">Distribución de Pallets</a>
+    <!-- Botón "Inicio" flotante -->
+    <a href="{% url 'dashboard_predio' %}" class="btn-home">Inicio</a>
+
         <div class="collapse navbar-collapse" id="navbarNav">
             <ul class="navbar-nav">
                 <li class="nav-item">
-                    <a class="nav-link" href="{% url 'dashboard_predio' %}">Inicio</a>
+                    <!-- Este enlace ha sido movido para que ahora esté en la esquina -->
                 </li>
                 <!-- Agrega más enlaces según sea necesario -->
             </ul>
@@ -45,11 +46,11 @@
             <div id="distribuidores-container"></div>
 
             <!-- Botón para agregar formularios de distribuidores -->
-            <button type="button" class="btn btn-primary" id="agregar-distribuidores">Agregar Distribuidores</button>
+            <button type="button" class="btn-add" id="agregar-distribuidores">Agregar Distribuidores</button>
             <br><br>
 
             <!-- Botón para enviar el formulario -->
-            <button type="submit" class="btn btn-success">Distribuir Pallet</button>
+            <button type="submit" class="btn-submit">Distribuir Pallet</button>
         </form>
 
         <!-- Mostrar errores si existen -->
@@ -101,3 +102,5 @@
 </body>
 </html>
 
+{% load static %}
+<link rel="stylesheet" href="{% static 'css/styles.css' %}">

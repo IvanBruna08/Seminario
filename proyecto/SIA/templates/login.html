@@ -10,20 +10,21 @@
     <title>Inicio de Sesión</title>
     <style>
         body {
-            background-image: url("{% static 'images/tay.jpeg' %}");
+            background: url("{% static 'css/ag1.jpg' %}");
             background-size: cover;
             background-position: center;
             background-repeat: no-repeat;
+            margin: 0;
+            height: 100vh; /* Asegúrate de que el cuerpo ocupe toda la altura de la ventana */
             display: flex;
             justify-content: center;
             align-items: center;
-            height: 100vh;
-            margin: 0;
         }
+
         .main {
             width: 350px;
             padding: 40px;
-            background-color: #fff;
+            background-color: rgba(255, 255, 255, 0.4);
             box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
             border-radius: 10px;
         }
@@ -52,6 +53,7 @@
             border-radius: 5px;
             margin-top: 10px;
             font-size: 18px;
+            transition: background-color 0.3s; /* Transición suave */
         }
         .submit:hover {
             background-color: #388E3C; /* Verde más oscuro */
@@ -89,3 +91,4 @@
     </div>
 </body>
 </html>
+

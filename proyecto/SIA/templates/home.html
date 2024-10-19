@@ -4,30 +4,64 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="{% static 'css/styles.css' %}">
     <title>Plataforma de Seguimiento de Productos Agrícolas</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <link href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css?family=Ubuntu" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #c8e6c9; /* Verde suave */
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            color: #2E7D32; /* Verde oscuro */
+        }
+
+        /* Estilo del título */
+        .main-title {
+            font-size: 2.5em; /* Tamaño del título */
+            color: #2E7D32; /* Verde oscuro */
+            text-align: center; /* Centra el título */
+            margin-top: 20px; /* Espacio superior */
+        }
+
+        /* Estilo del botón */
+        .main-button {
+            display: block;
+            width: 200px; /* Ancho del botón */
+            margin: 20px auto; /* Centra el botón */
+            padding: 10px;
+            background-color: #4CAF50; /* Verde */
+            color: white;
+            text-align: center;
+            text-decoration: none;
+            border-radius: 5px;
+            font-size: 18px;
+            transition: background-color 0.3s; /* Transición suave */
+        }
+
+        .main-button:hover {
+            background-color: #388E3C; /* Verde más oscuro */
+        }
+    </style>
 </head>
 <body>
-    <!-- Barra de navegación superior -->
-    <header class="header-home">
-        <h2>Plataforma de Seguimiento de Productos Agrícolas</h2>
+    <header class="header-home" style="background: url('{% static 'css/bg1.jpg' %}') no-repeat center center; background-size: cover; height: 300px;">
     </header>
 
     <!-- Contenedor principal -->
     <main class="container-home">
         <section class="intro-home">
-            <h1>Bienvenido a la Plataforma de Seguimiento de Productos Agrícolas</h1>
-            <p>Seleccione cómo desea ingresar:</p>
+            <h1 class="main-title">Bienvenido a la Plataforma de Seguimiento de Productos Agrícolas</h1>
         </section>
 
         <!-- Contenedor para los botones -->
         <section class="button-container-home">
-            <a href="{% url 'login' %}" class="boton-home btn-trabajador">Iniciar</a>
+            <a href="{% url 'login' %}" class="main-button">Iniciar</a>
         </section>
     </main>
-
 </body>
 </html>
-
-
-

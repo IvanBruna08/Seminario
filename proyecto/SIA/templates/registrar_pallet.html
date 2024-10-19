@@ -3,5 +3,8 @@
 <form method="POST">
     {% csrf_token %}
     {{ form.as_p }}
-    <button type="submit">Crear Pallet</button>
+    <button type="submit" class="btn-submit">Crear Pallet</button>
 </form>
+
+{% load static %}
+<link rel="stylesheet" href="{% static 'css/styles.css' %}">

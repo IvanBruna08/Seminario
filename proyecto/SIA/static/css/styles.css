@@ -1,13 +1,18 @@
 /* Estilos generales */
 body {
     font-family: 'Arial', sans-serif;
-    background-color: #C8E6C9; /* Verde suave */
+    background-image: url('/static/css/ag1.jpg');
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
     margin: 0;
     padding: 0;
     display: flex;
     flex-direction: column;
     height: 100vh;
     color: #2E7D32; /* Verde oscuro */
+    justify-content: center; 
+    align-items: center; 
 }
 
 table {
@@ -23,17 +28,24 @@ th, td {
 }
 
 th {
-    background-color: #66BB6A;
+    background-color: #4CAF50; 
     color: white;
 }
 
+tr{
+    background-color: rgba(255,255,255, 0.7);
+}
 tr:hover {
-    background-color: #f1f1f1;
+    background-color: #c8e6c9;
+}
+.qr-image{
+    width: 100px;
+    height: auto;
 }
 
 /* Barra de navegación superior */
 .header {
-    background-color: #3C763D; /* Verde oscuro */
+    background-color: #6D4C41; /* Café oscuro */
     padding: 15px 20px;
     font-family: 'Verdana', sans-serif;
     display: flex;
@@ -46,6 +58,11 @@ tr:hover {
     top: 0;
     left: 0;
     z-index: 1000;
+}
+.sidebar-header {
+    display: none; /* Oculta el header dentro del sidebar por defecto */
+    padding: 15px; /* Espaciado para el header dentro del sidebar */
+    text-align: center; /* Centra el texto del header en el sidebar */
 }
 
 .header h2 {
@@ -63,19 +80,21 @@ tr:hover {
 }
 
 .btn-logout {
-    padding: 10px 20px;
-    background-color: #96dd96; /* Verde claro */
+    display: block;
+    margin: 10px auto;
+    padding: 10px;
+    background-color: #A1887F; 
     color: white;
-    border: none;
+    text-align: center;
+    text-decoration: none;
     border-radius: 5px;
-    cursor: pointer;
-    transition: background-color 0.3s ease;
-    font-size: 1em;
-    margin-left: 20px;
-}
+    margin-top: 10px;
+    font-size: 18px;
+    transition: background-color 0.3s;
+} 
 
 .btn-logout:hover {
-    background-color: #81c784; /* Un tono más oscuro del verde claro */
+    background-color: rgba(109, 76, 65); /* Café medio */
 }
 
 /* Ajuste del contenido */
@@ -91,17 +110,20 @@ tr:hover {
 }
 
 /* Barra lateral (sidebar) */
-.sidebar {
-    background-color: #A5D6A7; /* Verde claro para la barra lateral */
+.wrapper .sidebar {
+    background-color: rgba(109, 76, 65, 0.6); 
     padding: 15px;
     width: 250px;
-    border-radius: 5px;
-    box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
-    position: fixed;
-    top: 80px; /* Ajustado para coincidir con el header */
-    bottom: 0;
     left: 0;
+    border-radius: 0px;
+    box-shadow: 0px 0px 6px rgba(109, 76, 65, 0.9);
+    position: fixed;
+    top: 0px; 
+    bottom: 0;
+    height: 100vh;
+    transition: left 0.3s ease;
 }
+
 
 .sidebar a {
     color: white; /* Texto blanco para enlaces */
@@ -113,7 +135,7 @@ tr:hover {
 }
 
 .sidebar a:hover {
-    background-color: #66BB6A; /* Verde oscuro al pasar el mouse */
+    background-color: #6D4C41; 
 }
 
 .sidebar ul {
@@ -131,7 +153,7 @@ tr:hover {
 }
 
 .sidebar li:hover {
-    background-color: #4CAF50; /* Un tono más oscuro del verde para los elementos de lista */
+    background-color: #A1887F; /* Café claro al pasar el mouse */
     color: white;
 }
 
@@ -139,14 +161,52 @@ tr:hover {
 h1 {
     font-size: 2.2em;
     margin-bottom: 20px;
-    color: #388E3C; /* Verde medio */
+    color: #359738;
+    text-align: center;
+    background-color: rgba(255,255,255, 0.4);
+    border-radius: 15px;
+    padding: 10px;
+}
+h2{
+    font-size: 1.4em;
+    color: #1e7d21;
+    background-color:rgba(255,255,255, 0.6);
+    border-radius: 15px;
+    padding: 5px;
 }
 
 h3 {
     font-size: 1.8em;
-    color: #2E7031; /* Verde oscuro */
+    font-weight: 700;
+    color: #2E7D32;
+    text-align: center;
 }
 
+h5 {
+    font-size: 1.2em;
+    padding: 20px;
+    color: rgb(0, 0, 0);
+    text-align: center;
+    width: 100%;
+    border-radius: 10px;
+    box-shadow: 0px 0px 6px rgba(109, 76, 65, 0.9);
+}
+h5d {
+    font-size: 1.6em;
+    padding: 20px;
+    color: white;
+    text-align: center;
+    width: 100%;
+    border-radius: 10px;
+    box-shadow: 0px 0px 6px rgba(109, 76, 65, 0.9);
+}
+.sidebar-link{
+    font-size: 1.2em;
+    width: 100%;
+    color: white;
+    text-align: center;
+    box-shadow: 0px 0px 6px rgba(109, 76, 65, 0.9);
+}
 p {
     font-size: 16px;
     margin-bottom: 20px;
@@ -168,32 +228,60 @@ p {
 
 .form-input {
     padding: 10px;
-    border: 1px solid #B0BEC5; /* Color de borde gris claro */
+    border: 1px solid #BCAAA4; /* Color de borde café medio */
     border-radius: 5px;
     font-size: 1em;
-    width: 100%;
 }
 
 /* Estilo para el botón */
 .btn-submit {
-    background-color: #66BB6A; /* Verde claro para el botón */
+    display: block;
+    margin: 10px auto;
+    padding: 10px;
+    background-color: #4CAF50; /* Verde */
     color: white;
-    padding: 12px 20px;
-    border: none;
+    text-align: center;
+    text-decoration: none;
     border-radius: 5px;
-    font-size: 1.1em;
-    cursor: pointer;
-    transition: background-color 0.3s ease, transform 0.2s ease;
-    display: inline-block;
+    margin-top: 10px;
+    font-size: 18px;
+    transition: background-color 0.3s; /* Transición suave */
 }
 
+
 .btn-submit:hover {
-    background-color: #43A047; /* Verde más oscuro al pasar el mouse */
+    background-color: #1e7d21; /* Verde más oscuro al pasar el mouse */
 }
 
 .btn-submit:active {
-    background-color: #2E7D32; /* Verde oscuro al hacer clic */
+    background-color: #388E3C; /* Verde oscuro al hacer clic */
 }
+
+/* Estilo para el recuadro de descripciones */
+.descripcion-box {
+    background-color: rgba(255, 255, 255, 0.4); 
+    border-radius: 5px; 
+    padding: 15px; 
+    margin-top: 20px; 
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1); 
+    font-size: 16px; 
+    color: black; 
+}
+
+.nav-link a{
+    display: block;
+    margin: 10px auto;
+    padding: 10px;
+    background-color: #4CAF50; /* Verde */
+    color: white;
+    text-align: center;
+    text-decoration: none;
+    border-radius: 5px;
+    margin-top: 10px;
+    font-size: 18px;
+    transition: background-color 0.3s; /* Transición suave */
+}
+
 
 /* Estilo general del formulario */
 form {
@@ -201,7 +289,7 @@ form {
     max-width: 400px;
     margin: 20px auto;
     padding: 20px;
-    background-color: #f6f6f6; /* Fondo gris claro */
+    background-color: rgba(255, 255, 255, 0.4); 
     border-radius: 10px;
     box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
 }
@@ -217,10 +305,10 @@ form input[type="email"],
 form input[type="number"],
 form textarea,
 form select {
-    width: 100%;
+    width: 95%;
     padding: 10px;
     margin-bottom: 16px;
-    border: 1px solid #ccc; /* Borde gris claro */
+    border: 1px solid #BCAAA4; /* Borde café medio */
     border-radius: 5px;
     background-color: #fff; /* Fondo blanco */
     font-size: 1em;
@@ -252,7 +340,7 @@ form select:focus {
 
 /* Estilos para la barra de navegación superior */
 .header-home {
-    background-color: #2A5D34; /* Verde oscuro */
+    background-color: #6D4C41; /* Café oscuro */
     color: #fff; /* Texto blanco */
     padding: 15px;
     text-align: center;
@@ -279,12 +367,16 @@ form select:focus {
 
 /* Estilo de los botones */
 .boton-home {
-    display: inline-block;
-    padding: 10px 20px;
+    display: block;
+    width: 60px; /* Asegura que los botones ocupen el ancho completo */
+    padding: 12px; /* Aumento del padding para mayor comodidad */
+    color: white;
+    text-align: center;
     text-decoration: none;
-    color: #fff; /* Texto blanco */
     border-radius: 5px;
-    transition: background-color 0.3s ease;
+    margin-top: 10px;
+    font-size: 18px;
+    transition: background-color 0.3s; /* Transición suave */
 }
 
 .btn-trabajador {
@@ -292,15 +384,7 @@ form select:focus {
 }
 
 .btn-trabajador:hover {
-    background-color: #45A049; /* Verde oscuro */
-}
-
-.btn-cliente {
-    background-color: #2196F3; /* Azul */
-}
-
-.btn-cliente:hover {
-    background-color: #0B7DDA; /* Azul oscuro */
+    background-color: #388E3C; /* Verde oscuro */
 }
 
 /* Estilos generales del contenedor */
@@ -309,10 +393,10 @@ form select:focus {
     width: 800px; /* Ancho del contenedor, el doble del tamaño del formulario */
     margin: 40px auto;
     padding: 40px; /* Relleno para mayor espacio interno */
-    background-color: #ffffff; /* Blanco */
+    background-color: #F6F6F6; 
     border-radius: 10px;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-    border: 1px solid #e1e1e1; /* Borde gris claro */
+    border: 1px solid #BCAAA4; /* Borde café medio */
     box-sizing: border-box; /* Asegura que el padding y el borde estén incluidos en el ancho */
 }
 
@@ -342,7 +426,7 @@ form select:focus {
 /* Estilo del campo de entrada */
 .input-ingreso {
     padding: 12px;
-    border: 1px solid #B0BEC5; /* Gris claro */
+    border: 1px solid #BCAAA4; /* Borde café medio */
     border-radius: 6px;
     font-size: 1em;
     color: #2E7D32; /* Verde oscuro */
@@ -351,29 +435,49 @@ form select:focus {
 }
 
 /* Estilo del botón de enviar */
-.btn-ingreso {
-    padding: 12px 20px;
-    border: none;
-    border-radius: 6px;
-    color: #fff;
-    background-color: #66BB6A; /* Verde claro */
-    font-size: 1.1em;
-    cursor: pointer;
-    transition: background-color 0.3s ease, transform 0.3s ease;
-    font-weight: bold;
-    width: 100%; /* Asegura que el botón ocupe todo el ancho del formulario */
-    box-sizing: border-box; /* Asegura que el padding y el borde estén incluidos en el ancho */
+.btn-add {
+    display: block;
+    margin: 10px auto;
+    padding: 10px;
+    background-color: #c8e6c9; /* Verde */
+    color: black;
+    text-align: center;
+    text-decoration: none;
+    border-radius: 5px;
+    margin-top: 10px;
+    font-size: 18px;
+    transition: background-color 0.3s; 
 }
 
-.btn-ingreso:hover {
-    background-color: #57A95D; /* Verde un poco más oscuro */
+
+.btn-add:hover {
+    background-color: #196400; 
     transform: translateY(-2px);
 }
 
+.btn-home {
+    position: absolute; 
+    top: 20px;
+    left: 20px;
+    margin: 10px auto;
+    padding: 10px;
+    background-color: #5D4037; /* Café oscuro */
+    color: white;
+    text-align: center;
+    text-decoration: none;
+    border-radius: 5px;
+    margin-top: 10px;
+    font-size: 18px;
+    transition: background-color 0.3s;
+}
+.btn-home:hover{
+    background-color: #56352b; 
+    transform: translateY(-2px);
+}
 
 /* Estilos para la barra de navegación superior */
 .header-cosecha {
-    background-color: #2a5d34; /* Color de fondo verde */
+    background-color: #2A5D34; /* Color de fondo verde oscuro */
     color: #fff; /* Color del texto blanco */
     padding: 15px;
 }
@@ -395,30 +499,6 @@ form select:focus {
     margin-left: auto;
 }
 
-.btn-logout-cosecha {
-    display: inline-block;
-    width: 40px; /* Ancho del contenedor */
-    padding: 10px 25px;
-    background-color: #D32F2F; /* Rojo más oscuro */
-    color: #fff;
-    text-decoration: none;
-    border-radius: 8px;
-    font-size: 1.1em;
-    font-weight: bold;
-    transition: background-color 0.3s ease, transform 0.3s ease, box-shadow 0.3s ease;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2); /* Sombra sutil */
-}
-
-.btn-logout-cosecha:hover {
-    background-color: #C62828; /* Rojo oscuro */
-    transform: translateY(-2px);
-    box-shadow: 0 6px 8px rgba(0, 0, 0, 0.3); /* Sombra más intensa al pasar el cursor */
-}
-
-.btn-logout-cosecha:active {
-    background-color: #B71C1C; /* Rojo más oscuro al hacer clic */
-    transform: translateY(1px);
-}
 
 /* Estilos para el contenedor de registrar cosecha */
 .container-registrarC {
@@ -426,10 +506,10 @@ form select:focus {
     width: 600px; /* Ancho del contenedor */
     margin: 40px auto;
     padding: 30px;
-    background-color: #E8F5E9; /* Verde claro */
+    background-color: #D7E8D7; /* Verde claro */
     border-radius: 10px;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-    border: 1px solid #C8E6C9; /* Verde muy claro */
+    border: 1px solid #B2DFDB; /* Verde muy claro */
     box-sizing: border-box; /* Asegura que el padding y el borde estén incluidos en el ancho */
 }
 
@@ -492,77 +572,13 @@ form select:focus {
     color: #2E7D32; /* Verde más oscuro */
 }
 
-/* Estilos para el contenedor principal */
-.main-layout-cosecha {
-    display: flex;
-    max-width: 1200px;
-    margin: 20px auto;
-    gap: 20px;
-}
-
-/* Estilos para la barra lateral (sidebar) */
-.sidebar-cosecha {
-    width: 250px;
-    background-color: #E8F5E9; /* Verde claro */
-    padding: 20px;
-    border-radius: 8px;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-}
-
-.sidebar-cosecha ul {
-    list-style: none;
-    padding: 0;
-    margin: 0;
-}
-
-.sidebar-cosecha li {
-    margin-bottom: 10px;
-}
-
-.sidebar-link {
-    text-decoration: none;
-    color: #388E3C; /* Verde oscuro */
-    font-size: 1.1em;
-    display: block;
-    padding: 10px;
-    border-radius: 5px;
-    transition: background-color 0.3s ease, color 0.3s ease;
-}
-
-.sidebar-link:hover {
-    background-color: #66BB6A; /* Verde más claro */
-    color: #fff; /* Color del texto blanco */
-}
-
-/* Estilos para el contenido principal */
-.main-container-cosecha {
-    flex: 1;
-    padding: 20px;
-    background-color: #ffffff; /* Blanco */
-    border-radius: 8px;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-}
-
-.intro-section-cosecha {
-    margin-bottom: 20px;
-}
-
-.intro-section-cosecha h3 {
-    font-size: 1.5em;
-    color: #2E7D32; /* Verde oscuro */
-}
-
-.intro-section-cosecha p {
-    font-size: 1em;
-    color: #34495e; /* Gris oscuro */
-}
 
 /* Contenedor principal */
 .detalleC {
     max-width: 1200px;
     margin: 80px auto 20px; /* Deja espacio para el header */
     padding: 20px;
-    background-color: #E8F5E9; /* Fondo verde claro */
+    background-color: #D7E8D7; /* Fondo verde claro */
     border-radius: 8px;
     box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
 }
@@ -647,7 +663,7 @@ form select:focus {
     max-width: 1200px;
     margin: 80px auto 20px; /* Deja espacio para el header */
     padding: 20px;
-    background-color: #E8F5E9; /* Fondo verde claro */
+    background-color: #D7E8D7; /* Fondo verde claro */
     border-radius: 8px;
     box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
 }
@@ -728,7 +744,7 @@ form select:focus {
 
 /* Botón para marcar como transportado */
 .marcarT-button {
-    background-color: #4CAF50; /* Verde */
+    background-color: #66BB6A; /* Verde claro */
     color: white;
     padding: 10px 20px;
     font-size: 1.2em;
@@ -739,7 +755,7 @@ form select:focus {
 }
 
 .marcarT-button:hover {
-    background-color: #388E3C; /* Verde más oscuro al pasar el cursor */
+    background-color: #57A95D; /* Verde más oscuro al pasar el cursor */
 }
 
 /* Contenedor principal */
@@ -777,7 +793,7 @@ form select:focus {
 }
 
 .status-button {
-    background-color: #4CAF50; /* Verde */
+    background-color: #66BB6A; /* Verde claro */
     color: white; /* Color del texto */
     padding: 10px 20px; /* Espaciado interior */
     font-size: 1.2em; /* Tamaño de la fuente */
@@ -787,7 +803,7 @@ form select:focus {
 }
 
 .status-button:hover {
-    background-color: #388E3C; /* Verde más oscuro al pasar el cursor */
+    background-color: #57A95D; /* Verde más oscuro al pasar el cursor */
 }
 
 /* Estilo responsive para pantallas pequeñas */
@@ -799,11 +815,24 @@ form select:focus {
 
 @media (max-width: 991px) {
     .sidebar {
-        display: none; /* Oculta la barra lateral */
+        display: block; /* Oculta la barra lateral */
     }
 
     .content {
         margin-left: 0; /* Elimina el margen izquierdo */
+    }
+}
+@media (max-width: 991px) {
+    .header {
+        display: none; /* Oculta el header original en pantallas pequeñas */
+    }
+
+    .sidebar-header {
+        display: block; /* Muestra el header dentro del sidebar */
+    }
+
+    .sidebar-header h1 {
+        font-size: 1.2em; /* Ajusta el tamaño del h1 dentro del sidebar */
     }
 }
 
@@ -829,90 +858,19 @@ form select:focus {
     }
 
     h1 {
-        font-size: 1.8em; /* Tamaño de h1 reducido */
+        font-size: 1.4em; /* Tamaño de h1 reducido */
     }
 
     h3 {
-        font-size: 1.4em; /* Tamaño de h3 reducido */
+        font-size: 1em; /* Tamaño de h3 reducido */
     }
 
     p {
-        font-size: 14px; /* Tamaño de párrafo reducido */
+        font-size: 10px; /* Tamaño de párrafo reducido */
     }
 
     .btn-submit {
         width: 100%; /* Ancho completo para el botón de envío */
         padding: 10px; /* Espaciado interior */
-    }
-
-    .sidebar {
-        display: none; /* Oculta la barra lateral */
-    }
-}
-
-
-
-
-
-
-
-
-/* Estilo responsive para pantallas pequeñas */
-@media (max-width: 1072px) {
-    .main-container {
-        padding: 80px 20px 20px;
-    }
-}
-
-@media (max-width: 991px) {
-    .sidebar {
-        display: none;
-    }
-
-    .content {
-        margin-left: 0;
-    }
-}
-
-@media (max-width: 767px) {
-    .header {
-        flex-direction: column;
-        align-items: flex-start;
-        padding: 10px;
-    }
-
-    .main-container {
-        padding: 60px 10px 10px;
-    }
-}
-
-@media (max-width: 320px) {
-    .header {
-        padding: 10px;
-    }
-
-    .main-container {
-        padding: 50px 10px 10px;
-    }
-
-    h1 {
-        font-size: 1.8em;
-    }
-
-    h3 {
-        font-size: 1.4em;
-    }
-
-    p {
-        font-size: 14px;
-    }
-
-    .btn-submit {
-        width: 100%;
-        padding: 10px;
-    }
-
-    .sidebar {
-        display: none;
     }
 }
