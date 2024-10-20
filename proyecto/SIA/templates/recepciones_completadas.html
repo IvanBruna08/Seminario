@@ -7,26 +7,33 @@
     <title>Recepciones Completadas</title>
 </head>
 <body>
-    <h1>Recepciones Completadas</h1>
-    <table>
-        <thead>
-            <tr>
-                <th>ID Recepción</th>
-                <th>Fecha</th>
-                <th>Estado</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for recepcion in recepciones %}
-            <tr>
-                <td>{{ recepcion.id }}</td>
-                <td>{{ recepcion.fecha_recepcion }}</td>
-                <td>{{ recepcion.estado_recepcion }}</td>
-            </tr>
-            {% endfor %}
-        </tbody>
-    </table>
-    <a href="{% url 'crear_empaque' %}">Crear Empaque</a>
-    <a href="{% url 'distribuir_caja' %}">Distribuir Caja</a>
+   
+    <div class="container-tablas">
+        <h1>Recepciones Completadas</h1>
+        <table>
+            <thead>
+                <tr>
+                    <th>ID Recepción</th>
+                    <th>Fecha</th>
+                    <th>Estado</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for recepcion in recepciones %}
+                <tr>
+                    <td>{{ recepcion.id }}</td>
+                    <td>{{ recepcion.fecha_recepcion }}</td>
+                    <td>{{ recepcion.estado_recepcion }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Botones fuera del contenedor -->
+    <div class="acciones">
+        <a href="{% url 'crear_empaque' %}" class="btn-submit">Crear Empaque</a>
+        <a href="{% url 'distribuir_caja' %}" class="btn-submit">Distribuir Caja</a>
+    </div>
 </body>
 </html>

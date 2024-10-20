@@ -7,13 +7,15 @@
     <title>Dashboard Distribuidor</title>
 </head>
 <body>
-    <h1>Dashboard Distribuidor</h1>
-    <ul>
-        <li><a href="{% url 'recepciones_completadas' %}">Pallet Recepcionado</a></li>
-        <li><a href="{% url 'crear_empaque' %}">Crear Empaque</a></li>
-        <li><a href="{% url 'distribuir_caja' %}">Distribuir Caja</a></li>
-        <li><a href="{% url 'cajas_view' %}">Caja Lista</a></li>
-        <a href="{% url 'custom_logout' %}" class="btn-logout-cosecha">Salir</a>
-    </ul>
+    <h1>Distribuidor</h1>
+    <div class="contenedor-lista-d">
+        <ul>
+            <li><a href="{% url 'recepciones_completadas' %}" class="lista-d">Pallet Recepcionado</a></li>
+            <li><a href="{% url 'crear_empaque' %}" class="lista-d">Crear Empaque</a></li>
+            <li><a href="{% url 'distribuir_caja' %}" class="lista-d">Distribuir Caja</a></li>
+            <li><a href="{% url 'cajas_view' %}" class="lista-d">Caja Lista</a></li>
+        </ul>
+    </div>
+    <a href="{% url 'custom_logout' %}" class="btn-logout">Salir</a>
 </body>
 </html>

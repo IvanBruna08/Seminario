@@ -7,19 +7,8 @@
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
 </head>
 <body>
-    <nav class="navbar navbar-expand-lg navbar-light bg-light">
-        <a class="navbar-brand" href="#">Distribución de Cajas</a>
-        <div class="collapse navbar-collapse" id="navbarNav">
-            <ul class="navbar-nav">
-                <li class="nav-item">
-                    <a class="nav-link" href="{% url 'distribuir_caja' %}">Distribuir Cajas</a>
-                </li>
-                <!-- Agrega más enlaces según sea necesario -->
-            </ul>
-        </div>
-    </nav>
-
-    <div class="container mt-4">
+        <a class="btn-home" href="{% url 'dashboard_distribuidor' %}">Salir</a>
+    <div class="contenedor-dist">
         <h1>Distribuir Cajas</h1>
         <form method="post" action="{% url 'distribuir_caja' %}">
             {% csrf_token %}
@@ -42,9 +31,9 @@
 
             <div id="cajas-container"></div>
 
-            <button type="button" class="btn btn-primary" id="agregar-cajas">Agregar Cajas</button>
+            <button type="button" class="btn-add" id="agregar-cajas">Agregar Cajas</button>
             <br><br>
-            <button type="submit" class="btn btn-success">Distribuir</button>
+            <button type="submit" class="btn-submit">Distribuir</button>
         </form>
 
         <!-- Mostrar errores si existen -->
@@ -96,3 +85,5 @@
 </body>
 </html>
 
+{% load static %}
+<link rel="stylesheet" href="{% static 'css/styles.css' %}">

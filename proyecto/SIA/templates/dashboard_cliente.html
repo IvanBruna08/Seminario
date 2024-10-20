@@ -8,33 +8,19 @@
     <link rel="stylesheet" href="{% static 'css/styles.css' %}">
 </head>
 <body>
-    <!-- Barra de navegación superior -->
-    <header class="header-cosecha">
-        <nav class="nav-container-cosecha">
-            <h2 class="welcome-message-cosecha">Bienvenido, {{ nombre_usuario }}</h2>
-            <div class="logout-button-cosecha">
-                <a href="{% url 'custom_logout' %}" class="btn-logout-cosecha">Salir</a>
-            </div>
-        </nav>
-    </header>
+        <h1 >Bienvenido, {{ nombre_usuario }}</h1>
+    <div class="contenedor-lista-d">
+        <ul>
+            <li><a class="lista-d">Pagar</a></li>
+            <li><a class="lista-d">Historial Pagos</a></li>
+        </ul>
 
-    <!-- Contenedor principal con barra lateral y contenido -->
-    <div class="main-layout-cosecha">
-        <!-- Barra lateral (sidebar) -->
-        <nav class="sidebar-cosecha">
-            <ul>
-                <li><a >Pagar</a></li>
-                <li><a >Historial Pagos</a></li>
-            </ul>
-        </nav>
-
-        <!-- Contenido principal -->
         <main class="main-container-cosecha" id="contenido">
             {% block content %}
             <!-- Este bloque se sobrescribirá en plantillas hijas -->
             {% endblock %}
         </main>
     </div>
-
+    <a href="{% url 'custom_logout' %}" class="btn-logout">Salir</a>
 </body>
 </html>
