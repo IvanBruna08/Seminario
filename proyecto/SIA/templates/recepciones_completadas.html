@@ -7,6 +7,7 @@
     <title>Recepciones Completadas</title>
 </head>
 <body>
+<<<<<<< HEAD
     <h1>Recepciones Completadas</h1>
     <table>
         <thead>
@@ -29,5 +30,35 @@
         </tbody>
     </table>
     <a href="{% url 'dashboard_distribuidor' %}" class="btn-home">Inicio</a>
+=======
+   
+    <div class="container-tablas">
+        <h1>Recepciones Completadas</h1>
+        <table>
+            <thead>
+                <tr>
+                    <th>ID Recepción</th>
+                    <th>Fecha</th>
+                    <th>Estado</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for recepcion in recepciones %}
+                <tr>
+                    <td>{{ recepcion.id }}</td>
+                    <td>{{ recepcion.fecha_recepcion }}</td>
+                    <td>{{ recepcion.estado_recepcion }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Botones fuera del contenedor -->
+    <div class="acciones">
+        <a href="{% url 'crear_empaque' %}" class="btn-submit">Crear Empaque</a>
+        <a href="{% url 'distribuir_caja' %}" class="btn-submit">Distribuir Caja</a>
+    </div>
+>>>>>>> ea592f2bc55f7c366c0d0916e68aa7dfeb847aee
 </body>
 </html>

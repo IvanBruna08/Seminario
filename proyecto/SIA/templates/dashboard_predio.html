@@ -3,11 +3,15 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<<<<<<< HEAD
     <title>{% block title %}Predio - Funciones del Trabajador: {{ nombre }}{% endblock %}</title>
     {% load static %}
     <link rel="stylesheet" href="{% static 'css/styles.css' %}">
 
     <!-- Bootstrap CSS -->
+=======
+    <title>{% block title %}Predio - Funciones del Trabajador: {{ nombre }}{% endblock %} </title>
+>>>>>>> ea592f2bc55f7c366c0d0916e68aa7dfeb847aee
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
     <script src="https://cdn.jsdelivr.net/gh/ethereum/web3.js/dist/web3.min.js"></script>
     <style>
@@ -49,7 +53,11 @@
             font-size: 1.8rem;
         }
         p {
+<<<<<<< HEAD
             background-color: rgba(200, 230, 201, 0.3);
+=======
+            background-color: rgba(200,	230, 201, 0.3);
+>>>>>>> ea592f2bc55f7c366c0d0916e68aa7dfeb847aee
             padding: 5px;
             color: black;
             text-align: center;
@@ -91,6 +99,10 @@
                     <li><a href="{% url 'custom_logout' %}" class="btn-logout-cosecha">Salir</a></li>
                 {% endblock %}
             </ul>
+<<<<<<< HEAD
+=======
+            <a href="{% url 'custom_logout' %}" class="btn-logout">Salir</a>
+>>>>>>> ea592f2bc55f7c366c0d0916e68aa7dfeb847aee
         </nav>
 
         <!-- Contenido principal -->
@@ -160,3 +172,6 @@
     </script>
 </body>
 </html>
+
+{% load static %}
+<link rel="stylesheet" href="{% static 'css/styles.css' %}">

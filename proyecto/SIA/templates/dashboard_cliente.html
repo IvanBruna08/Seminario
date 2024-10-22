@@ -11,8 +11,13 @@
         <h1 >Bienvenido, {{ nombre_usuario }}</h1>
     <div class="contenedor-lista-d">
         <ul>
+<<<<<<< HEAD
             <li><a class="lista-d">Historial Pagos</a></li>
             <li><button id="connectButton" class="btn btn-primary">Conectar MetaMask</button></li> 
+=======
+            <li><a class="lista-d">Pagar</a></li>
+            <li><a class="lista-d">Historial Pagos</a></li>
+>>>>>>> ea592f2bc55f7c366c0d0916e68aa7dfeb847aee
         </ul>
 
         <main class="main-container-cosecha" id="contenido">
@@ -21,6 +26,7 @@
             {% endblock %}
         </main>
     </div>
+<<<<<<< HEAD
     <div class="contenedor-lista-d">
         <p id="walletAddress">No conectado</p>
     </div>
@@ -80,5 +86,8 @@
 
         connectButton.addEventListener('click', connectMetaMask);
     </script>
+=======
+    <a href="{% url 'custom_logout' %}" class="btn-logout">Salir</a>
+>>>>>>> ea592f2bc55f7c366c0d0916e68aa7dfeb847aee
 </body>
 </html>

@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     {% load static %}
-    <link rel="stylesheet" href="{% static 'css/styles.css' %}"> <!-- Asegúrate de tener el archivo CSS -->
     <title>Información de Pallet</title>
 </head>
 <body>
@@ -80,10 +79,17 @@
             </table>
         </div>
     {% else %}
+<<<<<<< HEAD
         <div class="alert">
             <h2>Por favor, selecciona un pallet para ver la información.</h2>
+=======
+        <div class="descripcion-box">
+            <p>Por favor, selecciona un pallet para ver la información.</p>
+>>>>>>> ea592f2bc55f7c366c0d0916e68aa7dfeb847aee
         </div>
     {% endif %}
 </div>
 </body>
 </html>
+
+<link rel="stylesheet" href="{% static 'css/styles.css' %}">

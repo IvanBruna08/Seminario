@@ -7,7 +7,11 @@
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
 </head>
 <body>
+<<<<<<< HEAD
     <a class="btn-home" href="{% url 'dashboard_distribuidor' %}">Salir</a>
+=======
+        <a class="btn-home" href="{% url 'dashboard_distribuidor' %}">Salir</a>
+>>>>>>> ea592f2bc55f7c366c0d0916e68aa7dfeb847aee
     <div class="contenedor-dist">
         <h1>Distribuir Cajas</h1>
         <form method="post" action="{% url 'distribuir_caja' %}">
@@ -39,9 +43,9 @@
 
             <div id="cajas-container"></div>
 
-            <button type="button" class="btn btn-primary" id="agregar-cajas">Agregar Cajas</button>
+            <button type="button" class="btn-add" id="agregar-cajas">Agregar Cajas</button>
             <br><br>
-            <button type="submit" class="btn btn-success">Distribuir</button>
+            <button type="submit" class="btn-submit">Distribuir</button>
         </form>
 
         <!-- Mostrar errores si existen -->
@@ -108,5 +112,11 @@
     </script>
 </body>
 </html>
+<<<<<<< HEAD
 {% load static %}
 <link rel="stylesheet" href="{% static 'css/styles.css' %}">
+=======
+
+{% load static %}
+<link rel="stylesheet" href="{% static 'css/styles.css' %}">
+>>>>>>> ea592f2bc55f7c366c0d0916e68aa7dfeb847aee
