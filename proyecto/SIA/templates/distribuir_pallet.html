@@ -5,21 +5,14 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Distribuir Pallet</title>
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'css/styles.css' %}">
 </head>
 <body>
-    <nav class="navbar navbar-expand-lg navbar-light bg-light">
-        <a class="navbar-brand" href="#">Distribución de Pallets</a>
-        <div class="collapse navbar-collapse" id="navbarNav">
-            <ul class="navbar-nav">
-                <li class="nav-item">
-                    <a class="nav-link" href="{% url 'dashboard_predio' %}">Inicio</a>
-                </li>
-                <!-- Agrega más enlaces según sea necesario -->
-            </ul>
-        </div>
-    </nav>
+    <!-- Botón "Inicio" flotante -->
+    <a href="{% url 'dashboard_predio' %}" class="btn-home">Inicio</a>
 
-    <div class="container mt-4">
+    <div class="contenedor-dist">
         <h1>Distribuir Pallet</h1>
         <form method="post" action="{% url 'distribuir_pallet' %}">
             {% csrf_token %}
@@ -44,10 +37,6 @@
             <!-- Contenedor para los formularios de distribuidores -->
             <div id="distribuidores-container"></div>
 
-            <!-- Botón para agregar formularios de distribuidores -->
-            <button type="button" class="btn btn-primary" id="agregar-distribuidores">Agregar Distribuidores</button>
-            <br><br>
-
             <!-- Botón para enviar el formulario -->
             <button type="submit" class="btn btn-success">Distribuir Pallet</button>
         </form>
@@ -68,30 +57,28 @@
     <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
     <script>
         $(document).ready(function() {
-            let contadorDistribuidores = 0;
-
-            // Al hacer clic en "Agregar Distribuidores"
-            $('#agregar-distribuidores').click(function() {
-                const cantidadDistribuidores = parseInt($('#cantidad_distribuidores').val());
-
+            // Escuchar cambios en el campo de cantidad de distribuidores
+            $('#cantidad_distribuidores').on('input', function() {
+                const cantidadDistribuidores = parseInt($(this).val()) || 0;
+                $('#distribuidores-container').empty(); // Limpiar el contenedor
+                
                 for (let i = 0; i < cantidadDistribuidores; i++) {
-                    contadorDistribuidores++;
                     $('#distribuidores-container').append(`
                         <div class="form-group">
-                            <h5>Distribuidor ${contadorDistribuidores}</h5>
+                            <h5>Distribuidor ${i + 1}</h5>
                             
                             <!-- Seleccionar Distribuidor -->
-                                <label for="distribuidor_${contadorDistribuidores}">Seleccionar Distribuidor:</label>
-                                <select class="form-control" id="distribuidor_${contadorDistribuidores}" name="distribuidor_${contadorDistribuidores}-distribuidor" required>
-                                    <option value="">Seleccione un distribuidor</option>
-                                    {% for distribuidor in distribuidores %}
-                                        <option value="{{ distribuidor.id }}">{{ distribuidor.nombre }}</option>
-                                    {% endfor %}
-                                </select>
+                            <label for="distribuidor_${i + 1}">Seleccionar Distribuidor:</label>
+                            <select class="form-control" id="distribuidor_${i + 1}" name="distribuidor_${i + 1}-distribuidor" required>
+                                <option value="">Seleccione un distribuidor</option>
+                                {% for distribuidor in distribuidores %}
+                                    <option value="{{ distribuidor.id }}">{{ distribuidor.nombre }}</option>
+                                {% endfor %}
+                            </select>
 
                             <!-- Campo para peso del pallet asignado al distribuidor -->
-                            <label for="peso_pallet_${contadorDistribuidores}">Peso Asignado (kg):</label>
-                            <input type="number" step="any" class="form-control" id="peso_pallet_${contadorDistribuidores}" name="distribuidor_${contadorDistribuidores}-peso_enviado" required>
+                            <label for="peso_pallet_${i + 1}">Peso Asignado (kg):</label>
+                            <input type="number" step="any" class="form-control" id="peso_pallet_${i + 1}" name="distribuidor_${i + 1}-peso_enviado" required>
                         </div>
                     `);
                 }
@@ -100,4 +87,3 @@
     </script>
 </body>
 </html>
-

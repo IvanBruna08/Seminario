@@ -6,6 +6,7 @@
     <title>Registrar Recepción</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/4.5.2/css/bootstrap.min.css">
     {% load static %}
+    <link rel="stylesheet" href="{% static 'css/styles.css' %}"> <!-- Asegúrate de tener el archivo CSS -->
     <style>
         body {
             margin: 20px;
@@ -32,7 +33,7 @@
 
         <div class="mt-4">
             <h4>Actualizar Estado de Recepción</h4>
-            <form method="post" action="{% url 'registrar_recepcion' pallet.id %}" id="recepcionForm">
+            <form method="post" action="{% url 'registrar_recepcion' secure_id %}" id="recepcionForm">
                 {% csrf_token %}
                 {{ form.as_p }} 
                 <button type="submit" class="btn btn-secondary mt-2">Confirmar Cambios</button>
@@ -41,7 +42,7 @@
             <button id="endDelivery" class="end-btn btn btn-danger">Finalizar Entrega</button>
 
             <!-- Formulario para finalizar la entrega (oculto) -->
-            <form id="endDeliveryForm" method="POST" action="{% url 'finalizar_entrega' pallet.id %}" style="display: none;">
+            <form id="endDeliveryForm" method="POST" action="{% url 'finalizar_entrega' secure_id %}" style="display: none;">
                 {% csrf_token %}
                 <input type="hidden" name="latitude" id="ruta_final_latitude"> <!-- Cambiar a latitude -->
                 <input type="hidden" name="longitude" id="ruta_final_longitude"> <!-- Cambiar a longitude -->

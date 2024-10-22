@@ -46,7 +46,7 @@
 
     <div id="map"></div>
 
-    <form id="startDeliveryForm" method="POST" action="{% url 'iniciar_entrega' pallet.id %}" style="display:none;">
+    <form id="startDeliveryForm" method="POST" action="{% url 'iniciar_entrega' secure_id %}" style="display:none;">
         {% csrf_token %}
         <input type="hidden" name="ruta_inicio_latitude" id="ruta_inicio_latitude">
         <input type="hidden" name="ruta_inicio_longitude" id="ruta_inicio_longitude">

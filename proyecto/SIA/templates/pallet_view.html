@@ -11,6 +11,7 @@
 
 <div class="container">
     <h1>Gestión de Pallets</h1>
+    <a href="{% url 'dashboard_predio' %}" class="btn-home">Inicio</a>
     
     <form method="get" action="{% url 'pallet_view' %}" class="form-select">
         <label for="pallet_select">Selecciona un Pallet:</label>
@@ -80,10 +81,9 @@
         </div>
     {% else %}
         <div class="alert">
-            <p>Por favor, selecciona un pallet para ver la información.</p>
+            <h2>Por favor, selecciona un pallet para ver la información.</h2>
         </div>
     {% endif %}
 </div>
-
 </body>
 </html>

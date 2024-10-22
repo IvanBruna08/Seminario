@@ -28,7 +28,7 @@ class Predio(models.Model):
     nombre = models.CharField(max_length=100, null=True, blank=True)
     direccion = models.CharField(max_length=100, null=True, blank=True)
     billetera = models.CharField(max_length=42, null=True, blank=True)
-    rut = models.CharField(max_length=11, null=True, blank=True)
+    rut = models.CharField(max_length=12, null=True, blank=True)
     password = models.CharField(max_length=10, null=True, blank=True)
     latitude = models.FloatField(null=True, blank=True)
     longitude = models.FloatField(null=True, blank=True)
@@ -44,7 +44,7 @@ class Transporte(models.Model):
     nombre = models.CharField(max_length=100, null=True, blank=True)
     auto = models.CharField(max_length=100, null=True, blank=True)
     patente = models.CharField(max_length=7, null=True, blank=True)
-    rut = models.CharField(max_length=11, null=True, blank=True)
+    rut = models.CharField(max_length=12, null=True, blank=True)
     password = models.CharField(max_length=10, null=True, blank=True)
     billetera = models.CharField(max_length=42, null=True, blank=True)
     def __str__(self):
@@ -72,7 +72,7 @@ class Cliente(models.Model):
     nombre = models.CharField(max_length=100, null=True, blank=True)
     tipo_cliente = models.CharField(max_length=100, choices=[('supermercado', 'Supermercado'), ('restaurante', 'Restaurante'), ('hotel', 'Hotel')],blank=True)
     direccion = models.CharField(max_length=255, null=True, blank=True)
-    rut = models.CharField(max_length=11, null=True, blank=True)
+    rut = models.CharField(max_length=12, null=True, blank=True)
     password = models.CharField(max_length=10, null=True, blank=True)
     billetera = models.CharField(max_length=42, null=True, blank=True)
     latitude = models.FloatField(null=True, blank=True)
@@ -89,8 +89,13 @@ class Pallet(models.Model):
     predio = models.ForeignKey('Predio', on_delete=models.CASCADE)  # Asegúrate de que el nombre sea consistente
     qr_pallet = models.ImageField(upload_to='qr_codes/', blank=True, null=True)
     lugar = models.CharField(max_length=100)
-    producto = models.CharField(max_length=100)
-    clasificacion = models.CharField(max_length=100)
+    producto = models.CharField(max_length=100, choices=[('tomate', 'Tomate'),('zanahoria','Zanahoria'),('lechuga','Lechuga'),('brócoli','Brócoli')])
+    clasificacion = models.CharField(max_length=100,choices=[
+        ('Hortaliza de Hoja', 'Hortaliza de Hoja'),
+        ('Hortaliza de Fruto', 'Hortaliza de Fruto'),
+        ('Hortaliza de Raíz', 'Hortaliza de Raíz'),
+        ('Hortaliza de Flor', 'Hortaliza de Flor'),
+    ])
     fecha_cosecha = models.DateField()
     cantidad = models.DecimalField(max_digits=10, decimal_places=2)
     peso = models.DecimalField(max_digits=10, decimal_places=2)
@@ -108,6 +113,16 @@ class Pallet(models.Model):
 
 
     def save(self, *args, **kwargs):
+        # Asignar automáticamente la clasificación basada en el producto
+        if not self.clasificacion:
+            if self.producto == 'lechuga':
+                self.clasificacion = 'Hortaliza de Hoja'
+            elif self.producto == 'tomate':
+                self.clasificacion = 'Hortaliza de Fruto'
+            elif self.producto == 'zanahoria':
+                self.clasificacion = 'Hortaliza de Raíz'
+            elif self.producto == 'brocoli':
+                self.clasificacion = 'Hortaliza de Flor'
         # Solo generar el código QR si no existe
         if not self.qr_pallet:
             # Asegúrate de que el objeto se haya guardado para obtener el ID
@@ -173,23 +188,25 @@ class Recepcion(models.Model):
     )
     def actualizar_peso_y_cantidad(self, nuevas_cajas):
         """
-        Actualiza el peso del pallet y la cantidad de cajas después de la creación de nuevas cajas.
+        Actualiza el peso del pallet y la cantidad de cajas después de la creación de nuevas cajas
+        basándose en la capacidad de las cajas según el tipo de caja.
         """
-        # Calcular el peso total de las nuevas cajas, ignorando las que no tienen peso asignado
-        peso_nuevas_cajas = sum(caja.peso_caja for caja in nuevas_cajas if caja.peso_caja is not None)
+        # Calcular el peso total basado en la capacidad de las cajas (TipoCaja)
+        peso_total_cajas = sum(caja.tipo_caja.capacidad for caja in nuevas_cajas if caja.tipo_caja is not None)
         
         # Verificar que el peso de las nuevas cajas no exceda el peso disponible del pallet
-        if peso_nuevas_cajas > self.peso_recepcion:
+        if peso_total_cajas > self.peso_recepcion:
             raise ValueError("El peso de las nuevas cajas excede el peso restante del pallet.")
         
-        # Actualizar el peso del pallet restando el peso de las nuevas cajas
-        self.peso_recepcion -= peso_nuevas_cajas
+        # Actualizar el peso del pallet restando el peso de las nuevas cajas (basado en la capacidad)
+        self.peso_recepcion -= peso_total_cajas
 
-        # Acumular la cantidad de cajas creadas (solo contando las que tienen peso)
-        self.cantidad_cajas += len([caja for caja in nuevas_cajas if caja.peso_caja is not None])
+        # Acumular la cantidad de cajas creadas
+        self.cantidad_cajas += len(nuevas_cajas)
 
-        # Guardar el empaque con los valores actualizados
+        # Guardar la recepción con los valores actualizados
         self.save()
+
         return self.peso_recepcion
 
     def __str__(self):
@@ -222,40 +239,51 @@ class Empaque(models.Model):
         self.save()
         return self.peso_pallet
 
-    
+class TipoCaja(models.Model):
+    Material = models.CharField(max_length=20)
+    capacidad = models.DecimalField(max_digits=10, decimal_places=2)
+    recicable = models.BooleanField(default=False)
+    def __str__(self):
+        return self.Material  # Mostrar el nombre del distribuidor
+
 
 class Caja(models.Model):
     recepcion = models.ForeignKey(Recepcion, on_delete=models.CASCADE, null=True, blank=True)  # Relación con Empaque
-    cliente = models.ForeignKey(Cliente, on_delete=models.CASCADE, null=True, blank=True)  # Relación con Cliente
+    cliente = models.ForeignKey(Cliente, on_delete=models.CASCADE, null=True, blank=True)  # Relación con cliente
+    tipo_caja = models.ForeignKey(TipoCaja, on_delete=models.CASCADE, null=True,blank=True)
     qr_caja = models.ImageField(upload_to='qr_codes/', blank=True, null=True)
-    peso_caja = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
-    tipo_caja = models.CharField(max_length=100, blank=True, null=True)  # Tipo de caja
     fecha_caja = models.DateTimeField(auto_now_add=True, null=True)  # Fecha y hora actual al crear la caja, null=True para registros existentes
     estado_envio = models.CharField(max_length=100, choices=[('pendiente', 'Pendiente'), ('enviado', 'Enviado'), ('entregado', 'Entregado')],default='pendiente')
 
     def save(self, *args, **kwargs):
         # Usamos una transacción para asegurar que ambos procesos se ejecuten correctamente
         with transaction.atomic():
-            # Asegurar que peso_caja sea un Decimal válido
-            if self.peso_caja is not None:
-                try:
-                    self.peso_caja = Decimal(self.peso_caja)  # Convertir a Decimal
-                except (ValueError, InvalidOperation):
-                    raise ValueError("El peso de la caja debe ser un número válido.")
-
-            # Verificar que el peso de la caja no exceda el peso restante del pallet
-            if self.peso_caja and self.recepcion and self.peso_caja > self.recepcion.peso_recepcion:
-                raise ValueError("El peso de la caja excede el peso restante del pallet.")
+            if self.recepcion and self.tipo_caja:
+                # Obtener todas las cajas asociadas a la recepción
+                cajas_existentes = Caja.objects.filter(recepcion=self.recepcion)
+                
+                # Calcular la capacidad total de las cajas actuales
+                capacidad_total_existente = sum(caja.tipo_caja.capacidad for caja in cajas_existentes)
+                
+                # Capacidad de la caja actual que se está guardando
+                capacidad_nueva_caja = self.tipo_caja.capacidad
+                
+                # Calcular la nueva capacidad total si se agrega esta nueva caja
+                capacidad_total = capacidad_total_existente + capacidad_nueva_caja
+                
+                # Verificar si la nueva capacidad excede el peso del pallet
+                if capacidad_total > self.recepcion.peso_recepcion:
+                    raise ValueError("La capacidad total de las cajas excede el peso restante del pallet.")
+                
+                # Actualizar el peso y la cantidad en la recepción (si es necesario)
+                self.recepcion.actualizar_peso_y_cantidad([self])  # Solo esta caja en la lista
             
-            # Restar el peso de la caja del peso del pallet en el empaque
-            self.recepcion.actualizar_peso_y_cantidad([self])  # Solo esta caja en la lista
-
             # Guardar el objeto inicialmente para obtener un pk (si aún no lo tiene)
             if self.pk is None:
                 super().save(*args, **kwargs)
 
-            # Generar QR si el peso y cliente están asignados y aún no hay QR generado
-            if self.peso_caja and self.cliente and not self.qr_caja:
+            # Generar QR si el cliente está asignado y aún no hay QR generado
+            if  not self.qr_caja:
                 qr_data = f'/seleccionar_caja/{self.pk}/'  # URL que redirige a la vista
                 qr_code = generate_qr_code(qr_data)
                 qr_image_name = f'caja_{self.pk}.png'

@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html>
+<head>
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'css/styles.css' %}"> <!-- Asegúrate de tener el archivo CSS -->
+    <title>Actualizar Pallet</title>
+</head>
+<body>
+    <h2>Actualizar Pallet</h2>
+
+    <form method="POST">
+        {% csrf_token %}
+        <label for="pallet_id">Seleccionar Pallet:</label>
+        <select name="pallet_id" id="pallet_id" required>
+            {% for pallet in pallets %}
+                <option value="{{ pallet.id }}">{{ pallet.producto }} - {{ pallet.peso }} kg</option>
+            {% empty %}
+                <option value="">No hay pallets disponibles</option>
+            {% endfor %}
+        </select>
+
+        <h3>Opciones de Actualización</h3>
+        <button type="submit" name="action" value="actualizar_datos">Actualizar Datos del Pallet</button>
+        <button type="submit" name="action" value="eliminar_distribuidor">Eliminar Distribuidor</button>
+        <button type="submit" name="action" value="añadir_distribuidor">Añadir Distribuidor</button>
+    </form>
+</body>
+</html>

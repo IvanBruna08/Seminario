@@ -1,7 +1,54 @@
-<h1>Crear Pallet para {{ usuario_data.nombre }}</h1>
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'css/styles.css' %}">
+    <title>Crear Pallet</title>
+</head>
+<body>
+    <form method="POST">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <button type="submit" class="btn-submit">Crear Pallet</button>
+    </form>
+</body>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const productoField = document.querySelector('#id_producto');
+        const clasificacionField = document.querySelector('#id_clasificacion');
+        
+        const clasificaciones = {
+            'tomate': 'Hortaliza de Fruto',
+            'zanahoria': 'Hortaliza de Raíz',
+            'lechuga': 'Hortaliza de Hoja',
+            'brócoli': 'Hortaliza de Flor'
+        };
 
-<form method="POST">
-    {% csrf_token %}
-    {{ form.as_p }}
-    <button type="submit">Crear Pallet</button>
-</form>
+        function actualizarClasificacion() {
+            const selectedProduct = productoField.value;
+            if (selectedProduct) {
+                clasificacionField.innerHTML = '';  // Limpiar el campo de clasificación
+                const option = document.createElement('option');
+                option.value = clasificaciones[selectedProduct];
+                option.text = clasificaciones[selectedProduct];
+                clasificacionField.appendChild(option);
+                clasificacionField.disabled = false;  // Habilitar el campo de clasificación
+            } else {
+                clasificacionField.disabled = true;
+                clasificacionField.innerHTML = '';  // Limpiar si no hay producto
+            }
+        }
+
+        // Deshabilitar inicialmente si no hay producto seleccionado
+        if (!productoField.value) {
+            clasificacionField.disabled = true;
+        } else {
+            actualizarClasificacion();  // Si hay producto seleccionado al cargar, mostrar clasificación
+        }
+
+        // Escuchar los cambios en el campo de producto
+        productoField.addEventListener('change', actualizarClasificacion);
+    });
+</script>
+</html>

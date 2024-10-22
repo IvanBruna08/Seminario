@@ -1,0 +1,35 @@
+{% load static %}
+    <link rel="stylesheet" href="{% static 'css/styles.css' %}"> <!-- Asegúrate de tener el archivo CSS -->
+    <a href="{% url 'dashboard_distribuidor' %}" class="btn-home">Inicio</a>
+<form method="post">
+    {% csrf_token %}
+    <h3>Seleccionar Cajas</h3>
+    <ul>
+        {% for caja in cajas %}
+            <li>
+                <input type="checkbox" name="cajas" value="{{ caja.id }}">
+                {{ caja.tipo_caja }} - Recepción: {{ caja.recepcion }}
+            </li>
+        {% endfor %}
+    </ul>
+
+    <h3>Asignar Cliente (Opcional)</h3>
+    <select name="cliente_id" class="form-control">
+        <option value="">Ninguno</option>  <!-- Permitir sin cliente -->
+        {% for cliente in clientes %}
+            <option value="{{ cliente.id }}">{{ cliente.nombre }}</option>
+        {% endfor %}
+    </select>
+
+    <button type="submit" class="btn btn-primary">Asignar Cliente</button>
+
+    {% if errores %}
+        <div class="alert alert-danger">
+            <ul>
+                {% for error in errores %}
+                    <li>{{ error }}</li>
+                {% endfor %}
+            </ul>
+        </div>
+    {% endif %}
+</form>

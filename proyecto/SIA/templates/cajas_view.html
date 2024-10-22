@@ -1,3 +1,6 @@
+{% load static %}
+    <link rel="stylesheet" href="{% static 'css/styles.css' %}"> <!-- Asegúrate de tener el archivo CSS -->
+    <a href="{% url 'dashboard_distribuidor' %}" class="btn-home">Inicio</a>
 <form method="get" action="{% url 'cajas_view' %}">
     <label for="recepcion_select">Selecciona un empaque:</label>
     <select id="recepcion_select" name="recepcion_id" onchange="this.form.submit()">
@@ -29,7 +32,7 @@
                 <td>{{ caja.id }}</td>
                 <td>{{ caja.cliente }}</td>
                 <td>{{ caja.tipo_caja }}</td>
-                <td>{{ caja.peso_caja }}</td>
+                <td>{{ caja.tipo_caja.capacidad }}</td>
                 <td>
                     {% if caja.qr_caja %}
                         <img src="{{ caja.qr_caja.url }}" alt="QR de la caja">
@@ -38,13 +41,11 @@
                     {% endif %}
                 </td>
                 <td>
-                    <td>
                         {% if caja.fecha_caja %}
                             {{ caja.fecha_caja|date:"D d M Y H:i:s" }}
                         {% else %}
                             No hay Fecha Ingresada
                         {% endif %}
-                    </td>
                     
                 </td>
             </tr>

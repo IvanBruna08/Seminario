@@ -129,8 +129,8 @@ class EmpaqueAdmin(admin.ModelAdmin):
     list_filter = ('fecha_empaque',)
 
 class CajaAdmin(admin.ModelAdmin):
-    list_display = ('id', 'recepcion', 'cliente', 'tipo_caja', 'peso_caja','fecha_caja','qr_caja', 'estado_envio')  # Añadimos 'tipo_caja'
-    search_fields = ('recepcion__id', 'cliente__nombre', 'tipo_caja')  # Añadimos 'tipo_caja' en búsqueda
+    list_display = ('id', 'recepcion', 'cliente', 'tipo_caja','fecha_caja','qr_caja', 'estado_envio')  # Añadimos 'tipo_caja'
+    search_fields = ['cliente__nombre', 'recepcion__id']  # Añadimos 'tipo_caja' en búsqueda
     list_filter = ('recepcion', 'tipo_caja')  # Añadimos 'tipo_caja' en filtros
 
 class EnvioCajaAdmin(admin.ModelAdmin):

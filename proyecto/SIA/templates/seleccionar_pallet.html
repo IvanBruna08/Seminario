@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Seleccionar Pallet</title>
+    <script>
+        // Función para seleccionar un pallet
+        function seleccionarPallet() {
+            const palletId = document.getElementById('pallet-select').value;
+            window.location.href = '?pallet_id=' + palletId;  // Redirigir para mostrar distribuidores
+        }
+
+        // Función para eliminar un distribuidor
+        function eliminarDistribuidor(distribuidorId) {
+            if (confirm('¿Estás seguro de que deseas eliminar este distribuidor?')) {
+                fetch(`/eliminar-distribuidor/${distribuidorId}/`, {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRFToken': '{{ csrf_token }}',
+                        'Content-Type': 'application/json'
+                    }
+                }).then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        // Recargar la página después de eliminar
+                        window.location.reload();
+                    } else {
+                        alert('Hubo un error al eliminar el distribuidor.');
+                    }
+                });
+            }
+        }
+    </script>
+</head>
+<body>
+    <h2>Seleccionar Pallet</h2>
+    <label for="pallet-select">Selecciona un pallet:</label>
+    <select id="pallet-select" onchange="seleccionarPallet()">
+        <option value="">--Seleccionar--</option>
+        {% for pallet in pallets %}
+            <option value="{{ pallet.id }}" {% if pallet_seleccionado and pallet_seleccionado.id == pallet.id %}selected{% endif %}>
+                {{ pallet.producto }} - Peso: {{ pallet.peso }}kg
+            </option>
+        {% endfor %}
+    </select>
+
+    {% if distribuidores %}
+        <h3>Distribuidores Asociados al Pallet</h3>
+        <table>
+            <thead>
+                <tr>
+                    <th>Distribuidor</th>
+                    <th>Peso Enviado</th>
+                    <th>Acción</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for distribuidor in distribuidores %}
+                    <tr>
+                        <td>{{ distribuidor.distribuidor.nombre }}</td>
+                        <td>{{ distribuidor.peso_enviado }} kg</td>
+                        <td>
+                            <button onclick="eliminarDistribuidor({{ distribuidor.id }})">Eliminar</button>
+                        </td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    {% else %}
+        <p>No hay distribuidores asociados a este pallet.</p>
+    {% endif %}
+</body>
+</html>

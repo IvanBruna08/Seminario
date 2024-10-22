@@ -1,0 +1,44 @@
+{% load static %}
+    <link rel="stylesheet" href="{% static 'css/styles.css' %}"> <!-- Asegúrate de tener el archivo CSS -->
+<form method="post" action="{% url 'añadir_distribuidor' pallet.id %}">
+    {% csrf_token %}
+    <h2>Añadir Distribuidor para el Pallet</h2>
+    <p>Peso total del pallet: <strong>{{ pallet.peso }} kg</strong></p>
+
+    <div id="distribuidores-container">
+        <h3>Distribuidores Actuales</h3>
+        {% for distribuidor_pallet in distribuidor_pallets %}
+            <div class="form-group">
+                <label>Distribuidor: {{ distribuidor_pallet.distribuidor.nombre }}</label>
+                <p>Peso Actual Asignado: <strong>{{ distribuidor_pallet.peso_enviado }} kg</strong></p>
+                <label for="peso_enviado_{{ distribuidor_pallet.distribuidor.id }}">Modificar Peso Asignado (kg):</label>
+                <input type="number" step="any" class="form-control" id="peso_enviado_{{ distribuidor_pallet.distribuidor.id }}" name="distribuidor_{{ distribuidor_pallet.distribuidor.id }}-peso_enviado" value="{{ distribuidor_pallet.peso_enviado }}" required>
+            </div>
+        {% endfor %}
+    </div>
+
+    <div class="form-group">
+        <h3>Añadir Nuevo Distribuidor</h3>
+        <label for="nuevo_distribuidor">Seleccionar Distribuidor:</label>
+        <select class="form-control" id="nuevo_distribuidor" name="nuevo_distribuidor" required>
+            <option value="">Seleccione un distribuidor</option>
+            {% for distribuidor in distribuidores %}
+                <option value="{{ distribuidor.id }}">{{ distribuidor.nombre }}</option>
+            {% endfor %}
+        </select>
+        <label for="nuevo_peso">Peso Asignado (kg):</label>
+        <input type="number" step="any" class="form-control" id="nuevo_peso" name="nuevo_peso" required>
+    </div>
+
+    {% if errores %}
+        <div class="alert alert-danger">
+            <ul>
+            {% for error in errores %}
+                <li>{{ error }}</li>
+            {% endfor %}
+            </ul>
+        </div>
+    {% endif %}
+
+    <button type="submit" class="btn btn-primary">Guardar Cambios</button>
+</form>

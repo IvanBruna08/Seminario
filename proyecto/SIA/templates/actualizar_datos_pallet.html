@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'css/styles.css' %}"> <!-- Asegúrate de tener el archivo CSS -->
+    <title>Actualizar Datos del Pallet</title>
+    <script>
+        function togglePeso() {
+            const pesoInput = document.getElementById("id_peso");
+            const distribuidoresInputs = document.querySelectorAll('[name^="peso_enviado_"]');
+
+            // Cambiar el estado del campo peso del pallet
+            pesoInput.disabled = !pesoInput.disabled;
+
+            // Habilitar o deshabilitar los campos de los distribuidores
+            distribuidoresInputs.forEach(input => {
+                input.disabled = !input.disabled; // Alternar el estado de los inputs
+            });
+
+            // Limpiar el valor del peso del pallet si se desactiva
+            if (pesoInput.disabled) {
+                pesoInput.value = "{{ pallet.peso }}"; // Restablecer al peso original si se desactiva
+            } else {
+                // Ajustar el valor del peso del pallet según distribuidores
+                let totalPesoDistribuidores = 0;
+                distribuidoresInputs.forEach(input => {
+                    totalPesoDistribuidores += parseFloat(input.value) || 0;
+                });
+                pesoInput.value = totalPesoDistribuidores; // Ajustar peso del pallet
+            }
+        }
+
+        function validatePeso() {
+            const pesoInput = document.getElementById("id_peso");
+            const distribuidoresInputs = document.querySelectorAll('[name^="peso_enviado_"]');
+            let totalPesoDistribuidores = 0;
+
+            // Habilitar los campos de los distribuidores antes de la validación
+            distribuidoresInputs.forEach(input => {
+                if (input.disabled) {
+                    input.disabled = false; // Habilitar si están deshabilitados
+                }
+            });
+
+            distribuidoresInputs.forEach(input => {
+                const value = parseFloat(input.value);
+                totalPesoDistribuidores += isNaN(value) ? 0 : value; // Evitar NaN en la suma
+            });
+
+            // Comprobar si el peso de los distribuidores es igual al peso del pallet
+            if (totalPesoDistribuidores !== parseFloat(pesoInput.value)) {
+                alert(`El peso total de los distribuidores (${totalPesoDistribuidores}) debe ser igual al peso del pallet (${pesoInput.value}).`);
+                return false; // Evitar el envío del formulario
+            }
+
+            return true; // Permitir el envío del formulario
+        }
+    </script>
+</head>
+<body>
+    <h2>Actualizar Datos del Pallet: {{ pallet.producto }}</h2>
+
+    <form method="POST" onsubmit="return validatePeso();">
+        {% csrf_token %}
+        {{ form.as_p }}
+
+        <h3>Distribuidores Asociados</h3>
+        <table>
+            <tr>
+                <th>Distribuidor</th>
+                <th>Peso Enviado (kg)</th>
+            </tr>
+            {% for distribuidor in distribuidores %}
+                <tr>
+                    <td>{{ distribuidor.distribuidor.nombre }}</td>
+                    <td>
+                        <input type="hidden" name="distribuidorpallet_id_{{ distribuidor.id }}" value="{{ distribuidor.id }}">
+                        <input type="number" name="peso_enviado_{{ distribuidor.id }}" value="{{ distribuidor.peso_enviado }}" disabled>
+                    </td>
+                </tr>
+            {% endfor %}
+        </table>
+
+        <h3>Opciones</h3>
+        <button type="button" id="actualizarPesoBtn" onclick="togglePeso()">Actualizar Peso</button>
+        <button type="submit">Guardar Cambios</button>
+    </form>
+
+    {% if messages %}
+        <ul>
+            {% for message in messages %}
+                <li>{{ message }}</li>
+            {% endfor %}
+        </ul>
+    {% endif %}
+</body>
+</html>

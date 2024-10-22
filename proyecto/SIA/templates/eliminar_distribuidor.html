@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Eliminar Distribuidores - Pallet {{ pallet.id }}</title>
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'css/styles.css' %}"> <!-- Incluye tu CSS aquí -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+</head>
+<body>
+    <div class="container">
+        <h1>Eliminar Distribuidores para el Pallet {{ pallet.id }}</h1>
+        <h2>Pallet: {{ pallet.nombre }} - Peso: {{ pallet.peso }} kg</h2>
+
+        {% if distribuidores_pallet %}
+            <table>
+                <thead>
+                    <tr>
+                        <th>Distribuidor</th>
+                        <th>Peso Enviado (kg)</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for distribuidor_pallet in distribuidores_pallet %}
+                        <tr>
+                            <td>{{ distribuidor_pallet.distribuidor.nombre }}</td>
+                            <td>{{ distribuidor_pallet.peso_enviado }}</td>
+                            <td>
+                                <button class="btn-eliminar" 
+                                        data-id="{{ distribuidor_pallet.id }}"
+                                        data-nombre="{{ distribuidor_pallet.distribuidor.nombre }}">
+                                    Eliminar
+                                </button>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        {% else %}
+            <p>No hay distribuidores asociados a este pallet.</p>
+        {% endif %}
+    </div>
+    <script>
+        $(document).ready(function() {
+            $('.btn-eliminar').on('click', function() {
+                const distribuidorId = $(this).data('id');
+                const distribuidorNombre = $(this).data('nombre');
+    
+                // Confirmar eliminación
+                if (confirm(`¿Estás seguro de que deseas eliminar al distribuidor ${distribuidorNombre}?`)) {
+                    // Enviar la solicitud AJAX para eliminar el distribuidor
+                    $.ajax({
+                        url: "{% url 'eliminar_distribuidor_pallet' 0 %}".replace("0", distribuidorId),
+                        type: "POST",
+                        data: {
+                            'csrfmiddlewaretoken': '{{ csrf_token }}' // Añadir el token CSRF
+                        },
+                        success: function(response) {
+                            if (response.success) {
+                                // Recargar la página o eliminar la fila
+                                location.reload();
+                            } else {
+                                alert('Error al eliminar el distribuidor: ' + response.error);
+                            }
+                        },
+                        error: function() {
+                            alert('Error en la solicitud.');
+                        }
+                    });
+                }
+            });
+        });
+    </script>
+    
+</body>
+</html>

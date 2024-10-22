@@ -26,8 +26,8 @@ SECRET_KEY = 'django-insecure-wdde=xn(#)8^itqgy%oxt%@p8$4fi!=5i^_5k0wok&4db^wtcu
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 # Obtener el nombre de la aplicación desde la variable de entorno
-ALLOWED_HOSTS  = ['http://127.0.0.1:8000','miapp.com', 'www.miapp.com','rutamapa', 'localhost','127.0.0.1', '98eb-152-174-157-104.ngrok-free.app']
-CSRF_TRUSTED_ORIGINS = ['https://example.com','https://miapp.com','https://98eb-152-174-157-104.ngrok-free.app','http://127.0.0.1:8000']
+ALLOWED_HOSTS  = ['http://127.0.0.1:8000','miapp.com', 'www.miapp.com','rutamapa', 'localhost','127.0.0.1', 'ff9f-152-174-159-233.ngrok-free.app']
+CSRF_TRUSTED_ORIGINS = ['https://example.com','https://miapp.com','https://ff9f-152-174-159-233.ngrok-free.app','http://127.0.0.1:8000']
 
 
 # Application definition

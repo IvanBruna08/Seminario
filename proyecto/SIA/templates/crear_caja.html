@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Crear Tipo de Caja</title>
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'css/styles.css' %}"> <!-- Vincula tu CSS si es necesario -->
+</head>
+<body>
+    <div class="container">
+        <h1>Crear Tipo de Caja</h1>
+        
+        <!-- Mensaje de errores, si existen -->
+        {% if form.errors %}
+        <div class="error">
+            <ul>
+                {% for field in form %}
+                    {% for error in field.errors %}
+                        <li>{{ error }}</li>
+                    {% endfor %}
+                {% endfor %}
+            </ul>
+        </div>
+        {% endif %}
+
+        <!-- Formulario -->
+        <form method="POST">
+            {% csrf_token %}
+            <div class="form-group">
+                <label for="id_material">Material:</label>
+                {{ form.Material }}
+            </div>
+
+            <div class="form-group">
+                <label for="id_capacidad">Capacidad (kg):</label>
+                {{ form.capacidad }}
+            </div>
+
+            <div class="form-group">
+                <label for="id_recicable">¿Es Reciclable?</label>
+                {{ form.recicable }}
+            </div>
+
+            <button type="submit" class="btn btn-primary">Crear Tipo de Caja</button>
+        </form>
+    </div>
+</body>
+</html>

@@ -20,16 +20,24 @@ urlpatterns = [
     path('registrar_pallet', views.crear_pallet, name='registrar_pallet'),
     path('distribuir_pallet', views.distribuir_pallet, name='distribuir_pallet'),
     path('Pallets/', views.pallet_view, name='pallet_view'),
-    path('informacion_pallet/<int:pallet_id>/', views.informacion_pallet, name='informacion_pallet'),
-    path('recepcion/<int:pallet_id>/', views.registrar_recepcion, name='registrar_recepcion'),
+    path('informacion_pallet/<str:secure_id>/', views.informacion_pallet, name='informacion_pallet'),
+    path('recepcion/<str:secure_id>/', views.registrar_recepcion, name='registrar_recepcion'),
     # Ruta para transportar pallet y cajas
-    path('transportar_pallet/<int:pallet_id>/', views.transportar_pallet, name='transportar_pallet'),
-    path('iniciar-entrega-pallet/<int:pallet_id>/', views.iniciar_entrega, name='iniciar_entrega'),
-    path('finalizar-entrega-pallet/<int:pallet_id>/', views.finalizar_entrega, name='finalizar_entrega'),
+    path('transportar_pallet/<str:secure_id>/', views.transportar_pallet, name='transportar_pallet'),
+    path('actualizar_pallet/', views.actualizar_pallet, name='actualizar_pallet'),
+    path('actualizar_datos_pallet/<int:pallet_id>/', views.actualizar_datos_pallet, name='actualizar_datos_pallet'),
+    path('eliminar_distribuidor/<int:pallet_id>', views.eliminar_distribuidores, name='eliminar_distribuidor'),
+    path('eliminar-distribuidorpallet/<int:distribuidor_pallet_id>/', views.eliminar_distribuidor_pallet, name='eliminar_distribuidor_pallet'),
+    path('añadir_distribuidor/<int:pallet_id>/', views.añadir_distribuidor, name='añadir_distribuidor'),
+
+
+    
+    path('iniciar-entrega-pallet/<str:secure_id>/', views.iniciar_entrega, name='iniciar_entrega'),
+    path('finalizar-entrega-pallet/<str:secure_id>/', views.finalizar_entrega, name='finalizar_entrega'),
     path('verificar-pallet/', views.verificar_pallet, name='verificar_pallet'),
-    path('transportar-caja/<int:caja_id>/', views.transportar_caja, name='transportar_caja'),
+    path('transportar-caja/<str:secure_id>/', views.transportar_caja, name='transportar_caja'),
     path('iniciar-entrega-caja/<int:caja_id>/', views.iniciar_entrega_caja, name='iniciar_entrega_caja'),
-    path('finalizar-entrega-caja/<int:caja_id>/', views.finalizar_entrega_caja,name='finalizar_entrega_caja'),
+    path('finalizar-entrega-caja/<str:secure_id>/', views.finalizar_entrega_caja,name='finalizar_entrega_caja'),
     path('seleccionar_opcion/<int:pallet_id>/', views.seleccionar_opcion, name='selecionar_opcion'),
     # Para las funciones de crear caja y empaque
     path('recepciones-completadas/', views.recepciones_completadas, name='recepciones_completadas'),
@@ -38,7 +46,10 @@ urlpatterns = [
     path('cajas/', views.cajas_view, name='cajas_view'),
     # Funciones para escanear qr de caja
     path('seleccionar_caja/<int:caja_id>/', views.seleccionar_caja, name='selecionar_caja'),
-    path('informacion_caja/<int:caja_id>/', views.informacion_caja, name='informacion_caja'),
+    path('informacion_caja/<str:secure_id>/', views.informacion_caja, name='informacion_caja'),
     # funcion para cliente
-    path('recibir_caja/<int:caja_id>/', views.recibir_caja, name='recibir_caja'),
+    path('recibir_caja/<str:secure_id>/', views.recibir_caja, name='recibir_caja'),
+    path('asignar_cliente/', views.asignar_cliente, name='asignar_cliente'),
+    path('crear_caja/', views.tipocaja, name='crear_caja'),
+
 ]

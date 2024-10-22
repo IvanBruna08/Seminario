@@ -3,71 +3,116 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Información del Pallet</title><a href="{% url 'custom_logout' %}" class="btn-logout-cosecha">Salir</a>
+    <title>Información del Pallet</title>
+    <a href="{% url 'custom_logout' %}" class="btn-logout">Salir</a>
     <link href='https://api.mapbox.com/mapbox-gl-js/v2.10.0/mapbox-gl.css' rel='stylesheet' />
     <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            background-image: url('/static/css/ag1.jpg');
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+            color: black; 
+            padding: 20px; 
+            margin: 0; 
+        }
+
+        h1, h2 {
+            color: #2E7D32; 
+        }
+
+        .container {
+            max-width: 800px; 
+            margin: 0 auto; 
+            padding: 20px; 
+            background-color: rgba(255, 255, 255, 0.9); 
+            border-radius: 10px; 
+            box-shadow: 0 2px 10px rgba(109, 76, 65, 0.9); 
+        }
+
         table {
-            width: 40%; /* Asegura que la tabla use todo el ancho disponible */
-            border-collapse: collapse; /* Elimina el espacio entre bordes de celdas */
-            margin-top: 20px; /* Añade margen superior para separar la tabla del contenido anterior */
+            width: 100%;
+            border-collapse: collapse; 
+            margin-top: 20px; 
+            border-radius: 10px; 
+            overflow: hidden; 
+            box-shadow: 0 2px 10px rgba(109, 76, 65, 0.4); 
         }
         th, td {
-            border: 1px solid #dddddd; /* Añade un borde ligero a las celdas */
-            text-align: center; /* Centra el texto en las celdas */
-            padding: 12px; /* Añade relleno a las celdas para dar espacio */
+            border: 1px solid rgb(187, 187, 187); 
+            text-align: center; 
+            padding: 12px; 
         }
         th {
-            background-color: #f2f2f2; /* Añade un color de fondo a la fila del encabezado */
+            background-color: #4CAF50;
+            color: white; 
         }
-        tr:nth-child(even) {
-            background-color: #f9f9f9; /* Alterna el color de fondo para filas pares */
+
+        .info-section {
+            margin-top: 20px; 
         }
-        tr:hover {
-            background-color: #f1f1f1; /* Añade un efecto hover a las filas */
+        .btn-logout {
+            position: absolute; 
+            top: 20px;
+            left: 20px;
+            background-color: #A1887F; 
+            color: white;
+            padding: 10px 20px;
+            text-align: center;
+            text-decoration: none;
+            border-radius: 5px;
+            font-size: 18px;
+            transition: background-color 0.3s;
+            z-index: 1000;
         }
+        .btn-logout:hover {
+            background-color: rgba(109, 76, 65); /* Café medio */
+}
     </style>
 </head>
 <body>
-    <h1>Información del Pallet</h1>
-    <p><strong>ID del Pallet:</strong> {{ pallet.id }}</p>
-    <p><strong>ID del Pallet:</strong> {{ pallet.producto }}</p>
-    <p><strong>Fecha de Cosecha:</strong> {{ pallet.fecha_cosecha }}</p>
+    <div class="container">
+        <h1>Información del Pallet</h1>
+        <p><strong>ID del Pallet:</strong> {{ pallet.id }}</p>
+        <p><strong>Producto:</strong> {{ pallet.producto }}</p>
+        <p><strong>Fecha de Cosecha:</strong> {{ pallet.fecha_cosecha }}</p>
 
-    <h2>Información del Predio</h2>
-    <p><strong>Empresa del Predio:</strong> {{ predio.nombre }}</p>
-    <p><strong>Dirección del Predio:</strong> {{ predio.direccion }}</p>
-    <p><strong>Lugar de la cosecha:</strong> {{ pallet.lugar }}</p>
+        <h2>Información del Predio</h2>
+        <p><strong>Empresa del Predio:</strong> {{ predio.nombre }}</p>
+        <p><strong>Dirección del Predio:</strong> {{ predio.direccion }}</p>
+        <p><strong>Lugar de la cosecha:</strong> {{ pallet.lugar }}</p>
 
-    <h2>Distribución</h2>
-    <table>
-        <thead>
-            <tr>
-                <th>Distribuidor</th>
-                <th>Peso Enviado (kg)</th>
-                <th>Estado (kg)</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for distribucion in distribuciones %}
+        <h2>Distribución</h2>
+        <table>
+            <thead>
                 <tr>
-                    <td>{{ distribucion.distribuidor }}</td>
-                    <td>{{ distribucion.peso_enviado }}</td>
-                    <td>{{ distribucion.estado_pallet }}</td>
+                    <th>Distribuidor</th>
+                    <th>Peso Enviado (kg)</th>
+                    <th>Estado (kg)</th>
                 </tr>
-            {% empty %}
-                <tr>
-                    <td colspan="2">No hay distribuidores asignados.</td>
-                </tr>
-            {% endfor %}
-        </tbody>
-    </table>
+            </thead>
+            <tbody>
+                {% for distribucion in distribuciones %}
+                    <tr>
+                        <td>{{ distribucion.distribuidor }}</td>
+                        <td>{{ distribucion.peso_enviado }}</td>
+                        <td>{{ distribucion.estado_pallet }}</td>
+                    </tr>
+                {% empty %}
+                    <tr>
+                        <td colspan="3">No hay distribuidores asignados.</td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        <h2>Ubicación Predio</h2>
 
+        
 
-    <!-- Verificar las coordenadas -->
-    <p>Coordenadas del predio: Latitud: {{ predio.latitude }}, Longitud: {{ predio.longitude }}</p>
-
-    <!-- Mapa del Predio -->
-    <div id="map" data-latitude="{{ predio.latitude }}" data-longitude="{{ predio.longitude }}" style="height: 300px; width: 100%;"></div>
+        <!-- Mapa del Predio -->
+        <div id="map" data-latitude="{{ predio.latitude }}" data-longitude="{{ predio.longitude }}" style="height: 300px; width: 100%;"></div>
+    </div>
 
     <!-- Script para mostrar el mapa con Mapbox -->
     <script src="https://api.mapbox.com/mapbox-gl-js/v2.10.0/mapbox-gl.js"></script>

@@ -8,13 +8,16 @@ from django.urls import reverse
 from django.views import View
 from django.db import transaction
 from django.http import JsonResponse
+import hashlib
+import base64
 from django.db.models import Sum
 from django.views.decorators.csrf import csrf_exempt
-from .forms import ClienteForm,TransporteForm, PredioForm, DistribuidorForm, PalletForm,RecepcionForm,CustomLoginForm, DistribuidorPalletForm, CajaForm
+from .forms import ClienteForm,TransporteForm, PredioForm, DistribuidorForm, PalletForm,RecepcionForm,CustomLoginForm, DistribuidorPalletForm, CajaForm,TipoCajaForm
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import render, redirect
-from .models import Predio, Distribuidor, Transporte, Cliente, Pallet, EnvioPallet,Recepcion,Caja,Empaque,EnvioCaja,Pago, DistribuidorPallet
+from .models import Predio, Distribuidor, Transporte, Cliente, Pallet, EnvioPallet,Recepcion,Caja,Empaque,EnvioCaja,Pago, DistribuidorPallet, TipoCaja
 import json
+from django.contrib.admin.views.decorators import staff_member_required
 import os
 from datetime import datetime, timezone as dt_timezone
 import requests
@@ -37,6 +40,33 @@ else:
 # VISTAS PRINCIPALES
 def home(request):
     return render(request, 'home.html')
+
+# proteger urls
+# Función genérica para generar un hash seguro basado en cualquier ID
+def generate_secure_url_id(model_name, record_id):
+    """
+    Genera un hash seguro basado en el nombre del modelo y su ID.
+    El resultado es una cadena segura que puede usarse en la URL.
+    """
+    unique_string = f"{model_name}-{record_id}"
+    hash_object = hashlib.sha256(unique_string.encode())
+    return base64.urlsafe_b64encode(hash_object.digest()).decode('utf-8')[:22]
+
+# Función para validar el hash y obtener el ID original
+def validate_and_recover_id(secure_id, model_name):
+    # Esta función simula la validación del hash
+    # Recorre todos los objetos del modelo correspondiente y compara el hash
+    if model_name == "Pallet":
+        for pallet in Pallet.objects.all():
+            expected_secure_id = generate_secure_url_id("Pallet", pallet.id)
+            if secure_id == expected_secure_id:
+                return pallet.id
+    elif model_name == "Caja":
+        for caja in Caja.objects.all():
+            expected_secure_id = generate_secure_url_id("Caja", caja.id)
+            if secure_id == expected_secure_id:
+                return caja.id
+    return None
 @login_required_for_model(Cliente)
 def cliente(request):
     # Acceder a los datos del usuario directamente desde la sesión
@@ -139,6 +169,7 @@ def registrar_cliente(request):
         form = ClienteForm()
     return render(request, 'registrar_cliente.html', {'form': form})
 # LOGIN DE LOS ACTORES
+@staff_member_required
 def registro_actores(request):
     if request.method == 'POST':
         tipo_actor = request.POST.get('tipo_actor')  # Obtener el tipo de actor seleccionado
@@ -228,25 +259,28 @@ def custom_logout(request):
 # ACCESO AL QR PARA CADA ACTOR DE PALLET
 def seleccionar_opcion(request, pallet_id):
     # Asegúrate de que el usuario esté autenticado
-
     user_id = request.session.get('user_id')
     user_type = request.session.get('user_type')
 
     # Obtener el pallet
     pallet = get_object_or_404(Pallet, pk=pallet_id)
 
-    # Redirigir según el tipo de actor
+    # Generar un secure_id basado en el pallet_id
+    secure_id = generate_secure_url_id('Pallet', pallet_id)
+
+    # Redirigir según el tipo de actor, pero usando secure_id en la URL
     if user_type == 'cliente':
-        return redirect('informacion_pallet', pallet_id=pallet_id)
+        return redirect('informacion_pallet', secure_id=secure_id)
     elif user_type == 'distribuidor':
-        return redirect('registrar_recepcion', pallet_id=pallet_id)
+        return redirect('registrar_recepcion', secure_id=secure_id)
     elif user_type == 'transporte':
-        return redirect('transportar_pallet', pallet_id=pallet_id)
+        return redirect('transportar_pallet', secure_id=secure_id)
     elif user_type == 'predio':
-        return redirect('informacion_pallet', pallet_id=pallet_id)
+        return redirect('informacion_pallet', secure_id=secure_id)
 
     # Redirigir a una vista de error si el tipo no es válido
     return redirect('login')
+
 # CREAR PALLET
 @login_required_for_model(Predio)
 def crear_pallet(request):
@@ -263,7 +297,7 @@ def crear_pallet(request):
                 pallet = form.save(commit=False)
                 pallet.predio = predio
                 pallet.save()
-                return redirect('pallet_list')
+                return redirect('dashboard_predio')
         else:
             form = PalletForm()
         
@@ -273,7 +307,12 @@ def crear_pallet(request):
 #TRANPORTAR CAJA Y PALLET
 @login_required_for_model(Transporte)
 @csrf_exempt
-def iniciar_entrega(request, pallet_id):
+def iniciar_entrega(request, secure_id):
+    # Validar el hash y recuperar el pallet_id original
+    pallet_id = validate_and_recover_id(secure_id, 'Pallet')
+    if pallet_id is None:
+        # Si el hash no es válido, muestra un mensaje de error o redirige
+        return render(request, 'error.html', {'message': 'ID no válido'})
     if request.method == 'POST':
         try:
             # Obtener las coordenadas iniciales del formulario
@@ -320,7 +359,12 @@ def iniciar_entrega(request, pallet_id):
 
 @login_required_for_model(Transporte)
 @csrf_exempt
-def finalizar_entrega(request, pallet_id):
+def finalizar_entrega(request, secure_id):
+    # Validar el hash y recuperar el pallet_id original
+    pallet_id = validate_and_recover_id(secure_id, 'Pallet')
+    if pallet_id is None:
+        # Si el hash no es válido, muestra un mensaje de error o redirige
+        return render(request, 'error.html', {'message': 'ID no válido'})
     if request.method == 'POST':
         try:
             # Verifica si el contenido es JSON o un formulario
@@ -415,7 +459,14 @@ def verificar_pallet(request):
     return JsonResponse({'completado': completados})
 
 @login_required_for_model(Transporte)
-def transportar_pallet(request, pallet_id):
+@csrf_exempt
+def transportar_pallet(request, secure_id):
+    # Validar el hash y recuperar el pallet_id original
+    pallet_id = validate_and_recover_id(secure_id, 'Pallet')
+    if pallet_id is None:
+        # Si el hash no es válido, muestra un mensaje de error o redirige
+        return render(request, 'error.html', {'message': 'ID no válido'})
+
     # Acceder al user_id y user_type desde la sesión
     transporte_id = request.session.get('user_id')
     user_type = request.session.get('user_type')
@@ -455,63 +506,89 @@ def transportar_pallet(request, pallet_id):
         'pallet': pallet,
         'transporte': transporte,
         'distribuidores_info': distribuidores_info,  # Lista con información de distribuidores
-        'predio': pallet.predio
+        'predio': pallet.predio,
+        'secure_id': secure_id
     })
 
 # REGISTRAR LA RECEPCION DEL PALLET
 @login_required_for_model(Distribuidor)
-def registrar_recepcion(request, pallet_id):
-    # Obtener el ID del distribuidor desde la sesión
-    distribuidor_id = request.session.get('user_id')  # Suponiendo que user_id es el ID del distribuidor
-    pallet = get_object_or_404(Pallet, id=pallet_id)
+@csrf_exempt
+def registrar_recepcion(request, secure_id):
+    # Validar el hash y recuperar el pallet_id original
+    pallet_id = validate_and_recover_id(secure_id, 'Pallet')
+    if pallet_id is None:
+        # Si el hash no es válido, muestra un mensaje de error
+        return render(request, 'error.html', {'message': 'ID no válido'})
 
-    # Obtener el EnvioPallet asociado a ese pallet
-    # Esto devuelve el primer EnvioPallet que tiene este pallet
-    # Si no hay ninguno, levantará un 404
-    envio_pallet = get_object_or_404(EnvioPallet, pallet=pallet)
+    # Verificar si hay un usuario distribuidor en la sesión
+    distribuidor_id = request.session.get('user_id')  # Suponiendo que user_id es el ID del distribuidor
     if not distribuidor_id:
         return redirect('login')  # Redirigir al login si no hay usuario en sesión
 
-    # Obtener el objeto del distribuidor basado en el ID
-    distribuidor = get_object_or_404(Distribuidor, id=distribuidor_id)
-    dp = get_object_or_404(DistribuidorPallet, distribuidor=distribuidor_id, pallet = pallet_id)
+    # Obtener el pallet correspondiente al pallet_id
+    pallet = get_object_or_404(Pallet, id=pallet_id)
 
+    # Obtener el envío asociado al pallet
+    envio_pallet = get_object_or_404(EnvioPallet, pallet=pallet)
+
+    # Obtener el distribuidor
+    distribuidor = get_object_or_404(Distribuidor, id=distribuidor_id)
+
+    # Obtener DistribuidorPallet relacionado con este pallet y distribuidor
+    dp = get_object_or_404(DistribuidorPallet, distribuidor=distribuidor_id, pallet=pallet_id)
+
+    # Si el método es POST, procesamos el formulario
     if request.method == 'POST':
         form = RecepcionForm(request.POST)
         if form.is_valid():
-            # Crear la nueva recepción con los datos proporcionados
+            # Guardar la recepción asociada al envío y distribuidor
             recepcion = form.save(commit=False)
-            recepcion.envio_pallet = envio_pallet  # Asignar el EnvioPallet
-            recepcion.distribuidor = distribuidor  # Asignar el distribuidor
-            recepcion.peso_ingresado = recepcion.peso_recepcion
+            recepcion.envio_pallet = envio_pallet  # Asignar EnvioPallet
+            recepcion.distribuidor = distribuidor  # Asignar distribuidor
+            recepcion.peso_ingresado = recepcion.peso_recepcion  # Guardar el peso ingresado
             recepcion.save()  # Guardar la recepción en la base de datos
-            distribuidores_pallet = DistribuidorPallet.objects.filter(
+
+            # Actualizar estado del DistribuidorPallet a 'completado'
+            DistribuidorPallet.objects.filter(
                 pallet=pallet_id,
                 distribuidor=distribuidor_id
-            )
+            ).update(estado_pallet='completado')
 
-            # Actualizar el campo estado_envio de todos esos registros a 'completado'
-            distribuidores_pallet.update(estado_pallet='completado')
-
-            return redirect('registrar_recepcion', pallet_id=pallet_id)  # Redirigir a la misma página
+            return redirect('registrar_recepcion', secure_id=secure_id)  # Redirigir a la misma página tras completar
 
     else:
+        # Si el método no es POST, se crea un formulario vacío
         form = RecepcionForm()
 
-    return render(request, 'registrar_recepcion.html', {'pallet': pallet, 'envio_pallet': envio_pallet,'dp': dp , 'form': form})
+    # Renderizar el template con los datos necesarios
+    return render(request, 'registrar_recepcion.html', {
+        'pallet': pallet,
+        'envio_pallet': envio_pallet,
+        'dp': dp,
+        'form': form,
+        'secure_id': secure_id
+    })
 
 
 # MOSTRAR INFORMACION DEL PALLET PARA PREDIO
 @login_required_for_model(Predio)
-def informacion_pallet(request, pallet_id):
+def informacion_pallet(request, secure_id):
+    # Validar el hash y recuperar el pallet_id original
+    pallet_id = validate_and_recover_id(secure_id, 'Pallet')
+    if pallet_id is None:
+        # Si el hash no es válido, muestra un mensaje de error o redirige
+        return render(request, 'error.html', {'message': 'ID no válido'})
+    
+    # Recuperar el pallet usando el ID original
     pallet = get_object_or_404(Pallet, id=pallet_id)
     predio = pallet.predio  # Acceder al predio relacionado con el pallet
     distribuciones = DistribuidorPallet.objects.filter(pallet=pallet)
+    
     return render(request, 'informacion_pallet.html', {
         'pallet': pallet,
-        'predio': predio , # Pasar el predio al template
+        'predio': predio,  # Pasar el predio al template
         'distribuciones': distribuciones,
-        })
+    })
 # Función para calcular la distancia entre dos coordenadas
 
 def calcular_distancia(lat1, lon1, lat2, lon2):
@@ -573,7 +650,7 @@ def distribuir_caja(request):
     distribuidor_id = request.session.get('user_id')
     recepciones = Recepcion.objects.filter(distribuidor=distribuidor_id)
     recepcion = None
-    clientes = Cliente.objects.all()
+    tipocaja = TipoCaja.objects.all()
     errores = []
 
     if request.method == 'POST':
@@ -582,47 +659,53 @@ def distribuir_caja(request):
             recepcion = get_object_or_404(Recepcion, id=recepcion_id)
             cantidad_cajas = int(request.POST.get('cantidad_cajas', 0))
             nuevas_cajas = []
-            pesos_asignados = []
+            peso_total_cajas = 0  # Sumar pesos de los tipos de caja seleccionados
 
             for i in range(1, cantidad_cajas + 1):
+                # Procesar el formulario para cada caja
                 caja_form = CajaForm(request.POST, prefix=f'caja_{i}', recepcion=recepcion)
 
                 if caja_form.is_valid():
                     caja = caja_form.save(commit=False)
                     caja.recepcion = recepcion
                     
-                    peso_enviado = float(request.POST.get(f'caja_{i}-peso_enviado', 0))
+                    # Obtener el tipo de caja seleccionado
+                    tipo_caja = caja_form.cleaned_data['tipo_caja']
                     
-                    if peso_enviado < 0:
-                        errores.append(f'El peso para la caja {i} no puede ser menor a 0.')
-                    elif peso_enviado > recepcion.peso_recepcion:
-                        errores.append(f'El peso para la caja {i} no puede ser mayor al peso de la recepción ({recepcion.peso_recepcion}).')
-                    else:
-                        pesos_asignados.append(peso_enviado)
-                        nuevas_cajas.append(caja)
+                    # Obtener el peso del tipo de caja
+                    peso_caja = tipo_caja.capacidad
+                    
+                    # Sumar el peso del tipo de caja al total
+                    peso_total_cajas += peso_caja
+                    
+                    # Agregar la caja a la lista de cajas a guardar
+                    nuevas_cajas.append(caja)
                 else:
+                    # Capturar errores del formulario
                     for field, field_errors in caja_form.errors.items():
                         for error in field_errors:
                             errores.append(f'Error en la caja {i}: {error}')
 
-            if not errores and sum(pesos_asignados) > recepcion.peso_recepcion:
-                errores.append(f'La suma de los pesos no puede ser mayor al peso total de la recepción ({recepcion.peso_recepcion}).')
+            # Validar que la suma de los pesos de los tipos de caja no exceda el peso del pallet (recepción)
+            if peso_total_cajas > recepcion.peso_recepcion:
+                errores.append(f'La suma de las capacidades de las cajas ({peso_total_cajas} kg) no puede ser mayor al peso total de la recepción ({recepcion.peso_recepcion} kg).')
 
             if not errores:
                 try:
                     with transaction.atomic():
+                        # Guardar cada caja
                         for caja in nuevas_cajas:
                             caja.save()
                     return redirect('confirmation_page')
                 except ValueError as e:
                     errores.append(str(e))
 
-    recepciones = Recepcion.objects.filter(estado_recepcion='completado', distribuidor=distribuidor_id)  
+    recepciones = Recepcion.objects.filter(estado_recepcion='completado', distribuidor=distribuidor_id)
     return render(request, 'distribuir_caja.html', {
         'recepciones': recepciones,
         'recepcion': recepcion,
-        'clientes': clientes,
         'errores': errores,
+        'tipocaja': tipocaja,
     })
 
 # lo mismo para pallet 
@@ -680,7 +763,7 @@ def distribuir_pallet(request):
                         for distribucion in nuevas_distribuciones:
                             distribucion.save()  # Guardar cada distribución
 
-                    return redirect('confirmation_page')
+                    return redirect('dashboard_predio')
 
                 except ValueError as e:
                     errores.append(str(e))
@@ -718,49 +801,73 @@ def pallet_view(request):
 
 @login_required_for_model(Distribuidor)
 def cajas_view(request):
-    """Vista para gestionar las cajas de un empaque específico o mostrar todas las cajas y empaques."""
+    """Vista para gestionar las cajas asociadas a un distribuidor específico o mostrar las cajas filtradas por recepción."""
     
-    # Obtener el ID del empaque desde los parámetros GET
+    # Obtener el ID del distribuidor que ha iniciado sesión
     distribuidor_id = request.session.get('user_id')  # Suponiendo que user_id es el ID del distribuidor
-    recepcion_id = request.GET.get('recepcion_id')  # Obtener el ID del empaque desde los parámetros GET
-    recepciones = Recepcion.objects.filter(distribuidor = distribuidor_id)  # Obtener todos los empaques
+    if not distribuidor_id:
+        # Si no hay un distribuidor autenticado, redirigir o mostrar un mensaje adecuado
+        return render(request, 'error.html', {'message': 'No ha iniciado sesión como distribuidor.'})
+    
+    # Obtener las recepciones asociadas al distribuidor
+    recepciones = Recepcion.objects.filter(distribuidor=distribuidor_id)
+    
+    # Obtener el ID de la recepción seleccionada desde los parámetros GET
+    recepcion_id = request.GET.get('recepcion_id')
     
     if recepcion_id:
-        # Si se selecciona un ID de empaque, filtrar las cajas asociadas a ese empaque
-        recepcion = get_object_or_404(Recepcion, id=recepcion_id)
-        cajas = Caja.objects.filter(recepcion=recepcion)  # Obtener cajas asociadas al empaque
+        # Si se selecciona una recepción, filtrar las cajas asociadas a esa recepción y distribuidor
+        recepcion = get_object_or_404(Recepcion, id=recepcion_id, distribuidor=distribuidor_id)
+        cajas = Caja.objects.filter(recepcion=recepcion)
     else:
-        recepcion = None  # No se ha seleccionado ningún empaque
-        cajas = Caja.objects.all()  # Obtener todas las cajas si no se selecciona un empaque
-
+        # Si no se selecciona ninguna recepción, mostrar un mensaje
+        recepcion = None
+        cajas = []
+    
     return render(request, 'cajas_view.html', {
-        'recepciones': recepciones,  # Lista de empaques para seleccionar
-        'recepcion': recepcion,  # Empaque seleccionado (si hay alguno)
-        'cajas': cajas,  # Lista de cajas (todas o filtradas por empaque)
+        'recepciones': recepciones,  # Lista de recepciones asociadas al distribuidor
+        'recepcion': recepcion,  # Recepción seleccionada (si se ha seleccionado alguna)
+        'cajas': cajas,  # Cajas filtradas por la recepción seleccionada
+        'mensaje': "Por favor seleccione una recepción para ver las cajas." if not recepcion_id else "",
     })
 
 
-
 # ACCESO AL QR PARA CADA ACTOR DE PALLET
+
 def seleccionar_caja(request, caja_id):
-    if request.method == 'POST':
-        opcion = request.POST.get('opcion')
+    # Asegúrate de que el usuario esté autenticado
+    user_id = request.session.get('user_id')
+    user_type = request.session.get('user_type')
 
-        if opcion == 'distribuidor':
-            return redirect(reverse('login') + '?next=' + reverse('informacion_caja', args=[caja_id]))
-        elif opcion == 'transporte':
-            return redirect(reverse('login') + '?next=' + reverse('transportar_caja', args=[caja_id]))
-        elif opcion == 'cliente':
-            return redirect(reverse('login') + '?next=' + reverse('recibir_caja', args=[caja_id]))
+    # Obtener la caja
+    caja = get_object_or_404(Caja, pk=caja_id)
 
-        # Redirigir a la vista de login con la URL de redirección
-        if redirect_url:
-            return redirect('login', next=redirect_url)
+    # Generar un secure_id basado en el caja_id
+    secure_id = generate_secure_url_id('Caja', caja_id)
 
-    return render(request, 'seleccionar_caja.html', {'caja_id': caja_id})
+    # Redirigir según el tipo de actor, pero usando secure_id en la URL
+    if user_type == 'cliente':
+        return redirect('recibir_caja', secure_id=secure_id)
+    elif user_type == 'transporte':
+        return redirect('transportar_caja', secure_id=secure_id)
+    elif user_type == 'distribuidor':
+        return redirect('informacion_caja', secure_id=secure_id)
+
+    # Redirigir a una vista de error si el tipo no es válido
+    return redirect('login')
+
+
+
+
+
 
 @login_required_for_model(Distribuidor)
-def informacion_caja(request, caja_id):
+def informacion_caja(request, secure_id):
+    # Validar el hash y recuperar el pallet_id original
+    caja_id = validate_and_recover_id(secure_id, 'Caja')
+    if secure_id is None:
+        # Si el hash no es válido, muestra un mensaje de error o redirige
+        return render(request, 'error.html', {'message': 'ID no válido'})
     caja = get_object_or_404(Caja, id=caja_id)
     cliente = caja.cliente
     recepcion = caja.recepcion
@@ -777,7 +884,12 @@ def informacion_caja(request, caja_id):
         })
 
 @login_required_for_model(Transporte)
-def transportar_caja(request, caja_id):
+def transportar_caja(request, secure_id):
+    # Validar el hash y recuperar el pallet_id original
+    caja_id = validate_and_recover_id(secure_id, 'Caja')
+    if secure_id is None:
+        # Si el hash no es válido, muestra un mensaje de error o redirige
+        return render(request, 'error.html', {'message': 'ID no válido'})
     # Acceder al user_id y user_type desde la sesión
     transporte_id = request.session.get('user_id')
     user_type = request.session.get('user_type')
@@ -811,7 +923,12 @@ def transportar_caja(request, caja_id):
 
 @login_required_for_model(Transporte)
 @csrf_exempt
-def iniciar_entrega_caja(request, caja_id):
+def iniciar_entrega_caja(request, secure_id):
+    # Validar el hash y recuperar el pallet_id original
+    caja_id = validate_and_recover_id(secure_id, 'Caja')
+    if secure_id is None:
+        # Si el hash no es válido, muestra un mensaje de error o redirige
+        return render(request, 'error.html', {'message': 'ID no válido'})
     if request.method == "POST":
         try:
             transporte_id = request.session.get('user_id')
@@ -841,7 +958,12 @@ def iniciar_entrega_caja(request, caja_id):
             return JsonResponse({"error": str(e)}, status=500)
 
 @csrf_exempt
-def finalizar_entrega_caja(request, caja_id):
+def finalizar_entrega_caja(request, secure_id):
+    # Validar el hash y recuperar el pallet_id original
+    caja_id = validate_and_recover_id(secure_id, 'Caja')
+    if secure_id is None:
+        # Si el hash no es válido, muestra un mensaje de error o redirige
+        return render(request, 'error.html', {'message': 'ID no válido'})
     if request.method == "POST":
         try:
             transporte_id = request.session.get('user_id')
@@ -880,7 +1002,12 @@ def finalizar_entrega_caja(request, caja_id):
             return JsonResponse({"error": str(e)}, status=500)
 
 
-def recibir_caja(request, caja_id):
+def recibir_caja(request, secure_id):
+    # Validar el hash y recuperar el pallet_id original
+    caja_id = validate_and_recover_id(secure_id, 'Caja')
+    if secure_id is None:
+        # Si el hash no es válido, muestra un mensaje de error o redirige
+        return render(request, 'error.html', {'message': 'ID no válido'})
     if request.method == "GET":
         try:
             # Obtener la caja por su ID
@@ -936,11 +1063,245 @@ def recibir_caja(request, caja_id):
         except Exception as e:
             return JsonResponse({"error": str(e)}, status=500)
 
+@login_required_for_model(Distribuidor)
+def tipocaja(request):
+    if request.method == 'POST':
+        form = TipoCajaForm(request.POST)
+        if form.is_valid():
+            form.save()  # Guarda el nuevo TipoCaja en la base de datos
+            return redirect('dashboard_distribuidor')  # Redirige a la lista de tipos de caja
+    else:
+        form = TipoCajaForm()
+    
+    return render(request, 'crear_caja.html', {'form': form})
+
+@login_required_for_model(Distribuidor)
+def asignar_cliente(request):
+    distribuidor_id = request.session.get('user_id')
+    # Filtrar las cajas del distribuidor sin cliente asignado
+    cajas = Caja.objects.filter(recepcion__distribuidor=distribuidor_id, cliente__isnull=True)
+    clientes = Cliente.objects.all()  # Todos los clientes disponibles
+    errores = []
+
+    if request.method == 'POST':
+        # Obtén las cajas seleccionadas desde el formulario
+        cajas_seleccionadas = request.POST.getlist('cajas')  # Lista de IDs de cajas seleccionadas
+        cliente_id = request.POST.get('cliente_id')  # Cliente seleccionado
+
+        if cajas_seleccionadas:
+            # Si se seleccionó un cliente
+            cliente = None
+            if cliente_id:
+                cliente = get_object_or_404(Cliente, id=cliente_id)
+
+            try:
+                with transaction.atomic():
+                    # Actualizar las cajas seleccionadas
+                    for caja_id in cajas_seleccionadas:
+                        caja = Caja.objects.get(id=caja_id)
+                        caja.cliente = cliente  # Asigna el cliente o deja None
+                        caja.save()  # Guarda la caja actualizada
+                return redirect('dashboard_distribuidor')  # Redirige al confirmar
+            except Exception as e:
+                errores.append(f"Error al asignar cliente a las cajas: {str(e)}")
+        else:
+            errores.append("Debe seleccionar al menos una caja.")
+
+    return render(request, 'asignar_cliente.html', {
+        'cajas': cajas,
+        'clientes': clientes,
+        'errores': errores,
+    })
+
+def actualizar_pallet(request):
+    pallets = Pallet.objects.all()  # Obtener todos los pallets para mostrarlos
+
+    if request.method == 'POST':
+        # Aquí podrías manejar la lógica para actualizar según la opción seleccionada
+        pallet_id = request.POST.get('pallet_id')
+        action = request.POST.get('action')
+
+        if action == 'actualizar_datos':
+            return redirect('actualizar_datos_pallet', pallet_id=pallet_id)  # Redirigir a la vista específica para actualizar datos del pallet
+
+        elif action == 'eliminar_distribuidor':
+            return redirect('eliminar_distribuidor', pallet_id=pallet_id)  # Redirigir a la vista específica para eliminar un distribuidor
+
+        elif action == 'añadir_distribuidor':
+            return redirect('añadir_distribuidor', pallet_id=pallet_id)  # Redirigir a la vista específica para añadir un distribuidor
+
+    context = {
+        'pallets': pallets,
+    }
+    return render(request, 'actualizar_pallet.html', context)
+
+def actualizar_datos_pallet(request, pallet_id):
+    # Obtener el pallet correspondiente
+    pallet = get_object_or_404(Pallet, id=pallet_id)
+    # Obtener los distribuidores asociados al pallet
+    distribuidores = DistribuidorPallet.objects.filter(pallet=pallet)
+
+    if request.method == 'POST':
+        form = PalletForm(request.POST, instance=pallet)
+        
+        if form.is_valid():
+            # Guardar los datos del pallet
+            form.save()
+            
+            # Inicializar nuevo_peso_pallet
+            nuevo_peso_pallet = form.cleaned_data['peso']
+            total_peso_distribuidores = 0
+            
+            # Actualizar pesos de los distribuidores
+            for distribuidor in distribuidores:
+                distribuidor_peso_field = f"peso_enviado_{distribuidor.id}"
+                nuevo_peso_distribuidor = request.POST.get(distribuidor_peso_field)
+
+                if nuevo_peso_distribuidor:
+                    try:
+                        distribuidor.peso_enviado = float(nuevo_peso_distribuidor)
+                        distribuidor.save()  # Guardar cambios en el distribuidor
+                        total_peso_distribuidores += float(nuevo_peso_distribuidor)
+                    except ValueError:
+                        messages.error(request, "El peso ingresado no es válido.")
+                        return redirect('actualizar_datos_pallet', pallet_id=pallet_id)
+
+            # Validar que el peso total de los distribuidores coincida con el peso del pallet
+            if total_peso_distribuidores != nuevo_peso_pallet:
+                messages.error(request, "El peso total de los distribuidores debe ser igual al peso del pallet.")
+                return redirect('actualizar_datos_pallet', pallet_id=pallet_id)
+
+            messages.success(request, 'Pallet y pesos de distribuidores actualizados correctamente.')
+            return redirect('actualizar_pallet')
+
+    else:
+        form = PalletForm(instance=pallet)
+
+    context = {
+        'form': form,
+        'distribuidores': distribuidores,
+        'pallet': pallet,
+    }
+    return render(request, 'actualizar_datos_pallet.html', context)
+
+def eliminar_distribuidores(request, pallet_id):
+    """Vista para eliminar distribuidores de un pallet específico."""
+    
+    # Obtener el pallet que se está gestionando
+    pallet = get_object_or_404(Pallet, id=pallet_id)
+    
+    # Obtener los distribuidores asociados a este pallet
+    distribuidores_pallet = DistribuidorPallet.objects.filter(pallet=pallet)
+
+    return render(request, 'eliminar_distribuidor.html', {
+        'pallet': pallet,
+        'distribuidores_pallet': distribuidores_pallet,
+    })
+
+def eliminar_distribuidor_pallet(request, distribuidor_pallet_id):
+     
+    if request.method == 'POST' and request.headers.get('x-requested-with') == 'XMLHttpRequest':
+        try:
+            # Obtener el distribuidor_pallet que se desea eliminar
+            distribuidor_pallet = get_object_or_404(DistribuidorPallet, id=distribuidor_pallet_id)
+            pallet = distribuidor_pallet.pallet
+            peso_pallet = pallet.peso  # Guardar el peso original del pallet
+            
+            # Obtener todos los distribuidores asociados al pallet
+            distribuidores = DistribuidorPallet.objects.filter(pallet=pallet)
+            
+            # Eliminar el distribuidor
+            with transaction.atomic():
+                distribuidor_pallet.delete()
+
+                # Obtener los distribuidores restantes después de eliminar
+                distribuidores_restantes = DistribuidorPallet.objects.filter(pallet=pallet)
+                
+                if distribuidores_restantes.exists():
+                    # Suma de los pesos restantes
+                    peso_restante = sum(d.peso_enviado for d in distribuidores_restantes)
+
+                    # Verificar si la suma de los pesos es menor que el peso total del pallet
+                    diferencia = peso_pallet - peso_restante
+
+                    if diferencia != 0:
+                        # Redistribuir la diferencia proporcionalmente entre los distribuidores restantes
+                        for distribuidor in distribuidores_restantes:
+                            proporcion = distribuidor.peso_enviado / peso_restante
+                            distribuidor.peso_enviado += round(proporcion * diferencia, 2)
+                            distribuidor.save()
+                else:
+                    # Si no quedan distribuidores, el pallet recupera su peso original
+                    pallet.peso = peso_pallet
+                    pallet.save()
+
+            # Retornar respuesta JSON de éxito
+            return JsonResponse({'success': True})
+        
+        except Exception as e:
+            # Retornar respuesta de error en caso de excepción
+            return JsonResponse({'success': False, 'error': str(e)})
+    else:
+        return JsonResponse({'success': False, 'error': 'Método no permitido o no es una solicitud AJAX.'})
 
 
+def añadir_distribuidor(request, pallet_id):
+    pallet = get_object_or_404(Pallet, id=pallet_id)
+    distribuidores = Distribuidor.objects.all()
+    distribuidor_pallets = DistribuidorPallet.objects.filter(pallet=pallet)
+    errores = []
 
+    if request.method == 'POST':
+        # Recoger el peso del distribuidor existente y el nuevo distribuidor
+        total_peso = 0
+        distribuidor_pallets_data = []
+        
+        # Sumar pesos de distribuidores existentes y recoger nuevos datos
+        for distribuidor_pallet in distribuidor_pallets:
+            distribuidor_id = distribuidor_pallet.distribuidor.id
+            peso_enviado = request.POST.get(f'distribuidor_{distribuidor_id}-peso_enviado', distribuidor_pallet.peso_enviado)
+            
+            try:
+                peso_enviado_float = float(peso_enviado)
+                total_peso += peso_enviado_float  # Sumar peso del distribuidor existente
+                distribuidor_pallets_data.append((distribuidor_pallet.distribuidor, peso_enviado_float))
+            except ValueError:
+                errores.append(f"El peso enviado para el distribuidor {distribuidor_id} debe ser un número válido.")
+                continue
 
+        # Recoger los datos del nuevo distribuidor
+        nuevo_distribuidor_id = request.POST.get('nuevo_distribuidor')
+        nuevo_peso = request.POST.get('nuevo_peso')
+        
+        if nuevo_distribuidor_id and nuevo_peso:
+            try:
+                nuevo_peso_float = float(nuevo_peso)
+                total_peso += nuevo_peso_float  # Sumar el peso del nuevo distribuidor
+                nuevo_distribuidor = Distribuidor.objects.get(id=nuevo_distribuidor_id)
+                distribuidor_pallets_data.append((nuevo_distribuidor, nuevo_peso_float))
+            except ValueError:
+                errores.append("El peso del nuevo distribuidor debe ser un número válido.")
 
+        # Validar que la suma total sea igual al peso del pallet
+        if total_peso != pallet.peso:
+            errores.append("La suma de los pesos de los distribuidores debe ser igual al peso del pallet.")
+
+        # Si no hay errores, guardar los cambios
+        if not errores:
+            # Limpiar los DistribuidorPallet existentes (esto puede no ser necesario si sólo actualizas)
+            DistribuidorPallet.objects.filter(pallet=pallet).delete()
+            # Actualizar o crear los DistribuidorPallet
+            for distribuidor, peso in distribuidor_pallets_data:
+                DistribuidorPallet.objects.create(pallet=pallet, distribuidor=distribuidor, peso_enviado=peso)
+
+            return redirect('dashboard_predio')
+
+    return render(request, 'añadir_distribuidor.html', {
+        'pallet': pallet,
+        'distribuidores': distribuidores,
+        'distribuidor_pallets': distribuidor_pallets,
+        'errores': errores,
+    })
 """""
 def ingreso_trabajador(request):
     if request.method == 'POST':
