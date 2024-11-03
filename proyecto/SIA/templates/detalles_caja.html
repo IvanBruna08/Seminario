@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Detalles de la Caja</title>
+    <link href='https://api.mapbox.com/mapbox-gl-js/v3.7.0/mapbox-gl.css' rel='stylesheet' />
+    <style>
+        /* CSS básico para ajustar el tamaño al de la pantalla */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html, body {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+        }
+
+        .container {
+            display: flex;
+            flex-direction: row;
+            width: 100%;
+            height: 100%;
+            padding: 20px;
+            gap: 20px;
+            overflow: hidden;
+        }
+
+        /* Columna de información, se adapta al espacio disponible */
+        .info {
+            flex: 1;
+            padding: 1rem;
+            overflow-y: auto;
+            max-height: 100%;
+        }
+
+        /* Estilo adaptable para el mapa */
+        #map {
+            flex: 1;
+            min-height: 400px;
+            min-width: 400px;
+            height: 100%;
+            max-width: 50%;
+        }
+    </style>
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'css/styles.css' %}">
+    <script src='https://api.mapbox.com/mapbox-gl-js/v3.7.0/mapbox-gl.js'></script>
+</head>
+<body>
+  <div class="container">
+    <!-- Información -->
+    <div class="info">
+        <h1>Detalles del Producto</h1>
+        <p><strong>Producto:</strong> {{ caja.recepcion.envio_pallet.pallet.producto }}</p>
+        <p><strong>Clasificación:</strong> {{ caja.recepcion.envio_pallet.pallet.clasificacion }}</p>
+        <p><strong>Fecha de Cosecha:</strong> {{ caja.recepcion.envio_pallet.pallet.fecha_cosecha }}</p>
+        <p><strong>Tipo de Empaque:</strong> {{ caja.tipo_caja.Material}}</p>
+        <p><strong>Reciclable:</strong> {% if caja.tipo_caja.reciclable %}Sí{% else %}No{% endif %}</p>
+        <h1>Información de Origen</h1>
+        <p><strong>Predio:</strong> {{ predio.nombre }}</p>
+        <p><strong>Ubicación:</strong> {{ predio.direccion }}</p>
+        
+        <h2>Ruta a Centro de Distribución</h2>
+        <ul>
+            <li><strong>Desde:</strong> {{ predio.nombre }}</li>
+            <li><strong>Enviado al Centro de Distribución por:</strong> {{ envio_pallet.transporte.nombre}}</li>
+            <li><strong>Fecha y hora del envío:</strong> {{ envio_caja.fecha_inicio }}</li>
+            <li><strong>Vehículo:</strong> {{ envio_pallet.vehiculo.marca }}-{{envio_pallet.vehiculo.patente}}</li> 
+            <li><strong>Centro de Distribución:</strong> {{ recepcion.distribuidor.nombre }}</li>
+        </ul>
+
+        {% if envio_caja %}
+        <h2>Ruta Entrega</h2>
+        <ul>
+            <li><strong>Enviado por:</strong> {{ envio_caja.transporte.nombre }}</li>
+            <li><strong>Vehículo:</strong> {{ envio_caja.vehiculo.marca }}-{{envio_caja.vehiculo.patente}}</li>
+            <li><strong>Fecha de Envío:</strong> {{ envio_caja.fecha_inicio}}</li>
+        </ul>
+        {% endif %}
+        
+        <p><strong>Recibido el día:</strong> {{ recepcion_cliente.fecha }}</p>
+    </div>
+
+    <!-- Mapa -->
+    <div id="map"></div>
+  </div>
+
+  <!-- Script del Mapa -->
+  <script>
+      mapboxgl.accessToken = 'pk.eyJ1IjoiaXZhYjk4IiwiYSI6ImNtMHlwdGR4bTBxemYyc3EzeWlweTB4b3UifQ.SqDs4IzkxrtKlWqrbDfNXw';
+      
+      // Coordenadas iniciales y datos
+      const predioLat = parseFloat("{{ predio.latitude }}".replace(',', '.'));
+      const predioLng = parseFloat("{{ predio.longitude }}".replace(',', '.'));
+      const recepcionDistribuidorLat = parseFloat("{{ recepcion.distribuidor.latitude }}".replace(',', '.'));
+      const recepcionDistribuidorLng = parseFloat("{{ recepcion.distribuidor.longitude }}".replace(',', '.'));
+      const recepcionClienteLat = parseFloat("{{ recepcion_cliente.latitude }}".replace(',', '.'));
+      const recepcionClienteLng = parseFloat("{{ recepcion_cliente.longitude }}".replace(',', '.'));
+
+      const map = new mapboxgl.Map({
+          container: 'map',
+          style: 'mapbox://styles/mapbox/streets-v12',
+          center: [predioLng, predioLat],
+          zoom: 12,
+          minZoom: 3,
+          maxZoom: 18
+      });
+
+      map.addControl(new mapboxgl.NavigationControl(), 'top-right');
+
+      const coordinates = [
+          [predioLng, predioLat],
+      ];
+
+      const envioPalletCoords = [
+          {% for coord in envio_pallet.coordenadas %}
+              {"latitud": parseFloat("{{ coord.latitud }}".replace(',', '.')), "longitud": parseFloat("{{ coord.longitud }}".replace(',', '.'))},
+          {% endfor %}
+      ];
+
+      envioPalletCoords.forEach(coord => {
+          coordinates.push([coord.longitud, coord.latitud]);
+      });
+
+      coordinates.push([recepcionDistribuidorLng, recepcionDistribuidorLat]);
+      coordinates.push([recepcionClienteLng, recepcionClienteLat]);
+
+      map.on('load', () => {
+          const pointLabels = ['Predio', 'Distribuidor', 'Cliente'];
+          coordinates.forEach((coord, index) => {
+              new mapboxgl.Marker()
+                  .setLngLat(coord)
+                  .setPopup(new mapboxgl.Popup().setHTML(`<strong>${pointLabels[index]}</strong>`))
+                  .addTo(map);
+          });
+
+          map.addSource('route', {
+              'type': 'geojson',
+              'data': {
+                  'type': 'Feature',
+                  'properties': {},
+                  'geometry': {
+                      'type': 'LineString',
+                      'coordinates': coordinates
+                  }
+              }
+          });
+
+          map.addLayer({
+              'id': 'route',
+              'type': 'line',
+              'source': 'route',
+              'layout': {
+                  'line-join': 'round',
+                  'line-cap': 'round'
+              },
+              'paint': {
+                  'line-color': '#888',
+                  'line-width': 6
+              }
+          });
+
+          const bounds = coordinates.reduce((bounds, coord) => {
+              return bounds.extend(coord);
+          }, new mapboxgl.LngLatBounds(coordinates[0], coordinates[0]));
+
+          map.fitBounds(bounds, {
+              padding: 50
+          });
+      });
+
+      map.on('error', (e) => {
+          console.error('Error al cargar el mapa:', e);
+      });
+  </script>
+</body>
+</html>

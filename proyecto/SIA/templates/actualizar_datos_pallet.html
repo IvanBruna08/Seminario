@@ -7,42 +7,10 @@
     <link rel="stylesheet" href="{% static 'css/styles.css' %}"> <!-- Asegúrate de tener el archivo CSS -->
     <title>Actualizar Datos del Pallet</title>
     <script>
-        function togglePeso() {
-            const pesoInput = document.getElementById("id_peso");
-            const distribuidoresInputs = document.querySelectorAll('[name^="peso_enviado_"]');
-
-            // Cambiar el estado del campo peso del pallet
-            pesoInput.disabled = !pesoInput.disabled;
-
-            // Habilitar o deshabilitar los campos de los distribuidores
-            distribuidoresInputs.forEach(input => {
-                input.disabled = !input.disabled; // Alternar el estado de los inputs
-            });
-
-            // Limpiar el valor del peso del pallet si se desactiva
-            if (pesoInput.disabled) {
-                pesoInput.value = "{{ pallet.peso }}"; // Restablecer al peso original si se desactiva
-            } else {
-                // Ajustar el valor del peso del pallet según distribuidores
-                let totalPesoDistribuidores = 0;
-                distribuidoresInputs.forEach(input => {
-                    totalPesoDistribuidores += parseFloat(input.value) || 0;
-                });
-                pesoInput.value = totalPesoDistribuidores; // Ajustar peso del pallet
-            }
-        }
-
         function validatePeso() {
             const pesoInput = document.getElementById("id_peso");
             const distribuidoresInputs = document.querySelectorAll('[name^="peso_enviado_"]');
             let totalPesoDistribuidores = 0;
-
-            // Habilitar los campos de los distribuidores antes de la validación
-            distribuidoresInputs.forEach(input => {
-                if (input.disabled) {
-                    input.disabled = false; // Habilitar si están deshabilitados
-                }
-            });
 
             distribuidoresInputs.forEach(input => {
                 const value = parseFloat(input.value);
@@ -77,14 +45,13 @@
                     <td>{{ distribuidor.distribuidor.nombre }}</td>
                     <td>
                         <input type="hidden" name="distribuidorpallet_id_{{ distribuidor.id }}" value="{{ distribuidor.id }}">
-                        <input type="number" name="peso_enviado_{{ distribuidor.id }}" value="{{ distribuidor.peso_enviado }}" disabled>
+                        <input type="number" name="peso_enviado_{{ distribuidor.id }}" value="{{ distribuidor.peso_enviado }}">
                     </td>
                 </tr>
             {% endfor %}
         </table>
 
         <h3>Opciones</h3>
-        <button type="button" id="actualizarPesoBtn" onclick="togglePeso()">Actualizar Peso</button>
         <button type="submit">Guardar Cambios</button>
     </form>
 

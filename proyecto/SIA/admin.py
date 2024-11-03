@@ -1,6 +1,6 @@
 from django.contrib import admin
 from django.utils.html import format_html
-from .models import Transporte, Predio,Cliente,Distribuidor,Pallet, EnvioPallet, Recepcion, Empaque, Caja, EnvioCaja,Pago,DistribuidorPallet
+from .models import Transporte, Predio,Cliente,Distribuidor,Pallet, EnvioPallet, Recepcion, Caja, EnvioCaja,RecepcionCliente,DistribuidorPallet,Vehiculo
 
 class ClienteAdmin(admin.ModelAdmin):
     list_display = ('nombre', 'tipo_cliente','direccion','billetera', 'latitude', 'longitude', 'map_view')
@@ -77,7 +77,7 @@ class DistribuidorAdmin(admin.ModelAdmin):
 admin.site.register(Distribuidor, DistribuidorAdmin)
 
 class TransporteAdmin(admin.ModelAdmin):
-    list_display = ('nombre', 'rut','auto','patente', 'billetera')
+    list_display = ('nombre', 'rut', 'billetera')
 
 admin.site.register(Transporte, TransporteAdmin)
 
@@ -105,7 +105,7 @@ class DistribuidorPalletAdmin(admin.ModelAdmin):
 admin.site.register(DistribuidorPallet, DistribuidorPalletAdmin)
 
 class EnvioPalletAdmin(admin.ModelAdmin):
-    list_display = ('pallet', 'transporte', 'fecha_inicio', 'fecha_llegada')
+    list_display = ('pallet', 'transporte','vehiculo', 'fecha_inicio', 'fecha_llegada')
     list_filter = ('transporte', 'fecha_inicio')
     search_fields = ('pallet__id', 'transporte__id')  # Suponiendo que Transporte tiene un campo 'nombre'
 
@@ -123,10 +123,14 @@ class RecepcionAdmin(admin.ModelAdmin):
 # Registrar el modelo Recepcion en el admin junto con su configuración
 admin.site.register(Recepcion, RecepcionAdmin)
 
-class EmpaqueAdmin(admin.ModelAdmin):
-    list_display = ('id', 'recepcion', 'fecha_empaque', 'peso_pallet', 'cantidad_cajas')  # Eliminamos 'tipo_caja'
-    search_fields = ('recepcion__id',)  # Eliminamos 'tipo_caja'
-    list_filter = ('fecha_empaque',)
+class VehiculoAdmin(admin.ModelAdmin):
+    list_display = ('marca', 'modelo','patente')
+    list_filter = ('marca',)
+    search_fields = ('modelo', 'patente')  # Suponiendo que Transporte tiene un campo 'nombre'
+
+admin.site.register(Vehiculo, VehiculoAdmin)
+
+
 
 class CajaAdmin(admin.ModelAdmin):
     list_display = ('id', 'recepcion', 'cliente', 'tipo_caja','fecha_caja','qr_caja', 'estado_envio')  # Añadimos 'tipo_caja'
@@ -138,13 +142,12 @@ class EnvioCajaAdmin(admin.ModelAdmin):
     search_fields = ('caja__id', 'transporte__nombre')  # Asumiendo que Transporte tiene un campo 'nombre'
     list_filter = ('caja_id',)
 
-class PagoAdmin(admin.ModelAdmin):
-    list_display = ('id', 'cliente', 'monto', 'fecha_pago')
-    search_fields = ('cliente__nombre',)  # Asumiendo que Cliente tiene un campo 'nombre'
-    list_filter = ('fecha_pago',)
+class RecepcionClienteAdmin(admin.ModelAdmin):
+    list_display = ('id', 'caja', 'fecha', 'cliente_registrado','latitude','longitude')
+    search_fields = ('cliente',)  # Asumiendo que Cliente tiene un campo 'nombre'
+    list_filter = ('fecha',)
 
 # Registro de los modelos en el admin
-admin.site.register(Empaque, EmpaqueAdmin)
 admin.site.register(Caja, CajaAdmin)
 admin.site.register(EnvioCaja, EnvioCajaAdmin)
-admin.site.register(Pago, PagoAdmin)
+admin.site.register(RecepcionCliente, RecepcionClienteAdmin)

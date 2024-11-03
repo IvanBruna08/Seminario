@@ -4,6 +4,9 @@ from io import BytesIO
 from decimal import Decimal, InvalidOperation
 from django.core.files.base import ContentFile
 from .utils import get_coordinates
+from django.core.validators import RegexValidator
+from django.core.exceptions import ValidationError
+import re
 import json
 
 def generate_qr_code(data):
@@ -28,7 +31,7 @@ class Predio(models.Model):
     nombre = models.CharField(max_length=100, null=True, blank=True)
     direccion = models.CharField(max_length=100, null=True, blank=True)
     billetera = models.CharField(max_length=42, null=True, blank=True)
-    rut = models.CharField(max_length=12, null=True, blank=True)
+    rut = models.CharField(max_length=9, null=True, blank=True)
     password = models.CharField(max_length=10, null=True, blank=True)
     latitude = models.FloatField(null=True, blank=True)
     longitude = models.FloatField(null=True, blank=True)
@@ -42,20 +45,38 @@ class Predio(models.Model):
 # Modelo Transporte
 class Transporte(models.Model):
     nombre = models.CharField(max_length=100, null=True, blank=True)
-    auto = models.CharField(max_length=100, null=True, blank=True)
-    patente = models.CharField(max_length=7, null=True, blank=True)
-    rut = models.CharField(max_length=12, null=True, blank=True)
+    rut = models.CharField(max_length=9, null=True, blank=True)
     password = models.CharField(max_length=10, null=True, blank=True)
     billetera = models.CharField(max_length=42, null=True, blank=True)
     def __str__(self):
         return self.nombre  # Mostrar el nombre del distribuidor
+
+class Vehiculo(models.Model):
+    MARCAS = [
+        ('HYUNDAI', 'Hyundai'),
+        ('MERCEDES_BENZ', 'Mercedes-Benz'),
+        ('FOTON', 'Foton'),
+        ('CHEVROLET', 'Chevrolet'),
+        ('IVECO', 'Iveco'),
+        ('HINO', 'Hino'),
+    ]
+
+    marca = models.CharField(max_length=20, choices=MARCAS,default='Hyundai')
+    modelo = models.CharField(max_length=10,null=True,blank=False)
+    patente = models.CharField(max_length=6, unique=True,null=True, validators=[RegexValidator(regex=r'^[A-Z]{4}\d{2}$', message='La patente debe tener el formato AAAA00.')])
+    
+
+    def clean(self):
+        super().clean()
+        if not re.match(r'^[A-Z]{4}\d{2}$', self.patente):
+            raise ValidationError('La patente debe tener el formato AAAA00.')
 
 # Modelo Distribuidor
 class Distribuidor(models.Model):
     direccion = models.CharField(max_length=100, null=True, blank=True)
     nombre = models.CharField(max_length=100, null=True, blank=True)
     billetera = models.CharField(max_length=42, null=True, blank=True)
-    rut = models.CharField(max_length=11, null=True, blank=True)
+    rut = models.CharField(max_length=9, null=True, blank=True)
     password = models.CharField(max_length=10, null=True, blank=True)
     latitude = models.FloatField(null=True, blank=True)
     longitude = models.FloatField(null=True, blank=True)
@@ -72,7 +93,7 @@ class Cliente(models.Model):
     nombre = models.CharField(max_length=100, null=True, blank=True)
     tipo_cliente = models.CharField(max_length=100, choices=[('supermercado', 'Supermercado'), ('restaurante', 'Restaurante'), ('hotel', 'Hotel')],blank=True)
     direccion = models.CharField(max_length=255, null=True, blank=True)
-    rut = models.CharField(max_length=12, null=True, blank=True)
+    rut = models.CharField(max_length=9, null=True, blank=True)
     password = models.CharField(max_length=10, null=True, blank=True)
     billetera = models.CharField(max_length=42, null=True, blank=True)
     latitude = models.FloatField(null=True, blank=True)
@@ -152,6 +173,7 @@ class DistribuidorPallet(models.Model):
 class EnvioPallet(models.Model):
     pallet = models.ForeignKey(Pallet, on_delete=models.CASCADE)
     transporte = models.ForeignKey(Transporte, on_delete=models.CASCADE)
+    vehiculo = models.ForeignKey(Vehiculo, on_delete=models.CASCADE , null=True)
     fecha_inicio = models.DateTimeField(auto_now_add=True)
     fecha_llegada = models.DateTimeField(null=True, blank=True)
     ruta_inicio_latitude = models.FloatField(null=True, blank=True)
@@ -212,36 +234,14 @@ class Recepcion(models.Model):
     def __str__(self):
         return f"Recepción {self.id} - Pallet {self.envio_pallet.pallet.id}"
 
-class Empaque(models.Model):
-    recepcion = models.ForeignKey(Recepcion, on_delete=models.CASCADE)  # Relación con Recepcion
-    fecha_empaque = models.DateTimeField(auto_now_add=True)  # Fecha y hora de empaque
-    peso_pallet = models.DecimalField(max_digits=10, decimal_places=2)  # Peso actual del pallet
-    cantidad_cajas = models.PositiveIntegerField(default=0)  # Cantidad total de cajas acumuladas en este empaque
-
-    def actualizar_peso_y_cantidad(self, nuevas_cajas):
-        """
-        Actualiza el peso del pallet y la cantidad de cajas después de la creación de nuevas cajas.
-        """
-        # Calcular el peso total de las nuevas cajas, ignorando las que no tienen peso asignado
-        peso_nuevas_cajas = sum(caja.peso_caja for caja in nuevas_cajas if caja.peso_caja is not None)
-        
-        # Verificar que el peso de las nuevas cajas no exceda el peso disponible del pallet
-        if peso_nuevas_cajas > self.peso_pallet:
-            raise ValueError("El peso de las nuevas cajas excede el peso restante del pallet.")
-        
-        # Actualizar el peso del pallet restando el peso de las nuevas cajas
-        self.peso_pallet -= peso_nuevas_cajas
-
-        # Acumular la cantidad de cajas creadas (solo contando las que tienen peso)
-        self.cantidad_cajas += len([caja for caja in nuevas_cajas if caja.peso_caja is not None])
-
-        # Guardar el empaque con los valores actualizados
-        self.save()
-        return self.peso_pallet
 
 class TipoCaja(models.Model):
-    Material = models.CharField(max_length=20)
-    capacidad = models.DecimalField(max_digits=10, decimal_places=2)
+
+    Material = models.CharField(max_length=20,choices=[
+        ('carton', 'Cartón'),
+        ('madera', 'Madera'),
+    ],default='carton',blank=False)
+    capacidad = models.DecimalField(max_digits=10, decimal_places=2,blank=False)
     recicable = models.BooleanField(default=False)
     def __str__(self):
         return self.Material  # Mostrar el nombre del distribuidor
@@ -253,7 +253,7 @@ class Caja(models.Model):
     tipo_caja = models.ForeignKey(TipoCaja, on_delete=models.CASCADE, null=True,blank=True)
     qr_caja = models.ImageField(upload_to='qr_codes/', blank=True, null=True)
     fecha_caja = models.DateTimeField(auto_now_add=True, null=True)  # Fecha y hora actual al crear la caja, null=True para registros existentes
-    estado_envio = models.CharField(max_length=100, choices=[('pendiente', 'Pendiente'), ('enviado', 'Enviado'), ('entregado', 'Entregado')],default='pendiente')
+    estado_envio = models.CharField(max_length=100, choices=[('pendiente', 'Pendiente'), ('en_ruta', 'En Ruta'), ('entregado', 'Entregado')],default='pendiente')
 
     def save(self, *args, **kwargs):
         # Usamos una transacción para asegurar que ambos procesos se ejecuten correctamente
@@ -295,6 +295,7 @@ class Caja(models.Model):
 class EnvioCaja(models.Model):
     caja = models.ForeignKey(Caja, on_delete=models.CASCADE)
     transporte = models.ForeignKey('Transporte', on_delete=models.CASCADE)
+    vehiculo = models.ForeignKey(Vehiculo, on_delete=models.CASCADE, null= True)
     fecha_inicio = models.DateTimeField(auto_now_add=True)  # Captura la fecha y hora de inicio automáticamente
     fecha_llegada = models.DateTimeField(null=True, blank=True)  # Se llenará al finalizar la entrega
     ruta_inicio_latitude = models.FloatField(null=True, blank=True)  # Captura posición inicial GPS
@@ -302,18 +303,20 @@ class EnvioCaja(models.Model):
     ruta_final_latitude = models.FloatField(null=True, blank=True)  # Captura posición llegada GPS
     ruta_final_longitude = models.FloatField(null=True, blank=True)  # Captura posición llegada GPS
     distancia = models.FloatField(null=True, blank=True)  # Distancia entre la ruta inicial y final
+    coordenadas_transporte = models.JSONField(null=True, blank=True)
 
     def __str__(self):
         return f"Envio de Caja {self.caja.id} por Transporte {self.transporte.id}"
 
-class Pago(models.Model):
-    enviocaja = models.ForeignKey('EnvioCaja',on_delete=models.CASCADE, null=True, blank=True)
-    cliente = models.ForeignKey('Cliente', on_delete=models.CASCADE)
-    monto = models.DecimalField(max_digits=10, decimal_places=2)
-    fecha_pago = models.DateTimeField(auto_now_add=True)
+class RecepcionCliente(models.Model):
+    caja = models.ForeignKey('Caja',on_delete=models.CASCADE, null=True, blank=True)
+    fecha = models.DateTimeField(auto_now_add=True)
+    cliente_registrado = models.BooleanField(default=False)
+    latitude = models.FloatField(null=True, blank=True)
+    longitude = models.FloatField(null=True, blank=True)
 
     def __str__(self):
-        return f"Pago {self.id} de Cliente {self.cliente.id} por ${self.monto}"
+        return f"Recepcion {self.id} de Caja {self.caja} "
 
 
 

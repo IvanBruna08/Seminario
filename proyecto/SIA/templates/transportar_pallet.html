@@ -25,11 +25,28 @@
 </head>
 <body>
     <h1>Transportar Pallet</h1>
+    
+    <!-- Información del pallet -->
     <p><strong>ID del Pallet:</strong> {{ pallet.id }}</p>
     <p><strong>Producto:</strong> {{ pallet.producto }}</p>
     <p><strong>Cantidad:</strong> {{ pallet.cantidad }}</p>
     <p><strong>Peso:</strong> {{ pallet.peso }}</p>
 
+    <!-- Selección de vehículo -->
+    <h2>Selecciona un Vehículo:</h2>
+    <label for="vehicleSelect">Selecciona un Vehículo:</label>
+    <select id="vehicleSelect" name="vehiculo_id">
+        <option value="">-- Selecciona un vehículo --</option>
+        {% for vehiculo in vehiculos %}
+            <option value="{{ vehiculo.id }}">{{ vehiculo.marca }} - {{ vehiculo.patente }}</option>
+        {% endfor %}
+    </select>
+
+    <div class="buttons">
+        <button id="startDelivery" class="start-btn">Iniciar Entrega</button>
+    </div>
+
+    <!-- Información de destinos -->
     <h1>Destinos</h1>
     <ul>
         {% for distribucion in distribuidores_info %}
@@ -40,12 +57,10 @@
         {% endfor %}
     </ul>
 
-    <div class="buttons">
-        <button id="startDelivery" class="start-btn">Iniciar Entrega</button>
-    </div>
-
+    <!-- Mapa para mostrar rutas -->
     <div id="map"></div>
 
+    <!-- Formulario oculto para iniciar la entrega -->
     <form id="startDeliveryForm" method="POST" action="{% url 'iniciar_entrega' secure_id %}" style="display:none;">
         {% csrf_token %}
         <input type="hidden" name="ruta_inicio_latitude" id="ruta_inicio_latitude">
@@ -53,6 +68,8 @@
         <input type="hidden" name="transporte_latitude" id="transporte_latitude">
         <input type="hidden" name="transporte_longitude" id="transporte_longitude">
         <input type="hidden" id="id_pallet" value="{{ pallet.id }}">
+        <input type="hidden" name="vehiculo_id" id="vehiculo_id">
+        <input type="hidden" id="secure_id" value="{{ secure_id }}">
     </form>
 
     <script>
@@ -77,7 +94,7 @@
             .setPopup(new mapboxgl.Popup().setText('Origen: Predio'))
             .addTo(map);
 
-        // Distribuidores - extraídos desde Django (controlar formato)
+        // Distribuidores - extraídos desde Django
         var distribuidores = [
             {% for distribuidor in distribuidores_info %}
                 {
@@ -160,11 +177,12 @@
 
         // Mostrar las rutas
         mostrarRutasOptimas(distribuidores, longitudOrigen, latitudOrigen);
-    </script>
-    <script src="{% static 'java/transporte_caja.js' %}"></script>
 
+    </script>
+
+    <script src="{% static 'java/transporte_caja.js' %}"></script>
     <script>
-        // Verificar el estado del pallet y redirigir si todos los distribuidorpallet están 'completados'
+        // Verificar el estado del pallet y redirigir si todos los DistribuidorPallet están 'completados'
         function verificarEstadoPallet(palletId) {
             $.ajax({
                 type: "GET",
@@ -173,22 +191,19 @@
                 success: function(response) {
                     // Si todos los DistribuidorPallet tienen el estado 'completado'
                     if (response.completado) {
-                        alert('El recorrido ha finalizado. Redirigiendo a login...');
-                        window.location.href = '/login';
+                        alert('El recorrido ha finalizado. Redirigiendo a la página de éxito.');
+                        window.location.href = "/login";
                     }
-                },
-                error: function(error) {
-                    console.error('Error al verificar el estado del pallet:', error);
                 }
             });
         }
-    
-        // Verificar el estado del pallet cada 10 segundos
+
+        // Llamar a la función para verificar el estado del pallet cada 10 segundos
         setInterval(function() {
-            verificarEstadoPallet("{{ pallet.id }}");
+            verificarEstadoPallet('{{ pallet.id }}');
         }, 10000);
     </script>
+
 </body>
 </html>
-
 

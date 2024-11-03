@@ -178,10 +178,6 @@ tr:hover {
     padding: 0; 
     margin: 0; 
 }
-<<<<<<< HEAD
-
-=======
->>>>>>> ea592f2bc55f7c366c0d0916e68aa7dfeb847aee
 .contenedor-dist h1, label{
     color: black;
 }
@@ -861,7 +857,6 @@ form select:focus {
 }
 
 /* Estilo responsive para pantallas pequeñas */
-<<<<<<< HEAD
 /* Estilo general para pantallas grandes */
 @media (min-width: 1080px) {
     .main-container {
@@ -877,19 +872,10 @@ form select:focus {
 }
 
 /* Estilo para pantallas pequeñas */
-=======
-@media (max-width: 1072px) {
-    .main-container {
-        padding: 80px 20px 20px; /* Espaciado ajustado en la parte superior y lateral */
-    }
-}
-
->>>>>>> ea592f2bc55f7c366c0d0916e68aa7dfeb847aee
 @media (max-width: 991px) {
     .sidebar {
         display: block; /* Oculta la barra lateral */
     }
-<<<<<<< HEAD
     .content {
         margin-left: 0; /* Elimina el margen izquierdo */
     }
@@ -922,62 +908,3 @@ form select:focus {
         font-size: 10px; /* Tamaño de párrafo reducido */
     }
 }
-=======
-
-    .content {
-        margin-left: 0; /* Elimina el margen izquierdo */
-    }
-}
-@media (max-width: 991px) {
-    .header {
-        display: none; /* Oculta el header original en pantallas pequeñas */
-    }
-
-    .sidebar-header {
-        display: block; /* Muestra el header dentro del sidebar */
-    }
-
-    .sidebar-header h1 {
-        font-size: 1.2em; /* Ajusta el tamaño del h1 dentro del sidebar */
-    }
-}
-
-@media (max-width: 767px) {
-    .header {
-        flex-direction: column; /* Cambia la dirección de la flexbox a columna */
-        align-items: flex-start; /* Alinea los elementos a la izquierda */
-        padding: 10px; /* Ajusta el espaciado */
-    }
-
-    .main-container {
-        padding: 60px 10px 10px; /* Espaciado ajustado */
-    }
-}
-
-@media (max-width: 320px) {
-    .header {
-        padding: 10px; /* Espaciado en el header */
-    }
-
-    .main-container {
-        padding: 50px 10px 10px; /* Espaciado ajustado */
-    }
-
-    h1 {
-        font-size: 1.4em; /* Tamaño de h1 reducido */
-    }
-
-    h3 {
-        font-size: 1em; /* Tamaño de h3 reducido */
-    }
-
-    p {
-        font-size: 10px; /* Tamaño de párrafo reducido */
-    }
-
-    .btn-submit {
-        width: 100%; /* Ancho completo para el botón de envío */
-        padding: 10px; /* Espaciado interior */
-    }
-}
->>>>>>> ea592f2bc55f7c366c0d0916e68aa7dfeb847aee

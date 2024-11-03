@@ -1,9 +1,10 @@
 from django import forms
-from .models import Predio, Transporte,Distribuidor, Cliente,Pallet, EnvioPallet, Recepcion, Caja,Pago, EnvioCaja , DistribuidorPallet, TipoCaja
+from .models import Predio, Transporte,Distribuidor, Cliente,Pallet, EnvioPallet, Recepcion, Caja, EnvioCaja , DistribuidorPallet, TipoCaja, Vehiculo
 import sys
 from django.core.exceptions import ValidationError
 from django.utils import timezone
 from itertools import cycle
+from decimal import Decimal
  
 def validar_rut(rut):
 	rut = rut.upper();
@@ -25,7 +26,7 @@ def validar_rut(rut):
 		return False
 
 class CustomLoginForm(forms.Form):
-    rut = forms.CharField(max_length=100, widget=forms.TextInput(attrs={'placeholder': 'RUT'}))
+    rut = forms.CharField(max_length=9, widget=forms.TextInput(attrs={'placeholder': 'Ej: 12345678K '}))
     password = forms.CharField(widget=forms.PasswordInput(attrs={'placeholder': 'Contraseña'}))
 
     def clean(self):
@@ -55,10 +56,28 @@ class CustomLoginForm(forms.Form):
 class TransporteForm(forms.ModelForm):
     class Meta:
         model = Transporte
-        fields = ['nombre', 'auto', 'patente', 'rut', 'billetera']
+        fields = ['nombre','rut', 'password']
         widgets = {
             'password': forms.PasswordInput(attrs={'placeholder': 'Contraseña'}),
+            'rut': forms.TextInput(attrs={'placeholder': 'Ej: 12345678K '}),
         }
+    def __init__(self, *args, **kwargs):
+        super(TransporteForm, self).__init__(*args, **kwargs)
+        # Asegurarte de que todos los campos sean requeridos explícitamente
+        for field in self.fields.values():
+            field.required = True
+
+    def clean(self):
+        cleaned_data = super().clean()
+        nombre = cleaned_data.get("nombre")
+        rut = cleaned_data.get("rut")
+        password = cleaned_data.get("password")
+
+        # Verificar si algún campo está vacío
+        if not all([nombre, rut, password]):
+            raise forms.ValidationError("Todos los campos son obligatorios. Por favor, complétalos.")
+
+        return cleaned_data
     def clean_rut(self):
         rut = self.cleaned_data.get('rut')
 
@@ -66,6 +85,25 @@ class TransporteForm(forms.ModelForm):
             raise forms.ValidationError('El RUT ingresado no es válido.')
 
         return rut
+    
+
+class VehiculoForm(forms.ModelForm):
+    class Meta:
+        model = Vehiculo
+        fields = ['marca', 'modelo', 'patente']
+        widgets = {
+            'marca': forms.Select(attrs={'class': 'form-control'}),
+            'modelo': forms.TextInput(attrs={'class': 'form-control'}),
+            'patente': forms.TextInput(attrs={'class': 'form-control', 'maxlength': '6'}),
+
+        }
+        labels = {
+            'marca': 'Marca',
+            'modelo': 'Modelo',
+            'patente': 'Patente (AAAA00)',
+
+        }
+
 
 class PredioForm(forms.ModelForm):
     class Meta:
@@ -73,8 +111,28 @@ class PredioForm(forms.ModelForm):
         fields = ['nombre', 'direccion','rut','password']
         widgets = {
             'password': forms.PasswordInput(attrs={'placeholder': 'Contraseña'}),
+            'rut': forms.TextInput(attrs={'placeholder': 'Ej: 12345678K '}),
+            'direccion': forms.TextInput(attrs={'placeholder': 'Ej:Calle 123,Ciudad,Provincia'}),
         }
         # Método para validar el RUT
+    def __init__(self, *args, **kwargs):
+        super(PredioForm, self).__init__(*args, **kwargs)
+        # Asegurarte de que todos los campos sean requeridos explícitamente
+        for field in self.fields.values():
+            field.required = True
+
+    def clean(self):
+        cleaned_data = super().clean()
+        nombre = cleaned_data.get("nombre")
+        rut = cleaned_data.get("rut")
+        password = cleaned_data.get("password")
+        direccion = cleaned_data.get("direccion")
+
+        # Verificar si algún campo está vacío
+        if not all([nombre, rut, password,direccion]):
+            raise forms.ValidationError("Todos los campos son obligatorios. Por favor, complétalos.")
+
+        return cleaned_data
     def clean_rut(self):
         rut = self.cleaned_data.get('rut')
 
@@ -88,10 +146,19 @@ class TipoCajaForm(forms.ModelForm):
         model = TipoCaja
         fields = ['Material', 'capacidad', 'recicable']
         widgets = {
-            'Material': forms.TextInput(attrs={'placeholder': 'Ejemplo: Cartón'}),
             'capacidad': forms.NumberInput(attrs={'placeholder': 'Capacidad en kg'}),
             'recicable': forms.CheckboxInput(),
         }
+
+    def clean_capacidad(self):
+        capacidad = self.cleaned_data.get('capacidad')
+
+        capacidades_permitidas = [5, 8, 10, 12, 15, 20, 25, 30]
+        
+        if capacidad not in capacidades_permitidas:
+            raise ValidationError('La capacidad debe ser una de las siguientes: 5, 8, 10, 12, 15, 20, 25, 30 kg.')
+
+        return capacidad
 
 class DistribuidorForm(forms.ModelForm):
     class Meta:
@@ -99,7 +166,28 @@ class DistribuidorForm(forms.ModelForm):
         fields = ['nombre', 'direccion','rut','password']
         widgets = {
             'password': forms.PasswordInput(attrs={'placeholder': 'Contraseña'}),
+            'rut': forms.TextInput(attrs={'placeholder': 'Ej: 12345678K '}),
+            'direccion': forms.TextInput(attrs={'placeholder': 'Ej:Calle 123,Ciudad,Provincia'}),
         }
+            # Método para validar el RUT
+    def __init__(self, *args, **kwargs):
+        super(DistribuidorForm, self).__init__(*args, **kwargs)
+        # Asegurarte de que todos los campos sean requeridos explícitamente
+        for field in self.fields.values():
+            field.required = True
+
+    def clean(self):
+        cleaned_data = super().clean()
+        nombre = cleaned_data.get("nombre")
+        rut = cleaned_data.get("rut")
+        password = cleaned_data.get("password")
+        direccion = cleaned_data.get("direccion")
+
+        # Verificar si algún campo está vacío
+        if not all([nombre, rut, password,direccion]):
+            raise forms.ValidationError("Todos los campos son obligatorios. Por favor, complétalos.")
+
+        return cleaned_data
         # Método para validar el RUT
     def clean_rut(self):
         rut = self.cleaned_data.get('rut')
@@ -116,7 +204,28 @@ class ClienteForm(forms.ModelForm):
         fields = ['nombre', 'tipo_cliente', 'direccion','rut','password']
         widgets = {
             'password': forms.PasswordInput(attrs={'placeholder': 'Contraseña'}),
+            'rut': forms.TextInput(attrs={'placeholder': 'Ej: 12345678K '}),
+            'direccion': forms.TextInput(attrs={'placeholder': 'Ej:Calle 123,Ciudad,Provincia'}),
         }
+            # Método para validar el RUT
+    def __init__(self, *args, **kwargs):
+        super(ClienteForm, self).__init__(*args, **kwargs)
+        # Asegurarte de que todos los campos sean requeridos explícitamente
+        for field in self.fields.values():
+            field.required = True
+
+    def clean(self):
+        cleaned_data = super().clean()
+        nombre = cleaned_data.get("nombre")
+        rut = cleaned_data.get("rut")
+        password = cleaned_data.get("password")
+        direccion = cleaned_data.get("direccion")
+
+        # Verificar si algún campo está vacío
+        if not all([nombre, rut, password,direccion]):
+            raise forms.ValidationError("Todos los campos son obligatorios. Por favor, complétalos.")
+
+        return cleaned_data
         # Método para validar el RUT
     def clean_rut(self):
         rut = self.cleaned_data.get('rut')
@@ -144,8 +253,8 @@ class PalletForm(forms.ModelForm):
         self.fields['producto'].label = "Producto"
         self.fields['clasificacion'].label = "Clasificación"
         self.fields['fecha_cosecha'].label = "Fecha de Cosecha"
-        self.fields['cantidad'].label = "Cantidad"
-        self.fields['peso'].label = "Peso"
+        self.fields['cantidad'].label = "Cantidad Cajas"
+        self.fields['peso'].label = "Peso Total (kg)"
         self.fields['precio_venta'].label = "Precio de Venta"
 
     def clean(self):
@@ -176,21 +285,47 @@ class PalletForm(forms.ModelForm):
 class RecepcionForm(forms.ModelForm):
     peso_recepcion = forms.DecimalField(
         required=False,
-        widget=forms.NumberInput(attrs={'step': 'any'}),
+        widget=forms.NumberInput(attrs={'placeholder': 'Dejar en blanco si no hay cambio en el peso'}),
         label="Peso Final del Pallet (si hubo variación)"
     )
 
     class Meta:
         model = Recepcion
-        fields = ['estado_recepcion', 'peso_recepcion']  # Incluir el campo de estado y peso final
+        fields = [ 'peso_recepcion']  # Incluir el campo de estado y peso final
 
         widgets = {
             'estado_recepcion': forms.Select()
         }
 
     def __init__(self, *args, **kwargs):
+        self.dp = kwargs.pop('dp', None)
         super(RecepcionForm, self).__init__(*args, **kwargs)
-        self.fields['estado_recepcion'].label = "Estado de Recepción"
+        self.fields['peso_recepcion'].label = "Pesaje(KG)"
+
+    def clean(self):
+        cleaned_data = super().clean()
+        peso_recepcion = cleaned_data.get('peso_recepcion')
+
+        if self.dp is None:
+            raise ValidationError("El pallet no está disponible.")
+    
+        peso_enviado = self.dp.peso_enviado # Obtener el peso del pallet
+
+        # Si no se proporciona un valor para peso_recepcion, asignar el peso del pallet
+        if peso_recepcion is None:
+            peso_recepcion = peso_enviado
+            cleaned_data['peso_recepcion'] = peso_recepcion  # Asegúrate de que el valor se guarde en cleaned_data
+
+        # Validación del peso de recepción
+        if peso_recepcion < peso_enviado * Decimal(0.9) or peso_recepcion > peso_enviado:
+            raise ValidationError("El peso de recepción debe estar entre el 90% y el 100% del peso del pallet.")
+
+        return cleaned_data
+        
+        
+    
+    
+        
 
 class DistribuidorPalletForm(forms.ModelForm):
     class Meta:

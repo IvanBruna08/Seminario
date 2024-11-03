@@ -4,25 +4,23 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Transportar Caja</title>
-    <script src='https://api.mapbox.com/mapbox-gl-js/v2.6.1/mapbox-gl.js'></script>
-    <link href='https://api.mapbox.com/mapbox-gl-js/v2.6.1/mapbox-gl.css' rel='stylesheet' />
+    
+    <!-- Importar Mapbox CSS y JS -->
+    <link href="https://api.mapbox.com/mapbox-gl-js/v2.9.1/mapbox-gl.css" rel="stylesheet" />
+    <script src="https://api.mapbox.com/mapbox-gl-js/v2.9.1/mapbox-gl.js"></script>
+
+    <!-- Estilos para la interfaz -->
     <style>
         body { margin: 0; padding: 0; }
         #map { height: 400px; width: 100%; }
         h1 { text-align: center; }
         .info { margin: 20px; }
-        .buttons {
-            text-align: center;
-            margin: 20px;
-        }
-        .buttons button {
-            padding: 10px 20px;
-            font-size: 16px;
-            margin: 5px;
-        }
+        .buttons { text-align: center; margin: 20px; }
+        .buttons button { padding: 10px 20px; font-size: 16px; margin: 5px; }
         .start-btn { background-color: green; color: white; }
-        .end-btn { background-color: red; color: white; }
     </style>
+    
+    {% load static %}
 </head>
 <body>
     <h1>Transportar Caja</h1>
@@ -31,88 +29,82 @@
         <p><strong>Transportista:</strong> {{ transporte.nombre }}</p>
         <p><strong>ID Caja:</strong> {{ caja.id }}</p>
         <p><strong>Cliente:</strong> {{ cliente.nombre }}</p>
-        <p>Coordenadas del predio: Latitud: {{ cliente.latitude }}, Longitud: {{ cliente.longitude }}</p>
+        <p>Coordenadas del cliente: Latitud: {{ cliente.latitude }}, Longitud: {{ cliente.longitude }}</p>
     </div>
+    
+    <h2>Selecciona un Vehículo:</h2>
+    <label for="vehicleSelect">Selecciona un Vehículo:</label>
+    <select id="vehicleSelect" name="vehiculo_id">
+        <option value="">-- Selecciona un vehículo --</option>
+        {% for vehiculo in vehiculos %}
+            <option value="{{ vehiculo.id }}">{{ vehiculo.marca }} - {{ vehiculo.patente }}</option>
+        {% endfor %}
+    </select>
     
     <div id="map"></div>
 
     <div class="buttons">
         <button id="startDelivery" class="start-btn">Iniciar Entrega</button>
-        <button id="endDelivery" class="end-btn" disabled>Finalizar Entrega</button>
     </div>
 
-    <!-- Formulario para iniciar la entrega -->
-    <form id="startDeliveryForm" method="POST" action="{% url 'iniciar_entrega_caja' caja.id %}">
+    <form id="startDeliveryForm" method="POST" action="{% url 'iniciar_entrega_caja' secure_id %}">
         {% csrf_token %}
         <input type="hidden" name="ruta_inicio_latitude" id="ruta_inicio_latitude">
         <input type="hidden" name="ruta_inicio_longitude" id="ruta_inicio_longitude">
-    </form>
-
-    <!-- Formulario para finalizar la entrega -->
-    <form id="deliveryForm" method="POST" action="{% url 'finalizar_entrega_caja' caja.id %}">
-        {% csrf_token %}
-        <input type="hidden" name="ruta_final_latitude" id="ruta_final_latitude">
-        <input type="hidden" name="ruta_final_longitude" id="ruta_final_longitude">
+        <input type="hidden" name="transporte_latitude" id="transporte_latitude">
+        <input type="hidden" name="transporte_longitude" id="transporte_longitude">
+        <input type="hidden" name="vehiculo_id" id="vehiculo_id">
+        <input type="hidden" id="id_caja" value="{{ caja.id }}">
+        <input type="hidden" id="secure_id" value="{{ secure_id }}">
     </form>
 
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="{% static 'java/envio_caja.js' %}"></script>
+
     <script>
         mapboxgl.accessToken = 'pk.eyJ1IjoiaXZhYjk4IiwiYSI6ImNtMHlwdGR4bTBxemYyc3EzeWlweTB4b3UifQ.SqDs4IzkxrtKlWqrbDfNXw';
 
-        var latitudOrigen = parseFloat("{{ predio.latitude }}".replace(',', '.'));
-        var longitudOrigen = parseFloat("{{ predio.longitude }}".replace(',', '.'));
+        var latitudDistribuidor = parseFloat("{{ distribuidor.latitude }}".replace(',', '.'));
+        var longitudDistribuidor = parseFloat("{{ distribuidor.longitude }}".replace(',', '.'));
         var latitudDestino = parseFloat("{{ cliente.latitude }}".replace(',', '.'));
         var longitudDestino = parseFloat("{{ cliente.longitude }}".replace(',', '.'));
 
+        // Inicializar el mapa en las coordenadas del distribuidor
         var map = new mapboxgl.Map({
             container: 'map',
             style: 'mapbox://styles/mapbox/streets-v11',
-            center: [(longitudOrigen + longitudDestino) / 2, (latitudOrigen + latitudDestino) / 2],
-            zoom: 13
+            center: [longitudDistribuidor, latitudDistribuidor],
+            zoom: 10
         });
 
-        var markerOrigen = new mapboxgl.Marker({ color: 'green' })
-            .setLngLat([longitudOrigen, latitudOrigen])
-            .setPopup(new mapboxgl.Popup().setText('Origen: Predio'))
+        // Marcador para el distribuidor
+        new mapboxgl.Marker({ color: 'blue' })
+            .setLngLat([longitudDistribuidor, latitudDistribuidor])
+            .setPopup(new mapboxgl.Popup().setText('Distribuidor'))
             .addTo(map);
 
-        var markerDestino = new mapboxgl.Marker({ color: 'red' })
+        // Marcador para el cliente
+        new mapboxgl.Marker({ color: 'red' })
             .setLngLat([longitudDestino, latitudDestino])
-            .setPopup(new mapboxgl.Popup().setText('Destino: Cliente'))
+            .setPopup(new mapboxgl.Popup().setText('Cliente'))
             .addTo(map);
-        
-        var transporteMarker = null;
 
-        function errorGeoLocation(error) {
-            switch(error.code) {
-                case error.PERMISSION_DENIED:
-                    alert("El usuario denegó la solicitud de geolocalización.");
-                    break;
-                case error.POSITION_UNAVAILABLE:
-                    alert("La ubicación no está disponible.");
-                    break;
-                case error.TIMEOUT:
-                    alert("La solicitud de geolocalización ha caducado.");
-                    break;
-                case error.UNKNOWN_ERROR:
-                    alert("Se ha producido un error desconocido.");
-                    break;
-            }
-        }
-
+        // Función para obtener la ruta
         async function getRoute() {
-            const response = await fetch(`https://api.mapbox.com/directions/v5/mapbox/driving/${longitudOrigen},${latitudOrigen};${longitudDestino},${latitudDestino}?geometries=geojson&access_token=${mapboxgl.accessToken}`);
-            const data = await response.json();
-            const route = data.routes[0].geometry.coordinates;
+            const url = `https://api.mapbox.com/directions/v5/mapbox/driving/${longitudDistribuidor},${latitudDistribuidor};${longitudDestino},${latitudDestino}?geometries=geojson&access_token=${mapboxgl.accessToken}`;
+            const response = await fetch(url);
+            if (response.ok) {
+                const data = await response.json();
+                const coordinates = data.routes[0].geometry.coordinates;
 
-            map.on('load', function () {
+                // Agregar la ruta al mapa
                 map.addSource('route', {
                     'type': 'geojson',
                     'data': {
                         'type': 'Feature',
                         'geometry': {
                             'type': 'LineString',
-                            'coordinates': route
+                            'coordinates': coordinates
                         }
                     }
                 });
@@ -130,90 +122,35 @@
                         'line-width': 6
                     }
                 });
+            } else {
+                console.error('Error en la obtención de la ruta');
+            }
+        }
+
+        // Llamar a la función para mostrar la ruta entre el distribuidor y el cliente
+        getRoute();
+    </script>
+    <script>
+        // Verificar el estado del pallet y redirigir si todos los DistribuidorPallet están 'completados'
+        function verificarEstadoCaja(cajaId) {
+            $.ajax({
+                type: "GET",
+                url: '/verificar-caja/',
+                data: { id: cajaId },
+                success: function(response) {
+                    // Si todos los DistribuidorPallet tienen el estado 'completado'
+                    if (response.entregado) {
+                        alert('El recorrido ha finalizado. Redirigiendo a la página de éxito.');
+                        window.location.href = "/login";
+                    }
+                }
             });
         }
 
-        getRoute();
-
-        function iniciarEntrega() {
-            if (navigator.geolocation) {
-                navigator.geolocation.getCurrentPosition(function(position) {
-                    var latitudTransporte = position.coords.latitude;
-                    var longitudTransporte = position.coords.longitude;
-
-                    document.getElementById('ruta_inicio_latitude').value = latitudTransporte;
-                    document.getElementById('ruta_inicio_longitude').value = longitudTransporte;
-
-                    if (!transporteMarker) {
-                        transporteMarker = new mapboxgl.Marker({ color: 'blue' })
-                            .setLngLat([longitudTransporte, latitudTransporte])
-                            .setPopup(new mapboxgl.Popup().setText('Ubicación Actual del Transporte'))
-                            .addTo(map);
-                    } else {
-                        transporteMarker.setLngLat([longitudTransporte, latitudTransporte]);
-                    }
-
-                    map.setCenter([longitudTransporte, latitudTransporte]);
-
-                    // Enviar el formulario para iniciar la entrega usando AJAX
-                    $.ajax({
-                        type: "POST",
-                        url: $('#startDeliveryForm').attr('action'),
-                        data: $('#startDeliveryForm').serialize(),
-                        success: function (response) {
-                            console.log('Entrega iniciada:', response);
-                            document.getElementById('startDelivery').disabled = true;
-                            document.getElementById('endDelivery').disabled = false; // Habilitar botón de finalizar
-                        },
-                        error: function (error) {
-                            console.error('Error al iniciar entrega:', error);
-                        }
-                    });
-                }, errorGeoLocation, {
-                    enableHighAccuracy: true,
-                    maximumAge: 0,
-                    timeout: 5000
-                });
-            } else {
-                alert('Geolocalización no soportada.');
-            }
-        }
-
-        function finalizarEntrega() {
-            if (navigator.geolocation) {
-                navigator.geolocation.getCurrentPosition(function(position) {
-                    var rutaFinalLatitude = position.coords.latitude;
-                    var rutaFinalLongitude = position.coords.longitude;
-
-                    document.getElementById('ruta_final_latitude').value = rutaFinalLatitude;
-                    document.getElementById('ruta_final_longitude').value = rutaFinalLongitude;
-
-                    // Enviar el formulario para finalizar la entrega usando AJAX
-                    $.ajax({
-                        type: "POST",
-                        url: $('#deliveryForm').attr('action'),
-                        data: $('#deliveryForm').serialize(),
-                        success: function (response) {
-                            console.log('Entrega finalizada:', response);
-                            document.getElementById('startDelivery').disabled = false; // Habilitar botón de iniciar nuevamente
-                            document.getElementById('endDelivery').disabled = true; // Deshabilitar botón de finalizar
-                        },
-                        error: function (error) {
-                            console.error('Error al finalizar entrega:', error);
-                        }
-                    });
-                }, errorGeoLocation, {
-                    enableHighAccuracy: true,
-                    maximumAge: 0,
-                    timeout: 5000
-                });
-            } else {
-                alert('Geolocalización no soportada.');
-            }
-        }
-
-        document.getElementById('startDelivery').addEventListener('click', iniciarEntrega);
-        document.getElementById('endDelivery').addEventListener('click', finalizarEntrega);
+        // Llamar a la función para verificar el estado del pallet cada 10 segundos
+        setInterval(function() {
+            verificarEstadoCaja('{{ caja.id }}');
+        }, 10000);
     </script>
 </body>
 </html>

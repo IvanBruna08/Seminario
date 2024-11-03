@@ -8,7 +8,7 @@
         {% for caja in cajas %}
             <li>
                 <input type="checkbox" name="cajas" value="{{ caja.id }}">
-                {{ caja.tipo_caja }} - Recepción: {{ caja.recepcion }}
+                {{ caja.tipo_caja }} - id: {{ caja.id }}
             </li>
         {% endfor %}
     </ul>

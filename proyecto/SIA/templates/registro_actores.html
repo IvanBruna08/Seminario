@@ -13,9 +13,13 @@
             <option value="cliente">Cliente</option>
         </select>
     </div>
+    <label> Registrar Vehículo</label>
+    <a href="{% url 'registrar_vehiculo' %}" class="btn-submit">Registrar Vehiculo</a>
+
     
     <div style="text-align: center; margin-top: 20px;">
         <button type="submit" class="btn-submit">Continuar</button>
+        <a href="{% url 'login' %}" class="btn-home">Volver</a>
     </div>
 </form>
 

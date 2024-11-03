@@ -1,4 +1,4 @@
-// Definir la función para manejar errores de geolocalización
+// Función para manejar errores de geolocalización
 function errorGeoLocation(error) {
     switch (error.code) {
         case error.PERMISSION_DENIED:
@@ -16,79 +16,45 @@ function errorGeoLocation(error) {
     }
 }
 
-// Variable para almacenar el ID de pallet y las coordenadas de transporte
-let coordenadasTransporte = []; // Este array almacenará todas las coordenadas
+// Variable para almacenar el ID de pallet y coordenadas de transporte
 let idPallet = null;
-var latitudTransporte = null;
-var longitudTransporte = null;
-var transporteMarker = null;
+let envio_id = null;
+let transporteMarker = null;
 
 // Función para manejar el inicio de entrega y almacenar coordenadas iniciales
 function iniciarEntrega() {
+    const vehiculoId = $('#vehicleSelect').val();
+    if (!vehiculoId) {
+        alert('Por favor, selecciona un vehículo antes de iniciar la entrega.');
+        return;
+    }
+
     if (navigator.geolocation) {
         navigator.geolocation.getCurrentPosition(function(position) {
             const latitudTransporte = position.coords.latitude;
             const longitudTransporte = position.coords.longitude;
 
-            // Enviar las coordenadas iniciales y el id_pallet al servidor
+            // Enviar las coordenadas iniciales al servidor
             $.ajax({
                 type: "POST",
-                url: $('#startDeliveryForm').attr('action'), // URL correcta del formulario
+                url: $('#startDeliveryForm').attr('action'),
                 data: {
                     ruta_inicio_latitude: latitudTransporte,
                     ruta_inicio_longitude: longitudTransporte,
-                    id_pallet: $('#id_pallet').val(), // Asegúrate de tener este campo en tu formulario
+                    vehiculo_id: vehiculoId,
+                    id_pallet: $('#id_pallet').val(),
                     csrfmiddlewaretoken: $('input[name=csrfmiddlewaretoken]').val()
                 },
                 success: function(response) {
                     console.log('Coordenadas iniciales enviadas:', response);
                     if (response.success) {
                         idPallet = response.pallet_id;
-                        envioid = response.envio_id // Guarda el ID del pallet desde la respuesta
-                        console.log('ID del pallet guardado:', idPallet);
-                        localStorage.setItem('idPallet', idPallet); // Guarda el idPallet en el almacenamiento local
-                        localStorage.setItem('envioid', envioid)
+                        envio_id= response.envio_id
                         document.getElementById('startDelivery').disabled = true;
 
-                        
-                        // Inicializa el array de coordenadas y almacena en localStorage
-                        let coordenadasTransporte = [];
-
-                        // Variable para almacenar la última coordenada registrada
-                        let ultimaCoordenada = null;
-
                         // Inicia el seguimiento de ubicación
-                        navigator.geolocation.watchPosition(function(position) {
-                            const latitud = position.coords.latitude;
-                            const longitud = position.coords.longitude;
-                            const tiempoActual = new Date().toISOString();
-
-                            // Actualiza el marcador y el mapa
-                            if (!transporteMarker) {
-                                transporteMarker = new mapboxgl.Marker({ color: 'blue' })
-                                    .setLngLat([longitud, latitud])
-                                    .setPopup(new mapboxgl.Popup().setText('Transporte'))
-                                    .addTo(map);
-                            } else {
-                                transporteMarker.setLngLat([longitud, latitud]);
-                            }
-
-                            map.setCenter([longitud, latitud]);
-
-                            if (!ultimaCoordenada || 
-                                ultimaCoordenada.latitud !== latitud || 
-                                ultimaCoordenada.longitud !== longitud) {
-                                
-                                // Almacena las nuevas coordenadas junto con la marca de tiempo
-                                ultimaCoordenada = { latitud, longitud, tiempo: tiempoActual };
-                                coordenadasTransporte.push(ultimaCoordenada);
-                                localStorage.setItem('coordenadasTransporte', JSON.stringify(coordenadasTransporte));
-                        
-                                console.log('Coordenadas actualizadas:', latitud, longitud, 'a las', tiempoActual);
-                            }
-
-                            console.log('Coordenadas actualizadas:', latitud, longitud);
-                        }, errorGeoLocation);
+                        console.log("antes de llamar finalizar:",idPallet)
+                        iniciarSeguimientoDeCoordenadas();
                     }
                 }
             });
@@ -98,16 +64,56 @@ function iniciarEntrega() {
     }
 }
 
-// Función para finalizar la entrega y enviar coordenadas adicionales
+function iniciarSeguimientoDeCoordenadas() {
+    navigator.geolocation.watchPosition(function(position) {
+        const latitud = position.coords.latitude;
+        const longitud = position.coords.longitude;
+        const tiempoActual = new Date().toISOString();
+        console.log("en iniciar seguimiento:",idPallet)
+        // Actualiza el marcador y el mapa
+        if (!transporteMarker) {
+            transporteMarker = new mapboxgl.Marker({ color: 'blue' })
+                .setLngLat([longitud, latitud])
+                .setPopup(new mapboxgl.Popup().setText('Transporte'))
+                .addTo(map);
+        } else {
+            transporteMarker.setLngLat([longitud, latitud]);
+        }
+
+        map.setCenter([longitud, latitud]);
+
+        // Enviar la nueva coordenada al servidor
+        $.ajax({
+            type: "POST",
+            url: '/actualizar-coordenadas/',  // URL de la vista
+            contentType: "application/json",
+            data: JSON.stringify({
+                envio_id: envio_id,  // Se usa idPallet como identificador del envío
+                latitud: latitud,
+                longitud: longitud,
+                tiempo: tiempoActual
+            }),
+            success: function(response) {
+                console.log('Coordenada enviada:', response);
+            },
+            error: function(error) {
+                console.error('Error al enviar coordenada:', error);
+            }
+        });
+    }, errorGeoLocation);
+}
+// Función para finalizar la entrega y obtener todas las coordenadas almacenadas en el servidor
 function finalizarEntrega() {
     console.log("Función finalizarEntrega llamada");
-    const idPallet = localStorage.getItem('idPallet'); // Obtén el id del pallet desde el almacenamiento local
-    const envioid = localStorage.getItem('envioid');
-    console.log('ID del pallet al finalizar:', idPallet); // Depura el valor
-    console.log('ID del envioPallet al finalizar:', envioid); // Depura el valor
+    // Captura id_pallet y envio_id desde los elementos de entrada
+    const idPallet = document.getElementById('id_pallet').value;
+    const envio_id = document.getElementById('envio_id').value;
 
+    console.log("ID del pallet:", idPallet); // Para verificar el ID
+    console.log("ID del envio:", envio_id);   // Para verificar el ID
+    
     if (!idPallet) {
-        console.error('No se ha iniciado la entrega');
+        console.error('No se ha iniciado la entrega o falta el identificador del pallet');
         return;
     }
 
@@ -116,40 +122,32 @@ function finalizarEntrega() {
             const latitudFinal = position.coords.latitude;
             const longitudFinal = position.coords.longitude;
             const tiempoActual = new Date().toISOString(); 
+            console.log("Datos a enviar:", {
+                envio_id: envio_id,
+                ruta_final_latitude: latitudFinal,
+                ruta_final_longitude: longitudFinal,
+                tiempo: tiempoActual,
+                csrfmiddlewaretoken: $('input[name=csrfmiddlewaretoken]').val()
+            });
 
-            // Recupera las coordenadas del localStorage
-            const coordenadasTransporte = JSON.parse(localStorage.getItem('coordenadasTransporte')) || [];
-            
-            // Añade las coordenadas finales al array
-            coordenadasTransporte.push({ latitud: latitudFinal, longitud: longitudFinal, tiempo : tiempoActual });
-
-            // Enviar las coordenadas al servidor
+            // Enviar coordenadas finales y obtener todas las coordenadas de la entrega
             $.ajax({
                 type: "POST",
-                url: $('#endDeliveryForm').attr('action'), // URL correcta del formulario
-                data: JSON.stringify({
-                    latitude: latitudFinal,
-                    longitude: longitudFinal,
-                    coordenadasTransporte: coordenadasTransporte, // No es necesario convertir a JSON ya que lo hicimos antes
-                    id_pallet: idPallet,// ID del pallet
-                    envio_id: envioid
-                }),
-                contentType: "application/json", // Asegura que el contenido se envíe como JSON
-                headers: {
-                    'X-CSRFToken': $('input[name=csrfmiddlewaretoken]').val() // Agrega el token CSRF de Django
+                url: $('#endDeliveryForm').attr('action'),  // URL para finalizar entrega
+                data: {
+                    envio_id: envio_id,
+                    ruta_final_latitude: latitudFinal,
+                    ruta_final_longitude: longitudFinal,
+                    tiempo: tiempoActual,
+                    csrfmiddlewaretoken: $('input[name=csrfmiddlewaretoken]').val()
                 },
                 success: function(response) {
-                    console.log('Entrega finalizada:', response);
                     if (response.success) {
-                        alert(response.message);
-                        // Aquí puedes agregar lógica para redirigir o actualizar la página
-                        localStorage.removeItem('coordenadasTransporte');
-                        setTimeout(function() {
-                            window.location.href = '{% url "login" %}';  // URL de redirección al login
-                        }, 3000);  // Redirigir después de 3 segundos
-
+                        console.log('Entrega finalizada exitosamente:', response.message);
+                        // Aquí puedes redirigir al usuario a otra página o mostrar un mensaje de éxito
+                        window.location.href = '/login';  // Cambia esta URL según sea necesario
                     } else {
-                        alert(response.message);
+                        console.error('Error:', response.message);
                     }
                 },
                 error: function(error) {

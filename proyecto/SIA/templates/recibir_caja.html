@@ -1,14 +1,168 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <title>Información Producto</title>
+</head>
+<link href='https://api.mapbox.com/mapbox-gl-js/v2.10.0/mapbox-gl.css' rel='stylesheet' />
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            background-image: url('/static/css/ag1.jpg');
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+            color: black; 
+            padding: 20px; 
+            margin: 0; 
+        }
 
-<h2>Detalles de la Caja</h2>
+        h1, h2 {
+            color: #2E7D32; 
+        }
 
-<p>ID de Caja: {{ caja.id }}</p>
-<p>El pallet fue realizado por el transportista: {{ transporte_pallet.nombre }}</p>
-<p>El paquete fue realizado por el transportista: {{ transporte_caja.nombre }}</p>
-<p>Estado: {{ envio_caja.estado_envio }}</p>
-<p>Precio: {{ precio_formateado }}</p>
+        .container {
+            max-width: 800px; 
+            margin: 0 auto; 
+            padding: 20px; 
+            background-color: rgba(255, 255, 255, 0.9); 
+            border-radius: 10px; 
+            box-shadow: 0 2px 10px rgba(109, 76, 65, 0.9); 
+        }
 
-<form method="post">
+        table {
+            width: 100%;
+            border-collapse: collapse; 
+            margin-top: 20px; 
+            border-radius: 10px; 
+            overflow: hidden; 
+            box-shadow: 0 2px 10px rgba(109, 76, 65, 0.4); 
+        }
+        th, td {
+            border: 1px solid rgb(187, 187, 187); 
+            text-align: center; 
+            padding: 12px; 
+        }
+        th {
+            background-color: #4CAF50;
+            color: white; 
+        }
+
+        .info-section {
+            margin-top: 20px; 
+        }
+        .btn-logout {
+            position: absolute; 
+            top: 20px;
+            left: 20px;
+            background-color: #A1887F; 
+            color: white;
+            padding: 10px 20px;
+            text-align: center;
+            text-decoration: none;
+            border-radius: 5px;
+            font-size: 18px;
+            transition: background-color 0.3s;
+            z-index: 1000;
+        }
+        .btn-logout:hover {
+            background-color: rgba(109, 76, 65); /* Café medio */
+}
+    </style>
+<body>
+
+    <h2>Detalle Caja</h2>
+
+
+
+<p>Predio: {{ caja.recepcion.envio_pallet.pallet.predio.nombre }}</p>
+<p>Producto: {{ caja.recepcion.envio_pallet.pallet.producto }}</p>
+<p>Clasificación: {{ caja.recepcion.envio_pallet.pallet.clasificacion }}</p>
+{% load static %}
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+{% if hay_envio %}
+
+    <!-- Ejecutar finalizarEntrega para enviocaja antes de recepcioncliente -->
+    <button id="endDelivery" class="end-btn btn btn-danger">Finalizar</button>
+    <!-- Formulario para finalizar la entrega (oculto) -->
+    <form id="endDeliveryForm" method="POST" action="{% url 'finalizar_entrega_caja' secure_id %}" style="display: none;">
     {% csrf_token %}
-    <button type="submit">Confirmar Pago</button>
+        {% csrf_token %}
+        <input type="hidden" name="ruta_final_latitude" id="ruta_final_latitude">
+        <input type="hidden" name="ruta_final_longitude" id="ruta_final_longitude">
+        <input type="hidden" name="transporte_latitude" id="transporte_latitude">
+        <input type="hidden" name="transporte_longitude" id="transporte_longitude">
+        <input type="hidden" name="enviocaja_id" id="enviocaja_id" value="{{ envio_caja.id }}">
+        <input type="hidden" id="id_caja" value="{{ caja.id }}">
+        <input type="hidden" name="coordenadasTransporte" id="coordenadasTransporte">
+        <!-- Otros campos ocultos de enviocaja -->
+    </form>
+    <script src="{% static 'java/envio_caja.js' %}"></script>
+    <script>
+        $(document).ready(function() {
+            // Asignar el evento al botón "Finalizar Entrega"
+            $('#endDelivery').on('click', function() {
+                console.log("Función finalizarEntrega llamada");
+                finalizarEntrega();
+            });
+        });
+    </script>
+{% else %}
+    <!-- Ejecutar enviarARecepcionCliente directamente sin enviocaja -->
+    <button onclick="enviarARecepcionCliente()">Confirmar Recepción</button>
+{% endif %}
+
+<form id="recepcion-form"  method="POST">
+    {% csrf_token %}
+    <input type="hidden" name="latitude" id="latitude">
+    <input type="hidden" name="longitude" id="longitude">
 </form>
 
+<script>
+    function enviarARecepcionCliente() {
+        const form = document.getElementById('recepcion-form');
+        const latitudeInput = document.getElementById('latitude');
+        const longitudeInput = document.getElementById('longitude');
+
+        // Obtener la ubicación del cliente
+        navigator.geolocation.getCurrentPosition((position) => {
+            const longitude = position.coords.longitude;
+            const latitude = position.coords.latitude;
+
+            // Asignar las coordenadas a los campos ocultos
+            latitudeInput.value = latitude;
+            longitudeInput.value = longitude;
+
+            // Crear una solicitud AJAX para enviar el formulario de recepción
+            const xhr = new XMLHttpRequest();
+            xhr.open("POST", form.action, true);
+            xhr.responseType = 'blob';  // Configurar para recibir el archivo como Blob
+            
+            xhr.onload = function() {
+                if (xhr.status === 200) {
+                    const link = document.createElement('a');
+                    link.href = URL.createObjectURL(xhr.response);
+                    link.download = 'informacion_caja.png';
+                    document.body.appendChild(link);
+                    link.click();
+                    document.body.removeChild(link);
+
+                    const redirectUrl = xhr.getResponseHeader('X-Redirect');
+                    if (redirectUrl) {
+                        window.location.href = redirectUrl;
+                    }
+                } else {
+                    console.error("Error al descargar el archivo");
+                }
+            };
+
+            // Enviar el formulario de recepción
+            xhr.send(new FormData(form));
+        }, (error) => {
+            console.log('No se pudo obtener la ubicación');
+            alert('No se pudo obtener la ubicación. Por favor, asegúrese de que la geolocalización esté activada.');
+        });
+    }
+</script>
+</body>
+</html>

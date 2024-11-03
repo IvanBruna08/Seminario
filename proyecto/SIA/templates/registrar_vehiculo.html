@@ -1,0 +1,18 @@
+<!-- registro_predio.html -->
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Registro de Vehículo</title>
+</head>
+<body>
+    <h2>Registro de Vehículo</h2>
+    <form method="post">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <button type="submit" class="btn-submit">Registrar</button>
+        <a href="{% url 'registro_actores' %}" class="btn-home">Volver</a>
+    </form>
+</body>
+</html>
+{% load static %}
+<link rel="stylesheet" href="{% static 'css/styles.css' %}">

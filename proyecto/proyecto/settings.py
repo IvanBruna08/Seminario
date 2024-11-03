@@ -26,13 +26,8 @@ SECRET_KEY = 'django-insecure-wdde=xn(#)8^itqgy%oxt%@p8$4fi!=5i^_5k0wok&4db^wtcu
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 # Obtener el nombre de la aplicación desde la variable de entorno
-<<<<<<< HEAD
 ALLOWED_HOSTS  = ['http://127.0.0.1:8000','miapp.com', 'www.miapp.com','rutamapa', 'localhost','127.0.0.1', 'ff9f-152-174-159-233.ngrok-free.app']
 CSRF_TRUSTED_ORIGINS = ['https://example.com','https://miapp.com','https://ff9f-152-174-159-233.ngrok-free.app','http://127.0.0.1:8000']
-=======
-ALLOWED_HOSTS  = ['http://127.0.0.1:8000','miapp.com', 'www.miapp.com','rutamapa', 'localhost','127.0.0.1', '3f4c-190-100-238-124.ngrok-free.app']
-CSRF_TRUSTED_ORIGINS = ['https://example.com','https://miapp.com','https://3f4c-190-100-238-124.ngrok-free.app' ,'http://127.0.0.1:8000']
->>>>>>> ea592f2bc55f7c366c0d0916e68aa7dfeb847aee
 
 
 # Application definition
@@ -85,8 +80,13 @@ WSGI_APPLICATION = 'proyecto.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',}
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME':'proyectosia',
+        'USER':'postgres',
+        'PASSWORD':'proyecto123',
+        'HOST':'localhost',
+        'PORT':'5432',
+        }
 }
 
 

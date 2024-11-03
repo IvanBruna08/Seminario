@@ -10,12 +10,13 @@ from django.db import transaction
 from django.http import JsonResponse
 import hashlib
 import base64
-from django.db.models import Sum
+from django.db.models import Sum, Count
 from django.views.decorators.csrf import csrf_exempt
-from .forms import ClienteForm,TransporteForm, PredioForm, DistribuidorForm, PalletForm,RecepcionForm,CustomLoginForm, DistribuidorPalletForm, CajaForm,TipoCajaForm
+from .forms import ClienteForm,TransporteForm, PredioForm, DistribuidorForm, PalletForm,RecepcionForm,CustomLoginForm, DistribuidorPalletForm, CajaForm,TipoCajaForm,VehiculoForm
 from django.contrib.auth.decorators import login_required
+from django.core.files.base import ContentFile
 from django.shortcuts import render, redirect
-from .models import Predio, Distribuidor, Transporte, Cliente, Pallet, EnvioPallet,Recepcion,Caja,Empaque,EnvioCaja,Pago, DistribuidorPallet, TipoCaja
+from .models import Predio, Distribuidor, Transporte, Cliente, Pallet, EnvioPallet,Recepcion,Caja,EnvioCaja,RecepcionCliente, DistribuidorPallet, TipoCaja, generate_qr_code, Vehiculo
 import json
 from django.contrib.admin.views.decorators import staff_member_required
 import os
@@ -68,6 +69,7 @@ def validate_and_recover_id(secure_id, model_name):
                 return caja.id
     return None
 @login_required_for_model(Cliente)
+@csrf_exempt
 def cliente(request):
     # Acceder a los datos del usuario directamente desde la sesión
     user_id = request.session.get('user_id')
@@ -131,7 +133,8 @@ def predio(request):
         'user_type': user_type,
     })
 
-# REGISTRO DE LOS ACTORES 
+# REGISTRO DE LOS ACTORES
+@csrf_exempt 
 def registrar_predio(request):
     if request.method == 'POST':
         form = PredioForm(request.POST)
@@ -141,7 +144,7 @@ def registrar_predio(request):
     else:
         form = PredioForm()
     return render(request, 'registrar_predio.html', {'form': form})
-
+@csrf_exempt
 def registrar_transportista(request):
     if request.method == 'POST':
         form = TransporteForm(request.POST)
@@ -151,7 +154,7 @@ def registrar_transportista(request):
     else:
         form = TransporteForm()
     return render(request, 'registrar_transportista.html', {'form': form})
-
+@csrf_exempt
 def registrar_distribuidor(request):
     if request.method == 'POST':
         form = DistribuidorForm(request.POST)
@@ -161,7 +164,7 @@ def registrar_distribuidor(request):
     else:
         form = DistribuidorForm()
     return render(request, 'registrar_distribuidor.html', {'form': form})
-
+@csrf_exempt
 def registrar_cliente(request):
     if request.method == 'POST':
         form = ClienteForm(request.POST)
@@ -172,11 +175,8 @@ def registrar_cliente(request):
         form = ClienteForm()
     return render(request, 'registrar_cliente.html', {'form': form})
 # LOGIN DE LOS ACTORES
-<<<<<<< HEAD
 @staff_member_required
-=======
 @csrf_exempt
->>>>>>> ea592f2bc55f7c366c0d0916e68aa7dfeb847aee
 def registro_actores(request):
     if request.method == 'POST':
         tipo_actor = request.POST.get('tipo_actor')  # Obtener el tipo de actor seleccionado
@@ -191,6 +191,20 @@ def registro_actores(request):
         elif tipo_actor == 'transporte':
             return redirect('registrar_transportista')  # URL para el registro de transporte
     return render(request, 'registro_actores.html')
+
+
+@staff_member_required
+@csrf_exempt
+def registrar_vehiculo(request):
+    if request.method == 'POST':
+        form = VehiculoForm(request.POST)
+        if form.is_valid():
+            form.save()
+            return redirect('login')
+    else:
+        form = VehiculoForm()
+    return render(request, 'registrar_vehiculo.html', {'form': form})
+
 @csrf_exempt
 def custom_login(request):
     error_message = None
@@ -291,6 +305,7 @@ def seleccionar_opcion(request, pallet_id):
 
 # CREAR PALLET
 @login_required_for_model(Predio)
+@csrf_exempt
 def crear_pallet(request):
     user_id = request.session.get('user_id')
     if user_id:
@@ -324,6 +339,7 @@ def iniciar_entrega(request, secure_id):
     if request.method == 'POST':
         try:
             # Obtener las coordenadas iniciales del formulario
+            vehiculo_id = request.POST.get('vehiculo_id')  # Obtener el ID del vehículo
             latitude = request.POST.get('ruta_inicio_latitude')
             longitude = request.POST.get('ruta_inicio_longitude')
 
@@ -334,6 +350,8 @@ def iniciar_entrega(request, secure_id):
             # Obtener el objeto de transporte y pallet
             transporte = get_object_or_404(Transporte, id=request.session.get('user_id'))
             pallet = get_object_or_404(Pallet, id=pallet_id)
+            # Obtener la instancia de Vehiculo utilizando el vehiculo_id
+            vehiculo = get_object_or_404(Vehiculo, id=vehiculo_id)
             # Obtener todos los registros de DistribuidorPallet asociados al pallet
             distribuidores_pallet = DistribuidorPallet.objects.filter(pallet_id=pallet_id)
 
@@ -350,6 +368,7 @@ def iniciar_entrega(request, secure_id):
                 fecha_inicio=timezone.now(),
                 ruta_inicio_latitude=latitude,
                 ruta_inicio_longitude=longitude,
+                vehiculo = vehiculo,
                 coordenadas_transporte=[],  # Inicializa como lista vacía
             )
 
@@ -365,9 +384,10 @@ def iniciar_entrega(request, secure_id):
 
     return JsonResponse({'success': False, 'message': 'Método no permitido'}, status=405)
 
-@login_required_for_model(Transporte)
+
 @csrf_exempt
 def finalizar_entrega(request, secure_id):
+    print("Se ha recibido una solicitud en finalizar_entrega")
     # Validar el hash y recuperar el pallet_id original
     pallet_id = validate_and_recover_id(secure_id, 'Pallet')
     if pallet_id is None:
@@ -375,6 +395,7 @@ def finalizar_entrega(request, secure_id):
         return render(request, 'error.html', {'message': 'ID no válido'})
     if request.method == 'POST':
         try:
+            print("Se ha recibido una solicitud en finalizar_entrega 2")
             # Verifica si el contenido es JSON o un formulario
             if request.content_type == 'application/json':
                 data = json.loads(request.body)
@@ -382,9 +403,8 @@ def finalizar_entrega(request, secure_id):
                 data = request.POST
 
             # Obtén y convierte los valores a float cuando sea necesario
-            latitude = data.get('latitude')
-            longitude = data.get('longitude')
-            coordenadas_transporte = data.get('coordenadasTransporte')
+            latitude = data.get('ruta_final_latitude')
+            longitude = data.get('ruta_final_longitude')
             envio_id = data.get('envio_id')
 
             # Valida los datos necesarios
@@ -392,29 +412,11 @@ def finalizar_entrega(request, secure_id):
                 return JsonResponse({'success': False, 'message': 'Faltan la latitud o la longitud.'})
             if not envio_id:
                 return JsonResponse({'success': False, 'message': 'Falta el ID del envío.'})
-            if not coordenadas_transporte:
-                return JsonResponse({'success': False, 'message': 'No se recibieron coordenadas de transporte.'})
 
             # Convierte latitud y longitud a float
             latitude = float(latitude)
             longitude = float(longitude)
-
-            # Si `coordenadasTransporte` es una cadena JSON, debemos decodificarla
-            if isinstance(coordenadas_transporte, str):
-                coordenadas_transporte = json.loads(coordenadas_transporte)
-
-            # Procesar la lista de coordenadas y asegurarse de que los tiempos estén en la zona horaria local de Chile
-            for coord in coordenadas_transporte:
-                # Convertir el tiempo de cada coordenada a la zona horaria local configurada en Django
-                if 'tiempo' in coord:
-                    tiempo_utc = coord['tiempo']
-                    # Convertir la cadena de tiempo UTC a un objeto datetime
-                    tiempo_local = datetime.strptime(tiempo_utc, '%Y-%m-%dT%H:%M:%S.%fZ')
-                    # Hacer que sea consciente de la zona horaria UTC utilizando datetime.timezone.utc
-                    tiempo_local = tiempo_local.replace(tzinfo=dt_timezone.utc)
-                    # Convertir el tiempo a la zona horaria local configurada en Django (America/Santiago)
-                    coord['tiempo'] = timezone.localtime(tiempo_local).strftime('%d-%m-%Y, %I:%M:%S %p')
-
+            
             # Obtén el objeto de envío y el pallet
             envio = get_object_or_404(EnvioPallet, id=envio_id)
             pallet = get_object_or_404(Pallet, id=pallet_id)
@@ -422,8 +424,7 @@ def finalizar_entrega(request, secure_id):
             # Asignación de los valores
             envio.ruta_final_latitude = latitude
             envio.ruta_final_longitude = longitude
-            envio.fecha_llegada = timezone.now()  # Mantiene la fecha en UTC, pero la convierte al mostrar
-            envio.coordenadas_transporte = json.dumps(coordenadas_transporte)  # Guardar coordenadas con tiempos locales
+            envio.fecha_llegada = timezone.now()  # Mantiene la fecha en UTC, pero la convierte al mostrartiempos locales
 
             # Calcular distancia y guardar
             envio.distancia = calcular_distancia(
@@ -438,7 +439,7 @@ def finalizar_entrega(request, secure_id):
             pallet.estado_envio = 'completado'
             pallet.save()
 
-            return JsonResponse({'success': True, 'message': 'Entrega finalizada con éxito.'})
+            return JsonResponse({'success': True, 'message': 'Entrega finalizada exitosamente.'})
 
         except ValueError as e:
             # Captura errores de conversión a float
@@ -454,6 +455,65 @@ def finalizar_entrega(request, secure_id):
             return JsonResponse({'success': False, 'message': str(e)})
 
     return JsonResponse({'success': False, 'message': 'Método no permitido.'})
+# Actualizar coordenadas para Pallet
+@csrf_exempt
+def actualizar_coordenadas(request):
+    if request.method == 'POST':
+        try:
+            data = json.loads(request.body)
+            envio_id = data.get('envio_id')
+            latitud = data.get('latitud')
+            longitud = data.get('longitud')
+            tiempo = data.get('tiempo')
+
+            # Validar datos
+            if not (envio_id and latitud and longitud and tiempo):
+                return JsonResponse({'success': False, 'message': 'Datos incompletos.'})
+
+            envio = get_object_or_404(EnvioPallet, id=envio_id)
+
+            # Decodifica, actualiza y vuelve a codificar las coordenadas
+            coordenadas = json.loads(envio.coordenadas_transporte or "[]")
+            coordenadas.append({'latitud': latitud, 'longitud': longitud, 'tiempo': tiempo})
+            envio.coordenadas_transporte = json.dumps(coordenadas)
+            envio.save()
+
+            return JsonResponse({'success': True, 'message': 'Coordenada actualizada exitosamente.'})
+
+        except Exception as e:
+            return JsonResponse({'success': False, 'message': str(e)})
+
+    return JsonResponse({'success': False, 'message': 'Método no permitido.'})
+# Para Caja
+@csrf_exempt
+def actualizar_coordenadas_caja(request):
+    if request.method == 'POST':
+        try:
+            data = json.loads(request.body)
+            enviocaja_id = data.get('enviocaja_id')
+            latitud = data.get('latitud')
+            longitud = data.get('longitud')
+            tiempo = data.get('tiempo')
+
+            # Validar datos
+            if not (enviocaja_id and latitud and longitud and tiempo):
+                return JsonResponse({'success': False, 'message': 'Datos incompletos.'})
+
+            enviocaja = get_object_or_404(EnvioCaja, id=enviocaja_id)
+
+            # Decodifica, actualiza y vuelve a codificar las coordenadas
+            coordenadas = json.loads(enviocaja.coordenadas_transporte or "[]")
+            coordenadas.append({'latitud': latitud, 'longitud': longitud, 'tiempo': tiempo})
+            enviocaja.coordenadas_transporte = json.dumps(coordenadas)
+            enviocaja.save()
+
+            return JsonResponse({'success': True, 'message': 'Coordenada actualizada exitosamente.'})
+
+        except Exception as e:
+            return JsonResponse({'success': False, 'message': str(e)})
+
+    return JsonResponse({'success': False, 'message': 'Método no permitido.'})
+
 
 def verificar_pallet(request):
     pallet_id = request.GET.get('id')  # Obtener el ID del pallet desde la solicitud
@@ -465,6 +525,22 @@ def verificar_pallet(request):
 
     # Enviar una respuesta indicando si el pallet está completamente completado
     return JsonResponse({'completado': completados})
+
+# PARA CAJA
+def verificar_caja(request):
+    caja_id = request.GET.get('id')  # Obtener el ID de la caja desde la solicitud
+
+    # Obtener la instancia de la caja con el ID proporcionado
+    try:
+        caja = Caja.objects.get(id=caja_id)
+    except Caja.DoesNotExist:
+        return JsonResponse({'error': 'Caja no encontrada'}, status=404)
+
+    # Verificar si el estado de la caja es 'entregado'
+    entregado = caja.estado_envio == 'entregado'
+
+    # Enviar una respuesta indicando si la caja está en estado 'entregado'
+    return JsonResponse({'entregado': entregado})
 
 @login_required_for_model(Transporte)
 @csrf_exempt
@@ -482,13 +558,16 @@ def transportar_pallet(request, secure_id):
     # Obtener el pallet por su ID
     pallet = get_object_or_404(Pallet, id=pallet_id)
 
+    if pallet.estado_envio in ['completado', 'en_ruta']:
+        return render(request, 'error.html', {'message': 'El Pallet ya está en ruta o ha sido entregada, no se puede iniciar el transporte.'})
+    
     # Obtener las distribuciones asociadas al pallet
     distribuciones = DistribuidorPallet.objects.filter(pallet=pallet)
 
     # Verificar si hay distribuidores asociados
     if not distribuciones.exists() or not any(d.distribuidor for d in distribuciones):
         messages.error(request, 'No hay distribuidores asociados a este pallet.')
-        return redirect('pallet_list')  # Redirigir a una lista de pallets o a donde desees
+        return redirect('dashboard_transporte')  # Redirigir a una lista de pallets o a donde desees
 
     # Asegurarse de que se esté trabajando con un transporte
     if user_type != 'transporte':
@@ -497,7 +576,12 @@ def transportar_pallet(request, secure_id):
 
     # Obtener el objeto Transporte relacionado con el ID de la sesión
     transporte = get_object_or_404(Transporte, id=transporte_id)
+    vehiculos = Vehiculo.objects.all()
 
+    # Verificar si la lista de vehículos está vacía
+    if not vehiculos.exists():
+        messages.error(request, 'No hay vehículos registrados. No puedes iniciar la entrega sin seleccionar un vehículo.')
+        return redirect('dashboard_transporte')  # Redirige al transporte a un panel de control o vista informativa
     # Crear una lista de distribuidores con sus coordenadas
     distribuidores_info = []
     for distribucion in distribuciones:
@@ -515,6 +599,7 @@ def transportar_pallet(request, secure_id):
         'transporte': transporte,
         'distribuidores_info': distribuidores_info,  # Lista con información de distribuidores
         'predio': pallet.predio,
+        'vehiculos': vehiculos,
         'secure_id': secure_id
     })
 
@@ -525,56 +610,55 @@ def registrar_recepcion(request, secure_id):
     # Validar el hash y recuperar el pallet_id original
     pallet_id = validate_and_recover_id(secure_id, 'Pallet')
     if pallet_id is None:
-        # Si el hash no es válido, muestra un mensaje de error
         return render(request, 'error.html', {'message': 'ID no válido'})
 
-    # Verificar si hay un usuario distribuidor en la sesión
-    distribuidor_id = request.session.get('user_id')  # Suponiendo que user_id es el ID del distribuidor
+    distribuidor_id = request.session.get('user_id')
     if not distribuidor_id:
-        return redirect('login')  # Redirigir al login si no hay usuario en sesión
+        return redirect('login')
+    
+    pesaje_confirmado = request.session.get('pesaje_confirmado', False)
+    if pesaje_confirmado:
+        del request.session['pesaje_confirmado']
 
-    # Obtener el pallet correspondiente al pallet_id
     pallet = get_object_or_404(Pallet, id=pallet_id)
-
-    # Obtener el envío asociado al pallet
     envio_pallet = get_object_or_404(EnvioPallet, pallet=pallet)
-
-    # Obtener el distribuidor
     distribuidor = get_object_or_404(Distribuidor, id=distribuidor_id)
+    dp = DistribuidorPallet.objects.filter(distribuidor=distribuidor, pallet=pallet_id).first()
+    if dp is None:
+        return render(request, 'error.html', {'message': 'Este pallet no está asignado a su distribuidor.'})
+        # Verificar si ya existe una recepción registrada para este pallet
+    if Recepcion.objects.filter(envio_pallet=envio_pallet, estado_recepcion='completado').exists():
+        return render(request, 'error.html', {'message': 'El pallet ya ha sido recepcionado.'})
 
-    # Obtener DistribuidorPallet relacionado con este pallet y distribuidor
-    dp = get_object_or_404(DistribuidorPallet, distribuidor=distribuidor_id, pallet=pallet_id)
-
-    # Si el método es POST, procesamos el formulario
     if request.method == 'POST':
-        form = RecepcionForm(request.POST)
+        form = RecepcionForm(request.POST, dp=dp)  # Aquí se pasa el pallet al formulario
         if form.is_valid():
-            # Guardar la recepción asociada al envío y distribuidor
             recepcion = form.save(commit=False)
-            recepcion.envio_pallet = envio_pallet  # Asignar EnvioPallet
-            recepcion.distribuidor = distribuidor  # Asignar distribuidor
-            recepcion.peso_ingresado = recepcion.peso_recepcion  # Guardar el peso ingresado
-            recepcion.save()  # Guardar la recepción en la base de datos
+            recepcion.envio_pallet = envio_pallet
+            recepcion.distribuidor = distribuidor
+            recepcion.peso_ingresado = recepcion.peso_recepcion
+            recepcion.estado_recepcion='completado'
+            recepcion.save()
 
-            # Actualizar estado del DistribuidorPallet a 'completado'
             DistribuidorPallet.objects.filter(
                 pallet=pallet_id,
                 distribuidor=distribuidor_id
             ).update(estado_pallet='completado')
 
-            return redirect('registrar_recepcion', secure_id=secure_id)  # Redirigir a la misma página tras completar
+        request.session['pesaje_confirmado'] = True  # Almacena el estado en la sesión
+
+        return redirect('registrar_recepcion', secure_id=secure_id)
 
     else:
-        # Si el método no es POST, se crea un formulario vacío
-        form = RecepcionForm()
+        form = RecepcionForm(dp=dp)  # Pasar el pallet al crear el formulario vacío
 
-    # Renderizar el template con los datos necesarios
     return render(request, 'registrar_recepcion.html', {
         'pallet': pallet,
         'envio_pallet': envio_pallet,
         'dp': dp,
         'form': form,
-        'secure_id': secure_id
+        'secure_id': secure_id,
+        'pesaje_confirmado': pesaje_confirmado
     })
 
 
@@ -623,37 +707,9 @@ def recepciones_completadas(request):
     recepciones = Recepcion.objects.filter(estado_recepcion='completado',distribuidor = distribuidor_id)  # Obtener recepciones confirmadas
     return render(request, 'recepciones_completadas.html', {'recepciones': recepciones})
 
-@login_required_for_model(Distribuidor)
-def crear_empaque(request):
-    """Vista para crear un empaque a partir de una recepción seleccionada."""
-    if request.method == 'POST':
-        recepcion_id = request.POST.get('recepcion_id')
-        # Obtener la recepción seleccionada
-        recepcion = get_object_or_404(Recepcion, id=recepcion_id, estado_recepcion='completado')
-
-        try:
-            # Obtener el peso del pallet asociado a la recepción
-            peso_pallet = recepcion.peso_final
-
-            # Crear el nuevo empaque
-            empaque = Empaque.objects.create(
-                recepcion=recepcion,
-                peso_pallet=peso_pallet,
-                cantidad_cajas=0  # Inicialmente, cantidad de cajas es 0
-            )
-
-            messages.success(request, f"Empaque creado exitosamente con ID: {empaque.id}")
-            return redirect('distribuir_caja')  # Redirigir a la vista de cajas
-        except EnvioPallet.DoesNotExist:
-            messages.error(request, "No se encontró el peso del pallet para esta recepción.")
-    
-    # Obtener todas las recepciones que están en estado 'completado' para la selección
-    recepciones = Recepcion.objects.filter(estado_recepcion='completado')  
-    return render(request, 'crear_empaque.html', {
-        'recepciones': recepciones,
-    })
 
 @login_required_for_model(Distribuidor)
+@csrf_exempt
 def distribuir_caja(request):
     distribuidor_id = request.session.get('user_id')
     recepciones = Recepcion.objects.filter(distribuidor=distribuidor_id)
@@ -704,7 +760,7 @@ def distribuir_caja(request):
                         # Guardar cada caja
                         for caja in nuevas_cajas:
                             caja.save()
-                    return redirect('confirmation_page')
+                    return redirect('dashboard_distribuidor')
                 except ValueError as e:
                     errores.append(str(e))
 
@@ -718,10 +774,11 @@ def distribuir_caja(request):
 
 # lo mismo para pallet 
 @login_required_for_model(Predio)
+@csrf_exempt
 def distribuir_pallet(request):
     # Obtener todos los pallets disponibles
     predio_id = request.session.get('user_id')  # Suponiendo que user_id es el ID del distribuidor
-    pallets = Pallet.objects.filter(predio = predio_id)
+    pallets = Pallet.objects.filter(predio=predio_id).annotate(num_distribuciones=Count('distribuidorpallet')).filter(num_distribuciones=0)
     distribuidores = Distribuidor.objects.all()
     errores = []
     pallet = None
@@ -785,6 +842,7 @@ def distribuir_pallet(request):
 
 # lo mismo para pallet 
 @login_required_for_model(Distribuidor)
+@csrf_exempt
 def pallet_view(request):
     """Vista para gestionar las cajas de un empaque específico o mostrar todas las cajas y empaques."""
     
@@ -808,6 +866,7 @@ def pallet_view(request):
     })
 
 @login_required_for_model(Distribuidor)
+@csrf_exempt
 def cajas_view(request):
     """Vista para gestionar las cajas asociadas a un distribuidor específico o mostrar las cajas filtradas por recepción."""
     
@@ -854,22 +913,18 @@ def seleccionar_caja(request, caja_id):
     secure_id = generate_secure_url_id('Caja', caja_id)
 
     # Redirigir según el tipo de actor, pero usando secure_id en la URL
-    if user_type == 'cliente':
+    if user_type == 'cliente' or user_type is None:
         return redirect('recibir_caja', secure_id=secure_id)
     elif user_type == 'transporte':
         return redirect('transportar_caja', secure_id=secure_id)
     elif user_type == 'distribuidor':
         return redirect('informacion_caja', secure_id=secure_id)
-
     # Redirigir a una vista de error si el tipo no es válido
     return redirect('login')
 
 
-
-
-
-
 @login_required_for_model(Distribuidor)
+@csrf_exempt
 def informacion_caja(request, secure_id):
     # Validar el hash y recuperar el pallet_id original
     caja_id = validate_and_recover_id(secure_id, 'Caja')
@@ -892,6 +947,7 @@ def informacion_caja(request, secure_id):
         })
 
 @login_required_for_model(Transporte)
+@csrf_exempt
 def transportar_caja(request, secure_id):
     # Validar el hash y recuperar el pallet_id original
     caja_id = validate_and_recover_id(secure_id, 'Caja')
@@ -906,9 +962,13 @@ def transportar_caja(request, secure_id):
     caja = get_object_or_404(Caja, id=caja_id)
     cliente = caja.cliente
     recepcion = caja.recepcion
+    distribuidor=recepcion.distribuidor
     envio_pallet = recepcion.envio_pallet
     pallet = envio_pallet.pallet
     predio= pallet.predio
+    # Validar el estado de la caja
+    if caja.estado_envio in ['entregado', 'en_ruta']:
+        return render(request, 'error.html', {'message': 'La caja ya está en ruta o ha sido entregada, no se puede iniciar el transporte.'})
     
     # Asegurarse de que se esté trabajando con un transporte
     if user_type != 'transporte':
@@ -917,6 +977,12 @@ def transportar_caja(request, secure_id):
 
     # Obtener el objeto Transporte relacionado con el ID de la sesión
     transporte = get_object_or_404(Transporte, id=transporte_id)
+    vehiculos = Vehiculo.objects.all()
+
+    # Verificar si la lista de vehículos está vacía
+    if not vehiculos.exists():
+        messages.error(request, 'No hay vehículos registrados. No puedes iniciar la entrega sin seleccionar un vehículo.')
+        return redirect('dashboard_transporte')  # Redirige al transporte a un panel de control o vista informativa
     
     # Renderizar la plantilla y pasar los datos
     return render(request, 'transportar_caja.html', {
@@ -926,150 +992,193 @@ def transportar_caja(request, secure_id):
         'recepcion': recepcion,
         'envio_pallet': envio_pallet,
         'pallet': pallet,
-        'predio': predio
+        'vehiculos':vehiculos,
+        'predio': predio,
+        'distribuidor':distribuidor,
+        'secure_id': secure_id
     })
 
-@login_required_for_model(Transporte)
 @csrf_exempt
 def iniciar_entrega_caja(request, secure_id):
-    # Validar el hash y recuperar el pallet_id original
+    # Validar el hash y recuperar el caja_id original
     caja_id = validate_and_recover_id(secure_id, 'Caja')
-    if secure_id is None:
-        # Si el hash no es válido, muestra un mensaje de error o redirige
-        return render(request, 'error.html', {'message': 'ID no válido'})
+    if caja_id is None:
+        return JsonResponse({"error": "ID no válido"}, status=400)
+
     if request.method == "POST":
         try:
+            # Obtener el ID del transporte desde la sesión
             transporte_id = request.session.get('user_id')
             transporte = get_object_or_404(Transporte, id=transporte_id)
+            vehiculo_id = request.POST.get('vehiculo_id')
 
             # Obtener la caja y su envío relacionado
             caja = get_object_or_404(Caja, id=caja_id)
+            # Validar que el vehículo existe
+            vehiculo = get_object_or_404(Vehiculo, id=vehiculo_id)
 
-            # Capturar las coordenadas iniciales desde el formulario o frontend
-            ruta_inicio_latitude = float(request.POST['ruta_inicio_latitude'])
-            ruta_inicio_longitude = float(request.POST['ruta_inicio_longitude'])
+            # Verifica si las coordenadas se están enviando por primera vez
+            if 'ruta_inicio_latitude' in request.POST and 'ruta_inicio_longitude' in request.POST:
+                # Obtener coordenadas iniciales
+                latitude = request.POST.get('ruta_inicio_latitude')
+                longitude = request.POST.get('ruta_inicio_longitude')
 
-            # Crear un nuevo registro de EnvioCaja
-            envio_caja = EnvioCaja.objects.create(
-                caja=caja,
-                transporte=transporte,
-                ruta_inicio_latitude=ruta_inicio_latitude,
-                ruta_inicio_longitude=ruta_inicio_longitude,
-                fecha_inicio=timezone.now(),
-                estado_envio='enviado'
-            )
-            
-            # Redirigir de nuevo o mostrar mensaje
-            return redirect('transportar_caja', caja_id=caja_id)
+                if latitude is None or longitude is None:
+                    return JsonResponse({'success': False, 'message': 'Faltan coordenadas iniciales'})
+
+                # Crear un nuevo registro de EnvioCaja
+                envio_caja = EnvioCaja.objects.create(
+                    caja=caja,
+                    transporte=transporte,
+                    ruta_inicio_latitude=latitude,
+                    ruta_inicio_longitude=longitude,
+                    fecha_inicio=timezone.now(),
+                    vehiculo=vehiculo
+                    # Asignar el vehículo (asegúrate de que el modelo tiene este campo)
+                )
+                caja.estado_envio = 'en_ruta'
+                caja.save()
+
+                # Devolver una respuesta JSON con el ID de la caja y el envío creado
+                return JsonResponse({'success': True, 'enviocaja_id': envio_caja.id, 'caja_id': caja.id})
+
+
+            # Si se están actualizando coordenadas
+            enviocaja_id = request.POST.get('enviocaja_id')  # Obtén el ID del envío de la solicitud
+            enviocaja = get_object_or_404(EnvioCaja, id=enviocaja_id)
+
+            coordenadas_transporte = request.POST.get('coordenadasTransporte')
+            if coordenadas_transporte:
+                coordenadas_transporte = json.loads(coordenadas_transporte)
+                enviocaja.coordenadas_transporte = json.dumps(coordenadas_transporte)  # Guarda las coordenadas
+                enviocaja.save()  # Guarda los cambios
+
+            return JsonResponse({'success': True, 'message': 'Coordenadas actualizadas correctamente.'})
 
         except Exception as e:
-            return JsonResponse({"error": str(e)}, status=500)
+            return JsonResponse({'success': False, 'message': str(e)})
+
+    return JsonResponse({'success': False, 'message': 'Método no permitido'}, status=405)
 
 @csrf_exempt
 def finalizar_entrega_caja(request, secure_id):
-    # Validar el hash y recuperar el pallet_id original
+    # Validar el hash y recuperar el caja_id original
     caja_id = validate_and_recover_id(secure_id, 'Caja')
+    
     if secure_id is None:
         # Si el hash no es válido, muestra un mensaje de error o redirige
         return render(request, 'error.html', {'message': 'ID no válido'})
+    
     if request.method == "POST":
         try:
-            transporte_id = request.session.get('user_id')
-            transporte = get_object_or_404(Transporte, id=transporte_id)
+            # Verifica si el contenido es JSON o un formulario
+            if request.content_type == 'application/json':
+                data = json.loads(request.body)
+            else:
+                data = request.POST
 
-            # Obtener la caja
-            caja = get_object_or_404(Caja, id=caja_id)
+            # Obtén y convierte los valores a float cuando sea necesario
+            latitude = data.get('ruta_final_latitude')  # Cambiado de 'latitude' a 'ruta_final_latitude'
+            longitude = data.get('ruta_final_longitude')  # Cambiado de 'longitude' a 'ruta_final_longitude'
+            enviocaja_id = data.get('enviocaja_id')
+            print(latitude)
+            print(longitude)
+            # Valida los datos necesarios
+            if not latitude or not longitude:
+                return JsonResponse({'success': False, 'message': 'Faltan la latitud o la longitud.'})
+            if not enviocaja_id:
+                return JsonResponse({'success': False, 'message': 'Falta el ID del envío.'})
 
-            # Obtener el envío relacionado a la caja y transporte
-            envio_caja = get_object_or_404(EnvioCaja, caja=caja, transporte=transporte)
+            # Convierte latitud y longitud a float
+            latitude = float(latitude)
+            longitude = float(longitude)
+            # Obtén el objeto de envío
+            enviocaja = get_object_or_404(EnvioCaja, id=enviocaja_id)
+            print(enviocaja_id)
+            # Asignación de los valores
+            enviocaja.ruta_final_latitude = latitude
+            enviocaja.ruta_final_longitude = longitude
+            enviocaja.fecha_llegada = timezone.now()  # Mantiene la fecha en UTC
 
-            # Capturar las coordenadas finales desde el formulario o frontend
-            ruta_final_latitude = float(request.POST['ruta_final_latitude'])
-            ruta_final_longitude = float(request.POST['ruta_final_longitude'])
-
-            # Calcular la distancia (utilizando la fórmula Haversine)
-            distancia = calcular_distancia(
-                envio_caja.ruta_inicio_latitude,
-                envio_caja.ruta_inicio_longitude,
-                ruta_final_latitude,
-                ruta_final_longitude
+            # Calcular distancia y guardar
+            enviocaja.distancia = calcular_distancia(
+                enviocaja.ruta_inicio_latitude,
+                enviocaja.ruta_inicio_longitude,
+                enviocaja.ruta_final_latitude,
+                enviocaja.ruta_final_longitude
             )
-
-            # Actualizar el modelo EnvioCaja
-            envio_caja.ruta_final_latitude = ruta_final_latitude
-            envio_caja.ruta_final_longitude = ruta_final_longitude
-            envio_caja.fecha_llegada = timezone.now()
-            envio_caja.distancia = distancia
-            envio_caja.estado_envio = 'entregado'
-            envio_caja.save()
-
-            # Redirigir de nuevo o mostrar mensaje
-            return redirect('transportar_caja', caja_id=caja_id)
+            enviocaja.save()
+            # Respuesta para AJAX
+            return JsonResponse({'success': True, 'message': 'Entrega finalizada con éxito.'})
 
         except Exception as e:
             return JsonResponse({"error": str(e)}, status=500)
 
+    # En caso de un método no soportado o el retorno de una respuesta GET, se podría mostrar un error o alguna información básica
+    return JsonResponse({'success': False, 'message': 'Método no soportado'}, status=405)
 
+@csrf_exempt
 def recibir_caja(request, secure_id):
-    # Validar el hash y recuperar el pallet_id original
+    # Validar el hash y recuperar el ID original de la caja
     caja_id = validate_and_recover_id(secure_id, 'Caja')
-    if secure_id is None:
-        # Si el hash no es válido, muestra un mensaje de error o redirige
+    if caja_id is None:
         return render(request, 'error.html', {'message': 'ID no válido'})
+    
+    if RecepcionCliente.objects.filter(caja_id=caja_id).exists():
+        return render(request, 'error.html', {'message': 'Esta caja ya fue registrada.'})
+
+    # Obtener la caja por su ID antes de manejar el método POST o GET
+    try:
+        caja = get_object_or_404(Caja, id=caja_id)
+    except Exception as e:
+        return JsonResponse({"error": str(e)}, status=500)
+    hay_envio = EnvioCaja.objects.filter(caja=caja).exists()
+    envio_caja = EnvioCaja.objects.filter(caja=caja).first()  # Usar first() para evitar errores 404
     if request.method == "GET":
-        try:
-            # Obtener la caja por su ID
-            caja = get_object_or_404(Caja, id=caja_id)
-            cliente = caja.cliente
-            empaque = caja.empaque
-            recepcion = empaque.recepcion
-            envio_pallet = recepcion.envio_pallet
-            pallet = envio_pallet.pallet
-            predio= pallet.predio
-            transporte_pallet = envio_pallet.transporte
-
-
-            # Obtener el envío relacionado a la caja
-            envio_caja = get_object_or_404(EnvioCaja, caja=caja)
-            transporte_caja = envio_caja.transporte
-
-            # Aquí se debe obtener el precio de la caja (ajusta según tu modelo)
-            precio = (pallet.precio_venta * caja.peso_caja)
-            precio_formateado = f"${precio:,.1f}".replace(",", "X").replace(".", ",").replace("X", ".")
-
-            return render(request, 'recibir_caja.html', {
-                'caja': caja,
-                'envio_caja': envio_caja,
-                'precio': precio,
-                'predio': predio,
-                'transporte_pallet': transporte_pallet,
-                'transporte_caja' : transporte_caja,
-                'pallet': pallet,
-                'precio_formateado': precio_formateado
-            })
-
-        except Exception as e:
-            return JsonResponse({"error": str(e)}, status=500)
+        return render(request, 'recibir_caja.html', {'caja': caja, 'secure_id': secure_id,'hay_envio':hay_envio,'envio_caja':envio_caja})
 
     elif request.method == "POST":
         try:
-            # Obtener datos del cliente
-            cliente_id = request.session.get('user_id')  # Suponiendo que guardas el ID del cliente en la sesión
-            caja = get_object_or_404(Caja, id=caja_id)
+            # Determinar si la caja tiene un cliente asignado
+            cliente_registrado = caja.cliente is not None
 
-            # Crear el pago asociado a la caja y cliente
-            pago = Pago(
-                enviocaja=envio_caja,           # Relación con EnvioCaja
-                cliente_id=cliente_id,          # Relación con Cliente
-                monto=precio                    # Monto que debe pagar el cliente
+            # Capturar la posición del cliente
+            latitude = request.POST.get('latitude')
+            longitude = request.POST.get('longitude')
+
+            # Guardar el registro de la recepción
+            recepcion = RecepcionCliente(
+                caja=caja,
+                cliente_registrado=cliente_registrado,
+                latitude=latitude,
+                longitude=longitude
             )
-            pago.save()  # Guardar el registro en la base de datos
+            recepcion.save()
 
-            # Redirigir a una página de éxito o confirmación
-            return redirect('pagina_exito')  # Ajusta esto a la URL de tu elección
+            Caja.objects.filter(id=caja_id).update(estado_envio='entregado')
+
+            # Generar la URL para la vista de detalles de la caja
+            informacion_qr = request.build_absolute_uri(reverse('detalles_caja', args=[secure_id]))
+            qr_code_data = informacion_qr  # Almacena la URL completa en el QR
+            qr_code = generate_qr_code(qr_code_data)
+
+            # Crear un archivo temporal para el QR
+            qr_image_name = f'informacion_caja_{secure_id}.png'
+            qr_content = ContentFile(qr_code)
+
+            # Preparar el archivo para su descarga
+            response = HttpResponse(qr_content, content_type='image/png')
+            response['Content-Disposition'] = f'attachment; filename="{qr_image_name}"'
+            response['X-Redirect'] = request.build_absolute_uri('/login')
+            return response
 
         except Exception as e:
             return JsonResponse({"error": str(e)}, status=500)
+
+    # This can be reached in a case of an unexpected method (if needed)
+    return render(request, 'recibir_caja.html', {'caja': caja, 'secure_id': secure_id,'hay_envio': hay_envio,'envio_caja':envio_caja})  # Agregar user_id al contexto})
+
+
 
 @login_required_for_model(Distribuidor)
 def tipocaja(request):
@@ -1084,10 +1193,11 @@ def tipocaja(request):
     return render(request, 'crear_caja.html', {'form': form})
 
 @login_required_for_model(Distribuidor)
+@csrf_exempt
 def asignar_cliente(request):
     distribuidor_id = request.session.get('user_id')
     # Filtrar las cajas del distribuidor sin cliente asignado
-    cajas = Caja.objects.filter(recepcion__distribuidor=distribuidor_id, cliente__isnull=True)
+    cajas = Caja.objects.filter(recepcion__distribuidor=distribuidor_id, cliente__isnull=True,estado_envio='pendiente')
     clientes = Cliente.objects.all()  # Todos los clientes disponibles
     errores = []
 
@@ -1120,7 +1230,7 @@ def asignar_cliente(request):
         'clientes': clientes,
         'errores': errores,
     })
-
+@csrf_exempt
 def actualizar_pallet(request):
     pallets = Pallet.objects.all()  # Obtener todos los pallets para mostrarlos
 
@@ -1142,7 +1252,7 @@ def actualizar_pallet(request):
         'pallets': pallets,
     }
     return render(request, 'actualizar_pallet.html', context)
-
+@csrf_exempt
 def actualizar_datos_pallet(request, pallet_id):
     # Obtener el pallet correspondiente
     pallet = get_object_or_404(Pallet, id=pallet_id)
@@ -1184,6 +1294,9 @@ def actualizar_datos_pallet(request, pallet_id):
 
     else:
         form = PalletForm(instance=pallet)
+        # Convertir la fecha y el peso a los formatos correctos para el formulario
+        pallet.fecha_cosecha = pallet.fecha_cosecha.strftime('%Y-%m-%d')  # Asegúrate de que 'fecha' sea un campo de fecha en tu modelo
+        
 
     context = {
         'form': form,
@@ -1191,7 +1304,7 @@ def actualizar_datos_pallet(request, pallet_id):
         'pallet': pallet,
     }
     return render(request, 'actualizar_datos_pallet.html', context)
-
+@csrf_exempt
 def eliminar_distribuidores(request, pallet_id):
     """Vista para eliminar distribuidores de un pallet específico."""
     
@@ -1205,7 +1318,7 @@ def eliminar_distribuidores(request, pallet_id):
         'pallet': pallet,
         'distribuidores_pallet': distribuidores_pallet,
     })
-
+@csrf_exempt
 def eliminar_distribuidor_pallet(request, distribuidor_pallet_id):
      
     if request.method == 'POST' and request.headers.get('x-requested-with') == 'XMLHttpRequest':
@@ -1252,7 +1365,7 @@ def eliminar_distribuidor_pallet(request, distribuidor_pallet_id):
     else:
         return JsonResponse({'success': False, 'error': 'Método no permitido o no es una solicitud AJAX.'})
 
-
+@csrf_exempt
 def añadir_distribuidor(request, pallet_id):
     pallet = get_object_or_404(Pallet, id=pallet_id)
     distribuidores = Distribuidor.objects.all()
@@ -1310,6 +1423,37 @@ def añadir_distribuidor(request, pallet_id):
         'distribuidor_pallets': distribuidor_pallets,
         'errores': errores,
     })
+
+def detalles_caja(request, secure_id):
+    # Valida y recupera el ID de la caja usando el secure_id
+    caja_id = validate_and_recover_id(secure_id, 'Caja')
+    if caja_id is None:
+        return render(request, 'error.html', {'message': 'ID no válido'})
+
+     # Obtener la caja y mostrar la información
+    caja = get_object_or_404(Caja, id=caja_id)
+
+    # Obtener los datos relacionados
+    recepcion = get_object_or_404(Recepcion, id=caja.recepcion.id)
+    envio_pallet = get_object_or_404(EnvioPallet, id=recepcion.envio_pallet.id)
+    pallet = get_object_or_404(Pallet, id=envio_pallet.pallet.id)
+    predio = get_object_or_404(Predio, id=pallet.predio.id)
+     # Intenta obtener EnvioCaja y RecepcionCliente, manejando excepciones si no existen
+    envio_caja = EnvioCaja.objects.filter(caja=caja).first()
+    recepcion_cliente = RecepcionCliente.objects.filter(caja=caja).first()
+
+    # Pasar toda la información a la plantilla
+    context = {
+        'caja': caja,
+        'recepcion': recepcion,
+        'envio_pallet': envio_pallet,
+        'pallet': pallet,
+        'predio': predio,
+        'envio_caja': envio_caja,
+        'recepcion_cliente': recepcion_cliente
+    }
+
+    return render(request, 'detalles_caja.html', context)
 """""
 def ingreso_trabajador(request):
     if request.method == 'POST':

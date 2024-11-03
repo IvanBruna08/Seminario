@@ -23,7 +23,8 @@
             <th>Tipo Caja</th>
             <th>Peso Caja</th>
             <th>QR</th>
-            <th>Fecha Caja</th>  <!-- Agregamos el encabezado para la fecha -->
+            <th>Fecha Caja</th> 
+            <th>Estado</th>  <!-- Agregamos el encabezado para la fecha -->
         </tr>
     </thead>
     <tbody>
@@ -48,6 +49,7 @@
                         {% endif %}
                     
                 </td>
+                <td>{{ caja.estado_envio }}</td>
             </tr>
         {% endfor %}
     </tbody>

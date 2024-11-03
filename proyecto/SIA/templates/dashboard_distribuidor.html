@@ -7,11 +7,11 @@
     <title>Dashboard Distribuidor</title>
 </head>
 <body>
-<<<<<<< HEAD
     <h1>Dashboard Distribuidor</h1>
     <div class="contenedor-lista-d">
         <ul>
             <li><a href="{% url 'recepciones_completadas' %}" class="lista-d">Pallet Recepcionado</a></li>
+            <li><a href="{% url 'crear_caja' %}" class="lista-d">Registrar Cajas</a></li>
             <li><a href="{% url 'distribuir_caja' %}" class="lista-d">Distribuir Caja</a></li>
             <li><a href="{% url 'asignar_cliente' %}" class="lista-d">Asignar Cliente</a>
             <li><a href="{% url 'cajas_view' %}" class="lista-d">Caja Lista</a></li>
@@ -75,17 +75,5 @@
 
         connectButton.addEventListener('click', connectMetaMask);
     </script>
-=======
-    <h1>Distribuidor</h1>
-    <div class="contenedor-lista-d">
-        <ul>
-            <li><a href="{% url 'recepciones_completadas' %}" class="lista-d">Pallet Recepcionado</a></li>
-            <li><a href="{% url 'crear_empaque' %}" class="lista-d">Crear Empaque</a></li>
-            <li><a href="{% url 'distribuir_caja' %}" class="lista-d">Distribuir Caja</a></li>
-            <li><a href="{% url 'cajas_view' %}" class="lista-d">Caja Lista</a></li>
-        </ul>
-    </div>
-    <a href="{% url 'custom_logout' %}" class="btn-logout">Salir</a>
->>>>>>> ea592f2bc55f7c366c0d0916e68aa7dfeb847aee
 </body>
 </html>
