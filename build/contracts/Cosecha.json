@@ -25,7 +25,8 @@
         }
       ],
       "stateMutability": "view",
-      "type": "function"
+      "type": "function",
+      "constant": true
     },
     {
       "inputs": [
@@ -84,7 +85,8 @@
         }
       ],
       "stateMutability": "view",
-      "type": "function"
+      "type": "function",
+      "constant": true
     },
     {
       "inputs": [
@@ -212,7 +214,8 @@
         }
       ],
       "stateMutability": "view",
-      "type": "function"
+      "type": "function",
+      "constant": true
     }
   ],
   "metadata": "{\"compiler\":{\"version\":\"0.8.0+commit.c7dfd78e\"},\"language\":\"Solidity\",\"output\":{\"abi\":[{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"id\",\"type\":\"uint256\"}],\"name\":\"TransportadoMarcado\",\"type\":\"event\"},{\"inputs\":[],\"name\":\"cosechaCounter\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"name\":\"cosechas\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"id\",\"type\":\"uint256\"},{\"internalType\":\"string\",\"name\":\"producto\",\"type\":\"string\"},{\"internalType\":\"string\",\"name\":\"fechaCosecha\",\"type\":\"string\"},{\"internalType\":\"string\",\"name\":\"ubicacion\",\"type\":\"string\"},{\"internalType\":\"uint256\",\"name\":\"cantidadLote\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"cantidadAgua\",\"type\":\"uint256\"},{\"internalType\":\"string\",\"name\":\"pesticidasFertilizantes\",\"type\":\"string\"},{\"internalType\":\"string\",\"name\":\"practicasCultivo\",\"type\":\"string\"},{\"internalType\":\"bool\",\"name\":\"transportado\",\"type\":\"bool\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"_idCosecha\",\"type\":\"uint256\"}],\"name\":\"marcarTransportado\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"_id\",\"type\":\"uint256\"}],\"name\":\"obtenerCosecha\",\"outputs\":[{\"components\":[{\"internalType\":\"uint256\",\"name\":\"id\",\"type\":\"uint256\"},{\"internalType\":\"string\",\"name\":\"producto\",\"type\":\"string\"},{\"internalType\":\"string\",\"name\":\"fechaCosecha\",\"type\":\"string\"},{\"internalType\":\"string\",\"name\":\"ubicacion\",\"type\":\"string\"},{\"internalType\":\"uint256\",\"name\":\"cantidadLote\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"cantidadAgua\",\"type\":\"uint256\"},{\"internalType\":\"string\",\"name\":\"pesticidasFertilizantes\",\"type\":\"string\"},{\"internalType\":\"string\",\"name\":\"practicasCultivo\",\"type\":\"string\"},{\"internalType\":\"bool\",\"name\":\"transportado\",\"type\":\"bool\"}],\"internalType\":\"struct Cosecha.CosechaData\",\"name\":\"\",\"type\":\"tuple\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"string\",\"name\":\"_producto\",\"type\":\"string\"},{\"internalType\":\"string\",\"name\":\"_fechaCosecha\",\"type\":\"string\"},{\"internalType\":\"string\",\"name\":\"_ubicacion\",\"type\":\"string\"},{\"internalType\":\"uint256\",\"name\":\"_cantidadLote\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"_cantidadAgua\",\"type\":\"uint256\"},{\"internalType\":\"string\",\"name\":\"_pesticidasFertilizantes\",\"type\":\"string\"},{\"internalType\":\"string\",\"name\":\"_practicasCultivo\",\"type\":\"string\"}],\"name\":\"registrarCosecha\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"nonpayable\",\"type\":\"function\"}],\"devdoc\":{\"kind\":\"dev\",\"methods\":{},\"version\":1},\"userdoc\":{\"kind\":\"user\",\"methods\":{},\"version\":1}},\"settings\":{\"compilationTarget\":{\"project:/contracts/cosecha.sol\":\"Cosecha\"},\"evmVersion\":\"istanbul\",\"libraries\":{},\"metadata\":{\"bytecodeHash\":\"ipfs\"},\"optimizer\":{\"enabled\":false,\"runs\":200},\"remappings\":[]},\"sources\":{\"project:/contracts/cosecha.sol\":{\"keccak256\":\"0xdbf799f406a111d0d1d2c1433b2ad75cc40e2d246f5e0cdaef0c6c4baefc13f4\",\"license\":\"GPL-3.0\",\"urls\":[\"bzz-raw://a8e93631acddb5be5107df6ab2ff122323ea292d599788e23ce8abfd7f51d3a5\",\"dweb:/ipfs/QmdrYzG2GLnCHQy8ptE8dL6CgcBsfyNqRCSTF4hJp6WLYP\"]}},\"version\":1}",
@@ -8059,12 +8062,13 @@
     "5777": {
       "events": {},
       "links": {},
-      "address": "0xedFF98Aa4aa076AA55865AC88dD2e49ab6574938",
-      "transactionHash": "0xcfb5c775c0e38d871405fcbf5bb621f37144613ecff9d10982ea06d35ebde5ee"
+      "address": "0xCA27bA75848386dDc12da3ae6b7A7E2eF98a1654",
+      "transactionHash": "0xf3a0bd8b6b848fc022876903bbaf0196438a7ad4558dda681cc2f847d9ea3aef"
     }
   },
   "schemaVersion": "3.4.16",
-  "updatedAt": "2024-09-07T04:19:11.588Z",
+  "updatedAt": "2024-11-10T22:54:02.402Z",
+  "networkType": "ethereum",
   "devdoc": {
     "kind": "dev",
     "methods": {},

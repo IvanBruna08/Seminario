@@ -2,85 +2,119 @@
 pragma solidity ^0.8.0;
 
 contract Distribuidor {
-    // Estructura para la recepción de un pallet
-    struct RecepcionPallet {
-        uint envioPalletId;     // ID del envío de pallet
-        uint distribuidorId;     // ID del distribuidor
-        uint fechaRecepcion;     // Fecha de recepción
-        bool recibido;           // Estado de recepción
+    struct Recepcion {
+        uint256 idRecepcion;         
+        uint256 idEnvioPallet;      
+        uint256 pesoEnvio;           
     }
 
-    // Estructura para la caja
     struct Caja {
-        uint recepcionId;        // ID de la recepción a la que pertenece
-        uint clienteId;          // ID del cliente (opcional)
-        uint fechaCreacion;      // Fecha de creación de la caja
+        uint256 idCaja;              
+        uint256 idRecepcion;         
+        uint256 idCliente;           
+        uint256 tipocaja;           
     }
 
-    // Mapeo para almacenar las recepciones de pallets
-    mapping(uint => RecepcionPallet) public recepcionesPallets;
+    struct RecepcionCliente {
+        uint256 idRecepcionCliente;  
+        uint256 idCaja;              
+        uint256 fecha;               
+        int256 Latitude;             
+        int256 Longitude;            
+    }
 
-    // Mapeo para almacenar las cajas creadas
-    mapping(uint => Caja) public cajas;
+    mapping(uint256 => Recepcion) public recepciones;  
+    mapping(uint256 => Caja) public cajas;             
+    mapping(uint256 => RecepcionCliente) public recepcionClientes;   
+    uint256 public recepcionCount;    
+    uint256 public cajaCount;         
+    uint256 public recepcionClienteCount;  
 
-    // Contador para las cajas creadas
-    uint public contadorCajas;
+    event RecepcionRegistered(uint256 idRecepcion, uint256 idEnvioPallet, uint256 pesoEnvio);
+    event CajaRegistered(uint256 idCaja, uint256 idRecepcion, uint256 tipocaja);
+    event ClienteAsignado(uint256 idCaja, uint256 idCliente);
+    event RecepcionClienteRegistered(uint256 idRecepcionCliente, uint256 idCaja, uint256 fecha, int256 Latitude, int256 Longitude);
 
-    // Eventos
-    event PalletRecibido(
-        uint indexed envioPalletId,
-        uint indexed distribuidorId,
-        uint fechaRecepcion
-    );
-
-    event CajaCreada(
-        uint indexed cajaId,
-        uint indexed recepcionId,
-        uint clienteId,
-        uint fechaCreacion
-    );
-
-    event ClienteAsignado(
-        uint indexed cajaId,
-        uint indexed clienteId
-    );
-
-    // Función para marcar la recepción de un pallet
-    function marcarRecepcionPallet(
-        uint envioPalletId,
-        uint distribuidorId
+    // Función para registrar una nueva recepción
+    function registerRecepcion(
+        uint256 _idRecepcion,
+        uint256 _idEnvioPallet,
+        uint256 _pesoEnvio
     ) public {
-        require(recepcionesPallets[envioPalletId].envioPalletId == 0 || !recepcionesPallets[envioPalletId].recibido, "Pallet ya recibido.");
+        require(recepciones[_idRecepcion].idRecepcion == 0, "Recepcion ya registrada");
 
-        recepcionesPallets[envioPalletId] = RecepcionPallet({
-            envioPalletId: envioPalletId,
-            distribuidorId: distribuidorId,
-            fechaRecepcion: block.timestamp,
-            recibido: true
+        // Crear y almacenar la nueva recepción
+        recepciones[_idRecepcion] = Recepcion({
+            idRecepcion: _idRecepcion,
+            idEnvioPallet: _idEnvioPallet,
+            pesoEnvio: _pesoEnvio
         });
 
-        emit PalletRecibido(envioPalletId, distribuidorId, block.timestamp);
+        recepcionCount++;
+
+        // Emitir el evento de registro
+        emit RecepcionRegistered(_idRecepcion, _idEnvioPallet, _pesoEnvio);
     }
 
-    // Función para crear una caja
-    function crearCaja(uint recepcionId) public {
-        contadorCajas++;
-        
-        cajas[contadorCajas] = Caja({
-            recepcionId: recepcionId,
-            clienteId: 0, // Por defecto, no hay cliente asignado
-            fechaCreacion: block.timestamp
+    // Función para registrar una nueva caja en una recepción específica
+    function registerCaja(
+        uint256 _idCaja,
+        uint256 _idRecepcion,
+        uint256 _tipocaja
+    ) public {
+        require(cajas[_idCaja].idCaja == 0, "Caja ya registrada");
+        require(recepciones[_idRecepcion].idRecepcion != 0, "Recepcion no encontrada");
+
+        // Crear y almacenar la nueva caja
+        cajas[_idCaja] = Caja({
+            idCaja: _idCaja,
+            idRecepcion: _idRecepcion,
+            idCliente: 0,   // Inicia sin cliente asignado
+            tipocaja: _tipocaja
         });
 
-        emit CajaCreada(contadorCajas, recepcionId, 0, block.timestamp);
+        cajaCount++;
+
+        // Emitir el evento de registro
+        
+        emit CajaRegistered(_idCaja, _idRecepcion, _tipocaja);
     }
 
-    // Función para asignar un cliente a una caja
-    function asignarCliente(uint cajaId, uint clienteId) public {
-        require(cajas[cajaId].recepcionId != 0, "La caja no existe.");
-        
-        cajas[cajaId].clienteId = clienteId; // Asignar el cliente a la caja
-        
-        emit ClienteAsignado(cajaId, clienteId);
+    // Función para asignar un cliente a una caja específica
+    function asignarClienteACaja(uint256 _idCaja, uint256 _idCliente) public {
+        require(cajas[_idCaja].idCaja != 0, "Caja no encontrada");
+        require(cajas[_idCaja].idCliente == 0, "Cliente ya asignado a esta caja");
+
+        // Asignar el cliente a la caja
+        cajas[_idCaja].idCliente = _idCliente;
+
+        // Emitir el evento de asignación de cliente
+        emit ClienteAsignado(_idCaja, _idCliente);
+    }
+
+    // Función para registrar la recepción de una caja por parte de un cliente
+    function registerRecepcionCliente(
+        uint256 _idRecepcionCliente,
+        uint256 _idCaja,
+        uint256 _fecha,
+        int256 _Latitude,
+        int256 _Longitude
+    ) public {
+        require(cajas[_idCaja].idCaja != 0, "Caja no encontrada");
+
+
+        // Crear y almacenar la nueva recepción de cliente
+        recepcionClientes[_idRecepcionCliente] = RecepcionCliente({
+            idRecepcionCliente: _idRecepcionCliente,
+            idCaja: _idCaja,
+            fecha: _fecha,
+            Latitude: _Latitude,
+            Longitude: _Longitude
+        });
+
+        recepcionClienteCount++;
+
+        // Emitir el evento de registro
+        emit RecepcionClienteRegistered(_idRecepcionCliente, _idCaja, _fecha, _Latitude, _Longitude);
     }
 }

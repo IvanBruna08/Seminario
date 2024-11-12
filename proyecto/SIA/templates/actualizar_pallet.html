@@ -1,13 +1,9 @@
-<!DOCTYPE html>
-<html>
-<head>
-    {% load static %}
-    <link rel="stylesheet" href="{% static 'css/styles.css' %}"> <!-- Asegúrate de tener el archivo CSS -->
-    <title>Actualizar Pallet</title>
-</head>
-<body>
-    <h2>Actualizar Pallet</h2>
-    <a class="btn-home" href="{% url 'dashboard_predio' %}">Inicio</a>
+{% extends 'base.html' %}
+
+{% block title %}Actualizar Pallet{% endblock %}
+
+{% block content %}
+<h2>Actualizar Pallet</h2>
 
     <form method="POST">
         {% csrf_token %}
@@ -25,5 +21,4 @@
         <button type="submit" name="action" value="eliminar_distribuidor">Eliminar Distribuidor</button>
         <button type="submit" name="action" value="añadir_distribuidor">Añadir Distribuidor</button>
     </form>
-</body>
-</html>
+    {% endblock %}

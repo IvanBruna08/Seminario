@@ -2,128 +2,107 @@
 pragma solidity ^0.8.0;
 
 contract Transporte {
-    // Estructura para el envío de cajas
-    struct EnvioCaja {
-        uint envioCajaId;         // ID del envío de la caja
-        uint cajaId;              // ID de la caja
-        string coordenadasTransporte; // Coordenadas de transporte en formato JSON
-        uint fechaInicio;         // Fecha de inicio
-        uint fechaLlegada;        // Fecha de llegada
-        bool entregado;           // Estado de entrega
-    }
 
-    // Estructura para el envío de pallets
     struct EnvioPallet {
-        uint envioPalletId;      // ID del envío de pallet
-        uint palletId;            // ID del pallet
-        string coordenadasTransporte; // Coordenadas de transporte en formato JSON
-        uint fechaInicio;         // Fecha de inicio
-        uint fechaLlegada;        // Fecha de llegada
+        uint256 palletId;
+        uint256 transporteId;
+        uint256 vehiculoId;
+        uint256 fechaInicio;
+        uint256 fechaLlegada;
+        int256 rutaInicioLatitude;   
+        int256 rutaInicioLongitude;
+        int256 rutaFinalLatitude;
+        int256 rutaFinalLongitude;
     }
 
-    // Mapeo para almacenar los envíos de cajas
-    mapping(uint => EnvioCaja) public enviosCajas;
-    // Mapeo para almacenar los envíos de pallets
-    mapping(uint => EnvioPallet) public enviosPallets;
+    struct EnvioCaja {
+        uint256 cajaId;
+        uint256 transporteId;
+        uint256 vehiculoId;
+        uint256 fechaInicio;
+        uint256 fechaLlegada;
+        int256 rutaInicioLatitude;   
+        int256 rutaInicioLongitude;
+        int256 rutaFinalLatitude;
+        int256 rutaFinalLongitude;
+    }
 
-    // Eventos
-    event EntregaIniciadaCaja(
-        uint indexed envioCajaId,
-        uint indexed cajaId,
-        uint fechaInicio,
-        string coordenadasTransporte
-    );
+    mapping(uint256 => EnvioPallet) public enviosPallet;
+    mapping(uint256 => EnvioCaja) public enviosCaja;
 
-    event EntregaFinalizadaCaja(
-        uint indexed envioCajaId,
-        uint fechaLlegada,
-        string coordenadasTransporte
-    );
-
-    event EntregaIniciadaPallet(
-        uint indexed envioPalletId,
-        uint indexed palletId,
-        uint fechaInicio,
-        string coordenadasTransporte
-    );
-
-    event EntregaFinalizadaPallet(
-        uint indexed envioPalletId,
-        uint fechaLlegada,
-        string coordenadasTransporte
-    );
-
-    // Función para iniciar la entrega de una caja
-    function iniciarEntregaCaja(
-        uint envioCajaId,
-        uint cajaId,
-        string memory coordenadasTransporte
+    // Función pública para iniciar el envío de un pallet
+    function iniciarEnvioPallet(
+        uint256 palletId,
+        uint256 transporteId,
+        uint256 vehiculoId,
+        int256 rutaInicioLatitude,
+        int256 rutaInicioLongitude
     ) public {
-        // Registrar la entrega en el mapeo
-        enviosCajas[envioCajaId] = EnvioCaja({
-            envioCajaId: envioCajaId,
-            cajaId: cajaId,
-            coordenadasTransporte: coordenadasTransporte,
+        require(enviosPallet[palletId].fechaInicio == 0, "El envio del pallet ya ha sido iniciado");
+
+        enviosPallet[palletId] = EnvioPallet({
+            palletId: palletId,
+            transporteId: transporteId,
+            vehiculoId: vehiculoId,
             fechaInicio: block.timestamp,
             fechaLlegada: 0,
-            entregado: false
+            rutaInicioLatitude: rutaInicioLatitude,
+            rutaInicioLongitude: rutaInicioLongitude,
+            rutaFinalLatitude: 0,
+            rutaFinalLongitude: 0
         });
-
-        // Emitir el evento
-        emit EntregaIniciadaCaja(envioCajaId, cajaId, block.timestamp, coordenadasTransporte);
     }
 
-    // Función para finalizar la entrega de una caja
-    function finalizarEntregaCaja(
-        uint envioCajaId,
-        string memory coordenadasTransporte
+    // Función pública para finalizar el envío de un pallet
+    function finalizarEnvioPallet(
+        uint256 palletId,
+        int256 rutaFinalLatitude,
+        int256 rutaFinalLongitude
     ) public {
-        // Verificar que la entrega esté registrada
-        require(enviosCajas[envioCajaId].cajaId != 0, "Entrega no iniciada.");
-        require(!enviosCajas[envioCajaId].entregado, "La caja ya ha sido entregada.");
+        require(enviosPallet[palletId].fechaInicio != 0, "El envio del pallet no ha sido iniciado");
+        require(enviosPallet[palletId].fechaLlegada == 0, "El envio del pallet ya ha sido finalizado");
 
-        // Actualizar datos de entrega
-        enviosCajas[envioCajaId].fechaLlegada = block.timestamp;
-        enviosCajas[envioCajaId].coordenadasTransporte = coordenadasTransporte; // Guardar coordenadas finales
-        enviosCajas[envioCajaId].entregado = true;
-
-        // Emitir el evento
-        emit EntregaFinalizadaCaja(envioCajaId, block.timestamp, coordenadasTransporte);
+        EnvioPallet storage envio = enviosPallet[palletId];
+        envio.fechaLlegada = block.timestamp;
+        envio.rutaFinalLatitude = rutaFinalLatitude;
+        envio.rutaFinalLongitude = rutaFinalLongitude;
     }
 
-    // Función para iniciar la entrega de un pallet
-    function iniciarEntregaPallet(
-        uint envioPalletId,
-        uint palletId,
-        string memory coordenadasTransporte
+    // Función pública para iniciar el envío de una caja
+    function iniciarEnvioCaja(
+        uint256 cajaId,
+        uint256 transporteId,
+        uint256 vehiculoId,
+        int256 rutaInicioLatitude,
+        int256 rutaInicioLongitude
     ) public {
-        // Registrar la entrega en el mapeo
-        enviosPallets[envioPalletId] = EnvioPallet({
-            envioPalletId: envioPalletId,
-            palletId: palletId,
-            coordenadasTransporte: coordenadasTransporte,
+        require(enviosCaja[cajaId].fechaInicio == 0, "El envio de la caja ya ha sido iniciado");
+
+        enviosCaja[cajaId] = EnvioCaja({
+            cajaId: cajaId,
+            transporteId: transporteId,
+            vehiculoId: vehiculoId,
             fechaInicio: block.timestamp,
-            fechaLlegada: 0
+            fechaLlegada: 0,
+            rutaInicioLatitude: rutaInicioLatitude,
+            rutaInicioLongitude: rutaInicioLongitude,
+            rutaFinalLatitude: 0,
+            rutaFinalLongitude: 0
         });
-
-        // Emitir el evento
-        emit EntregaIniciadaPallet(envioPalletId, palletId, block.timestamp, coordenadasTransporte);
     }
 
-    // Función para finalizar la entrega de un pallet
-    function finalizarEntregaPallet(
-        uint envioPalletId,
-        string memory coordenadasTransporte
+    // Función pública para finalizar el envío de una caja
+    function finalizarEnvioCaja(
+        uint256 cajaId,
+        int256 rutaFinalLatitude,
+        int256 rutaFinalLongitude
     ) public {
-        // Verificar que la entrega esté registrada
-        require(enviosPallets[envioPalletId].palletId != 0, "Entrega no iniciada.");
+        require(enviosCaja[cajaId].fechaInicio != 0, "El envio de la caja no ha sido iniciado");
+        require(enviosCaja[cajaId].fechaLlegada == 0, "El envio de la caja ya ha sido finalizado");
 
-        // Actualizar datos de entrega
-        enviosPallets[envioPalletId].fechaLlegada = block.timestamp;
-        enviosPallets[envioPalletId].coordenadasTransporte = coordenadasTransporte; // Guardar coordenadas finales
-
-        // Emitir el evento
-        emit EntregaFinalizadaPallet(envioPalletId, block.timestamp, coordenadasTransporte);
+        EnvioCaja storage envio = enviosCaja[cajaId];
+        envio.fechaLlegada = block.timestamp;
+        envio.rutaFinalLatitude = rutaFinalLatitude;
+        envio.rutaFinalLongitude = rutaFinalLongitude;
     }
 }
-

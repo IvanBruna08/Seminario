@@ -11,7 +11,7 @@
         <h1 >Bienvenido, {{ nombre_usuario }}</h1>
     <div class="contenedor-lista-d">
         <ul>
-            <li><a class="lista-d">Historial Pagos</a></li>
+            <li><a href="{% url 'historial_cliente' %}" class="lista-d">Historial Pagos</a></li>
             <li><button id="connectButton" class="btn btn-primary">Conectar MetaMask</button></li> 
         </ul>
 

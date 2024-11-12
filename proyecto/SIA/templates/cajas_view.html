@@ -1,6 +1,6 @@
 {% load static %}
     <link rel="stylesheet" href="{% static 'css/styles.css' %}"> <!-- Asegúrate de tener el archivo CSS -->
-    <a href="{% url 'dashboard_distribuidor' %}" class="btn-home">Inicio</a>
+    <a href="{% url 'dashboard_distribuidor' %}" class="btn-home">Atrás</a>
 <form method="get" action="{% url 'cajas_view' %}">
     <label for="recepcion_select">Selecciona un empaque:</label>
     <select id="recepcion_select" name="recepcion_id" onchange="this.form.submit()">
@@ -23,8 +23,7 @@
             <th>Tipo Caja</th>
             <th>Peso Caja</th>
             <th>QR</th>
-            <th>Fecha Caja</th> 
-            <th>Estado</th>  <!-- Agregamos el encabezado para la fecha -->
+            <th>Fecha Caja</th>  <!-- Agregamos el encabezado para la fecha -->
         </tr>
     </thead>
     <tbody>
@@ -49,7 +48,6 @@
                         {% endif %}
                     
                 </td>
-                <td>{{ caja.estado_envio }}</td>
             </tr>
         {% endfor %}
     </tbody>

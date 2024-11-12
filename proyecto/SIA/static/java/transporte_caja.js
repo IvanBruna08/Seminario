@@ -105,13 +105,10 @@ function iniciarSeguimientoDeCoordenadas() {
 // Función para finalizar la entrega y obtener todas las coordenadas almacenadas en el servidor
 function finalizarEntrega() {
     console.log("Función finalizarEntrega llamada");
-    // Captura id_pallet y envio_id desde los elementos de entrada
+
     const idPallet = document.getElementById('id_pallet').value;
     const envio_id = document.getElementById('envio_id').value;
 
-    console.log("ID del pallet:", idPallet); // Para verificar el ID
-    console.log("ID del envio:", envio_id);   // Para verificar el ID
-    
     if (!idPallet) {
         console.error('No se ha iniciado la entrega o falta el identificador del pallet');
         return;
@@ -122,18 +119,22 @@ function finalizarEntrega() {
             const latitudFinal = position.coords.latitude;
             const longitudFinal = position.coords.longitude;
             const tiempoActual = new Date().toISOString(); 
-            console.log("Datos a enviar:", {
-                envio_id: envio_id,
-                ruta_final_latitude: latitudFinal,
-                ruta_final_longitude: longitudFinal,
-                tiempo: tiempoActual,
-                csrfmiddlewaretoken: $('input[name=csrfmiddlewaretoken]').val()
-            });
 
-            // Enviar coordenadas finales y obtener todas las coordenadas de la entrega
+            console.log("Latitud:", latitudFinal, "Longitud:", longitudFinal);
+
+            // Verificar si las coordenadas están disponibles antes de enviar
+            if (!latitudFinal || !longitudFinal) {
+                console.error('Las coordenadas de geolocalización no están disponibles.');
+                return;
+            }
+                        // Asignar coordenadas a campos ocultos
+            $('#ruta_final_latitude').val(latitudFinal);
+            $('#ruta_final_longitude').val(longitudFinal);
+
+            // Enviar coordenadas finales mediante AJAX
             $.ajax({
                 type: "POST",
-                url: $('#endDeliveryForm').attr('action'),  // URL para finalizar entrega
+                url: $('#endDeliveryForm').attr('action'),
                 data: {
                     envio_id: envio_id,
                     ruta_final_latitude: latitudFinal,
@@ -144,8 +145,7 @@ function finalizarEntrega() {
                 success: function(response) {
                     if (response.success) {
                         console.log('Entrega finalizada exitosamente:', response.message);
-                        // Aquí puedes redirigir al usuario a otra página o mostrar un mensaje de éxito
-                        window.location.href = '/login';  // Cambia esta URL según sea necesario
+                        window.location.href = '/login';  // Cambia esta URL si es necesario
                     } else {
                         console.error('Error:', response.message);
                     }
@@ -154,11 +154,14 @@ function finalizarEntrega() {
                     console.error('Error al finalizar entrega:', error);
                 }
             });
-        }, errorGeoLocation);
+        }, function(error) {
+            console.error('Error de geolocalización:', error);
+        });
     } else {
         alert('Geolocalización no soportada.');
     }
 }
+
 
 // Asignar el evento al botón de inicio de entrega
 document.getElementById('startDelivery').addEventListener('click', iniciarEntrega);

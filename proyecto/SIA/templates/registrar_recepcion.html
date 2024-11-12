@@ -35,10 +35,8 @@
             <form method="post" action="{% url 'registrar_recepcion' secure_id %}" id="recepcionForm">
                 {% csrf_token %}
                 {{ form.as_p }} 
-                <button id="confirmar" type="submit" class="btn btn-secondary mt-2">Confirmar Pesaje</button>
+                <button id="confirmar" type="submit" class="btn btn-secondary mt-2">Confirmar Pesaje y Finalizar Entrega</button>
             </form>
-            <!-- Botón para finalizar la entrega -->
-            <button id="endDelivery" class="end-btn btn btn-danger" disabled>Finalizar</button> <!-- Deshabilitado por defecto -->
 
             <!-- Formulario para finalizar la entrega (oculto) -->
             <form id="endDeliveryForm" method="POST" action="{% url 'finalizar_entrega' secure_id %}" style="display: none;">
@@ -57,24 +55,30 @@
     <script src="{% static 'java/transporte_caja.js' %}"></script>
     <script>
         $(document).ready(function() {
-            // Al enviar el formulario de recepción, habilitar el botón de finalizar
-            $('#recepcionForm').on('submit', function() {
-                // Habilita el botón "Finalizar" cuando se confirme el pesaje
-                $('#endDelivery').prop('disabled', false);
-            });
+            // Al enviar el formulario de recepción
+            $('#recepcionForm').on('submit', function(e) {
+                e.preventDefault();  // Evitar el envío inmediato del formulario
+                
+                // Confirmar Pesaje
+                const form = $(this);
+                $.ajax({
+                    type: form.attr('method'),
+                    url: form.attr('action'),
+                    data: form.serialize(),
+                    success: function(response) {
+                        console.log("Pesaje confirmado exitosamente");
     
-            // Si se ha confirmado el pesaje, habilitamos el botón de finalizar
-            {% if pesaje_confirmado %}
-                $('#endDelivery').prop('disabled', false);
-                $('#confirmar').prop('disabled',true);
-            {% endif %}
-    
-            // Asignar el evento al botón "Finalizar Entrega"
-            $('#endDelivery').on('click', function() {
-                console.log("Función finalizarEntrega llamada");
-                finalizarEntrega();
+                        // Llamamos a la función finalizarEntrega para gestionar las coordenadas y finalizar la entrega
+                        finalizarEntrega();
+                    },
+                    error: function(xhr, status, error) {
+                        console.error("Error al confirmar el pesaje:", error);
+                    }
+                });
             });
         });
     </script>
+   
+    
 </body>
 </html>

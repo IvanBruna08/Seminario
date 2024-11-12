@@ -1,15 +1,17 @@
 <!DOCTYPE html>
-<html lang="es">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    {% load static %}
-    <link rel="stylesheet" href="{% static 'css/styles.css' %}"> <!-- Asegúrate de tener el archivo CSS -->
-    <title>Actualizar Datos del Pallet</title>
+{% extends 'base.html' %}
+
+{% block content %}
     <script>
         function validatePeso() {
             const pesoInput = document.getElementById("id_peso");
             const distribuidoresInputs = document.querySelectorAll('[name^="peso_enviado_"]');
+
+            // Si no hay distribuidores, no es necesario validar
+            if (distribuidoresInputs.length === 0) {
+                return true; // Permitir el envío del formulario
+            }
+
             let totalPesoDistribuidores = 0;
 
             distribuidoresInputs.forEach(input => {
@@ -28,7 +30,6 @@
     </script>
 </head>
 <body>
-    <h2>Actualizar Datos del Pallet: {{ pallet.producto }}</h2>
 
     <form method="POST" onsubmit="return validatePeso();">
         {% csrf_token %}
@@ -63,4 +64,42 @@
         </ul>
     {% endif %}
 </body>
-</html>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const productoField = document.querySelector('#id_producto');
+        const clasificacionField = document.querySelector('#id_clasificacion');
+        
+        const clasificaciones = {
+            'tomate': 'Hortaliza de Fruto',
+            'zanahoria': 'Hortaliza de Raíz',
+            'lechuga': 'Hortaliza de Hoja',
+            'brócoli': 'Hortaliza de Flor'
+        };
+
+        function actualizarClasificacion() {
+            const selectedProduct = productoField.value;
+            if (selectedProduct) {
+                clasificacionField.innerHTML = '';  // Limpiar el campo de clasificación
+                const option = document.createElement('option');
+                option.value = clasificaciones[selectedProduct];
+                option.text = clasificaciones[selectedProduct];
+                clasificacionField.appendChild(option);
+                clasificacionField.disabled = false;  // Habilitar el campo de clasificación
+            } else {
+                clasificacionField.disabled = true;
+                clasificacionField.innerHTML = '';  // Limpiar si no hay producto
+            }
+        }
+
+        // Deshabilitar inicialmente si no hay producto seleccionado
+        if (!productoField.value) {
+            clasificacionField.disabled = true;
+        } else {
+            actualizarClasificacion();  // Si hay producto seleccionado al cargar, mostrar clasificación
+        }
+
+        // Escuchar los cambios en el campo de producto
+        productoField.addEventListener('change', actualizarClasificacion);
+    });
+</script>
+{% endblock %}

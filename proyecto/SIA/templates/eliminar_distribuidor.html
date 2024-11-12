@@ -1,13 +1,7 @@
 <!DOCTYPE html>
-<html lang="es">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Eliminar Distribuidores - Pallet {{ pallet.id }}</title>
-    {% load static %}
-    <link rel="stylesheet" href="{% static 'css/styles.css' %}"> <!-- Incluye tu CSS aquí -->
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-</head>
+{% extends 'base.html' %}
+
+{% block content %}
 <body>
     <div class="container">
         <h1>Eliminar Distribuidores para el Pallet {{ pallet.id }}</h1>
@@ -39,7 +33,7 @@
                 </tbody>
             </table>
         {% else %}
-            <p>No hay distribuidores asociados a este pallet.</p>
+            <h2>No hay distribuidores asociados a este pallet.</h2>
         {% endif %}
     </div>
     <script>
@@ -75,4 +69,4 @@
     </script>
     
 </body>
-</html>
+{% endblock %}

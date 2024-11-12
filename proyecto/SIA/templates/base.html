@@ -1,34 +1,28 @@
-{% load static %}
 <!DOCTYPE html>
 <html lang="es">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{% block title %}Mi Aplicación{% endblock %}</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    {% load static %}
     <link rel="stylesheet" href="{% static 'css/styles.css' %}">
 </head>
 <body>
     <header>
-        <h1>Mi Aplicación</h1>
-        <nav>
-            <ul>
-                <li><a href="{% url 'home' %}">Inicio</a></li>
-                <li><a href="{% url 'registrar_cosecha' %}">Registrar Cosecha</a></li>
-                <li><a href="{% url 'transporte' %}">Transporte</a></li>
-                <li><a href="{% url 'cliente' %}">Cliente</a></li>
-                <li><a href="{% url 'ingreso_trabajador' %}">Acceso Trabajador</a></li>
-            </ul>
-        </nav>
+        {% include 'navbar.html' %}
     </header>
 
     <main>
         {% block content %}
-        <!-- Contenido específico de cada página se coloca aquí -->
+        <!-- Aquí irá el contenido específico de cada página -->
         {% endblock %}
     </main>
 
     <footer>
-        <p>&copy; 2024 Mi Aplicación. Todos los derechos reservados.</p>
+        <!-- Pie de página común, si tienes uno -->
     </footer>
+
+    <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+    <!-- Otros scripts comunes a todas las páginas -->
 </body>
 </html>

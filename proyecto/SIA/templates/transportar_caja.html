@@ -128,7 +128,9 @@
         }
 
         // Llamar a la función para mostrar la ruta entre el distribuidor y el cliente
-        getRoute();
+        map.on('load', function() {
+    getRoute(); // Llama a la función getRoute cuando el mapa esté listo
+});
     </script>
     <script>
         // Verificar el estado del pallet y redirigir si todos los DistribuidorPallet están 'completados'

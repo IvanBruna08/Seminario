@@ -62,7 +62,7 @@ class Vehiculo(models.Model):
     ]
 
     marca = models.CharField(max_length=20, choices=MARCAS,default='Hyundai')
-    modelo = models.CharField(max_length=10,null=True,blank=False)
+    modelo = models.CharField(max_length=20 ,null=True,blank=False)
     patente = models.CharField(max_length=6, unique=True,null=True, validators=[RegexValidator(regex=r'^[A-Z]{4}\d{2}$', message='La patente debe tener el formato AAAA00.')])
     
 

@@ -26,13 +26,13 @@ from django.contrib.auth import authenticate as django_authenticate
 from django.conf import settings
 from django.views.generic import ListView
 from django.forms import formset_factory
-from .utils import get_web3
+from .utils import get_web3 , get_pallet_contract, get_transporte_contract, get_distribuidor_contract
 from django.utils import timezone
 from django.contrib import messages
 from .decorators import login_required_for_model
 from math import radians, sin, cos, sqrt, atan2
 # Conectar con Ganache
-ganache_url = "http://127.0.0.1:8545"
+ganache_url = "http://127.0.0.1:7545"
 web3 = Web3(Web3.HTTPProvider(ganache_url))
 if web3.is_connected():
     print("Conexión exitosa a Ganache.")
@@ -320,6 +320,39 @@ def crear_pallet(request):
                 pallet = form.save(commit=False)
                 pallet.predio = predio
                 pallet.save()
+                # Llamada al contrato inteligente para registrar el pallet
+                pallet_contract = get_pallet_contract()
+                
+                                # Obtener los datos necesarios del pallet
+                id_pallet = pallet.id  # ID del pallet
+                id_predio = predio.id  # ID del predio
+                producto = pallet.producto  # Nombre del producto
+
+                # Convertir la fecha de cosecha a timestamp
+                fecha_cosecha_datetime = datetime(pallet.fecha_cosecha.year, pallet.fecha_cosecha.month, pallet.fecha_cosecha.day)
+                fecha_cosecha_timestamp = int(fecha_cosecha_datetime.timestamp())
+
+                # Convertir peso a entero escalado (por ejemplo, multiplicando por 10)
+                factor_escala = 10
+                peso_pallet = int(Decimal(pallet.peso) * factor_escala)
+
+                # Transacción para registrar el pallet
+                try:
+                    tx_hash = pallet_contract.functions.registerPallet(
+                        id_pallet,
+                        id_predio,
+                        producto,
+                        fecha_cosecha_timestamp,
+                        peso_pallet
+                    ).transact({'from': web3.eth.accounts[0]})
+
+                    tx_receipt = web3.eth.wait_for_transaction_receipt(tx_hash)
+                    
+                    print("Transacción exitosa:", tx_hash.hex())
+                except ValueError as e:
+                    print("Error al registrar el pallet en la blockchain:", e)
+                    # Aquí podrías manejar el error como consideres necesario
+
                 return redirect('dashboard_predio')
         else:
             form = PalletForm()
@@ -371,14 +404,27 @@ def iniciar_entrega(request, secure_id):
                 vehiculo = vehiculo,
                 coordenadas_transporte=[],  # Inicializa como lista vacía
             )
+            latitude_conversion = int(float(envio.ruta_inicio_latitude) * 10**10)
+            longitude_conversion = int(float(envio.ruta_inicio_longitude) * 10**10)
+
+            transporte_contracto = get_transporte_contract()
+            try:
+                tx_hash = transporte_contracto.functions.iniciarEnvioPallet(
+                    envio.pallet.id,
+                    envio.transporte.id,
+                    envio.vehiculo.id,
+                    latitude_conversion,
+                    longitude_conversion
+                ).transact({'from': web3.eth.accounts[1]})
+                tx_receipt = web3.eth.wait_for_transaction_receipt(tx_hash)
+                print("Transacción exitosa:", tx_hash.hex())
+            except Exception as e:
+                print("Error al registrar en la blockchain:", e)
 
             # Actualizar el estado del pallet a 'En Proceso'
             pallet.estado_envio = 'en_ruta'
             pallet.save()
-
             return JsonResponse({'success': True, 'envio_id': envio.id, 'pallet_id': pallet.id})
-
-
         except Exception as e:
             return JsonResponse({'success': False, 'message': str(e)})
 
@@ -434,6 +480,20 @@ def finalizar_entrega(request, secure_id):
                 envio.ruta_final_longitude
             )
             envio.save()
+            latitude_conversion = int(float(envio.ruta_final_latitude) * 10**10)
+            longitude_conversion = int(float(envio.ruta_final_longitude) * 10**10)
+
+            transporte_contracto = get_transporte_contract()
+            try:
+                tx_hash = transporte_contracto.functions.finalizarEnvioPallet(
+                    envio.pallet.id,
+                    latitude_conversion,
+                    longitude_conversion
+                ).transact({'from': web3.eth.accounts[1]})
+                tx_receipt = web3.eth.wait_for_transaction_receipt(tx_hash)
+                print("Transacción exitosa:", tx_hash.hex())
+            except Exception as e:
+                print("Error al registrar en la blockchain:", e)            
 
             # Actualizar el estado del pallet
             pallet.estado_envio = 'completado'
@@ -627,7 +687,7 @@ def registrar_recepcion(request, secure_id):
     if dp is None:
         return render(request, 'error.html', {'message': 'Este pallet no está asignado a su distribuidor.'})
         # Verificar si ya existe una recepción registrada para este pallet
-    if Recepcion.objects.filter(envio_pallet=envio_pallet, estado_recepcion='completado').exists():
+    if Pallet.objects.filter(id=pallet_id, estado_envio='completado').exists():
         return render(request, 'error.html', {'message': 'El pallet ya ha sido recepcionado.'})
 
     if request.method == 'POST':
@@ -639,6 +699,18 @@ def registrar_recepcion(request, secure_id):
             recepcion.peso_ingresado = recepcion.peso_recepcion
             recepcion.estado_recepcion='completado'
             recepcion.save()
+            distribuidor_contract = get_distribuidor_contract()
+            _pesoenvio = int(float(recepcion.peso_ingresado )* 10)
+            try: 
+                tx_hash = distribuidor_contract.functions.registerRecepcion(
+                    recepcion.id,
+                    envio_pallet.id,
+                    _pesoenvio                
+                ).transact({'from': web3.eth.accounts[2]})
+                tx_receipt = web3.eth.wait_for_transaction_receipt(tx_hash)
+                print("Transaccion exitosa:",tx_hash.hex())
+            except ValueError as e:
+                print("Error al registrar recepción:",e)
 
             DistribuidorPallet.objects.filter(
                 pallet=pallet_id,
@@ -760,6 +832,17 @@ def distribuir_caja(request):
                         # Guardar cada caja
                         for caja in nuevas_cajas:
                             caja.save()
+                            distribuidor_contract = get_distribuidor_contract()
+                            try: 
+                                tx_hash = distribuidor_contract.functions.registerCaja(
+                                    caja.id,
+                                    recepcion.id,
+                                    caja.tipo_caja.id            
+                                ).transact({'from': web3.eth.accounts[2]})
+                                tx_receipt = web3.eth.wait_for_transaction_receipt(tx_hash.hex())
+                                print("Transaccion exitosa:",tx_hash.hex())
+                            except ValueError as e:
+                                print("Error al registrar recepción:",e)
                     return redirect('dashboard_distribuidor')
                 except ValueError as e:
                     errores.append(str(e))
@@ -784,6 +867,8 @@ def distribuir_pallet(request):
     pallet = None
 
     if request.method == 'POST':
+        pallet_contract = get_pallet_contract()
+        factor_escala = 10
         # Obtener el ID del pallet seleccionado
         pallet_id = request.POST.get('pallet_id')
         if pallet_id:
@@ -828,6 +913,26 @@ def distribuir_pallet(request):
                         for distribucion in nuevas_distribuciones:
                             distribucion.save()  # Guardar cada distribución
 
+                            id_distribuidor_pallet = distribucion.id
+                            id_pallet = distribucion.pallet.id  # Asegúrate de tener esta relación en el modelo
+                            id_distribuidor = distribucion.distribuidor.id  # Asegúrate de tener esta relación en el modelo
+                            peso_envio = int(Decimal(distribucion.peso_enviado) * factor_escala) 
+                            try:
+                                tx_hash = pallet_contract.functions.registerDistribuidorPallet(
+                                    id_distribuidor_pallet,
+                                    id_pallet,
+                                    id_distribuidor,
+                                    peso_envio
+                                ).transact({'from': web3.eth.accounts[0]})
+
+                                # Esperar el recibo de la transacción
+                                tx_receipt = web3.eth.wait_for_transaction_receipt(tx_hash)
+                                print(f"DistribuidorPallet registrado exitosamente en la blockchain: {tx_hash.hex()}")
+                            except Exception as e:
+
+                                print(f"Error en la transacción de DistribuidorPallet con id {id_distribuidor_pallet}: {e}")
+                                raise e
+
                     return redirect('dashboard_predio')
 
                 except ValueError as e:
@@ -841,7 +946,7 @@ def distribuir_pallet(request):
     })
 
 # lo mismo para pallet 
-@login_required_for_model(Distribuidor)
+@login_required_for_model(Predio)
 @csrf_exempt
 def pallet_view(request):
     """Vista para gestionar las cajas de un empaque específico o mostrar todas las cajas y empaques."""
@@ -1038,27 +1143,31 @@ def iniciar_entrega_caja(request, secure_id):
                 )
                 caja.estado_envio = 'en_ruta'
                 caja.save()
+                latitude_conversion = int(float(envio_caja.ruta_inicio_latitude) * 10**10)
+                longitude_conversion = int(float(envio_caja.ruta_inicio_longitude) * 10**10)
 
+                transporte_contracto = get_transporte_contract()
+                try:
+                    tx_hash = transporte_contracto.functions.iniciarEnvioCaja(
+                        envio_caja.caja.id,
+                        envio_caja.transporte.id,
+                        envio_caja.vehiculo.id,
+                        latitude_conversion,
+                        longitude_conversion,
+                    ).transact({'from': web3.eth.accounts[1]})
+                    tx_receipt = web3.eth.wait_for_transaction_receipt(tx_hash)
+                    print("Transacción exitosa:", tx_hash.hex())
+                except Exception as e:
+                    print("Error al registrar en la blockchain:", e)   
                 # Devolver una respuesta JSON con el ID de la caja y el envío creado
-                return JsonResponse({'success': True, 'enviocaja_id': envio_caja.id, 'caja_id': caja.id})
-
-
-            # Si se están actualizando coordenadas
-            enviocaja_id = request.POST.get('enviocaja_id')  # Obtén el ID del envío de la solicitud
-            enviocaja = get_object_or_404(EnvioCaja, id=enviocaja_id)
-
-            coordenadas_transporte = request.POST.get('coordenadasTransporte')
-            if coordenadas_transporte:
-                coordenadas_transporte = json.loads(coordenadas_transporte)
-                enviocaja.coordenadas_transporte = json.dumps(coordenadas_transporte)  # Guarda las coordenadas
-                enviocaja.save()  # Guarda los cambios
-
-            return JsonResponse({'success': True, 'message': 'Coordenadas actualizadas correctamente.'})
+            return JsonResponse({'success': True, 'envio_caja_id': envio_caja.id, 'caja_id': caja.id})
 
         except Exception as e:
             return JsonResponse({'success': False, 'message': str(e)})
 
     return JsonResponse({'success': False, 'message': 'Método no permitido'}, status=405)
+
+                
 
 @csrf_exempt
 def finalizar_entrega_caja(request, secure_id):
@@ -1108,6 +1217,20 @@ def finalizar_entrega_caja(request, secure_id):
                 enviocaja.ruta_final_longitude
             )
             enviocaja.save()
+            latitude_conversion = int(float(enviocaja.ruta_final_latitude) * 10**10)
+            longitude_conversion = int(float(enviocaja.ruta_final_longitude) * 10**10)
+
+            transporte_contracto = get_transporte_contract()
+            try:
+                tx_hash = transporte_contracto.functions.finalizarEnvioCaja(
+                    enviocaja.caja.id,
+                    latitude_conversion,
+                    longitude_conversion
+                ).transact({'from': web3.eth.accounts[1]})
+                tx_receipt = web3.eth.wait_for_transaction_receipt(tx_hash)
+                print("Transacción exitosa:", tx_hash.hex())
+            except Exception as e:
+                print("Error al registrar en la blockchain:", e) 
             # Respuesta para AJAX
             return JsonResponse({'success': True, 'message': 'Entrega finalizada con éxito.'})
 
@@ -1119,7 +1242,7 @@ def finalizar_entrega_caja(request, secure_id):
 
 @csrf_exempt
 def recibir_caja(request, secure_id):
-    # Validar el hash y recuperar el ID original de la caja
+    # Validar el hash y recuperar el ID original de la caja-------------
     caja_id = validate_and_recover_id(secure_id, 'Caja')
     if caja_id is None:
         return render(request, 'error.html', {'message': 'ID no válido'})
@@ -1136,6 +1259,7 @@ def recibir_caja(request, secure_id):
     envio_caja = EnvioCaja.objects.filter(caja=caja).first()  # Usar first() para evitar errores 404
     if request.method == "GET":
         return render(request, 'recibir_caja.html', {'caja': caja, 'secure_id': secure_id,'hay_envio':hay_envio,'envio_caja':envio_caja})
+
 
     elif request.method == "POST":
         try:
@@ -1154,6 +1278,22 @@ def recibir_caja(request, secure_id):
                 longitude=longitude
             )
             recepcion.save()
+            distribuidor_contracto = get_distribuidor_contract()
+            latitude_conversion = int(float(recepcion.latitude) * 10**10)
+            longitude_conversion = int(float(recepcion.longitude) * 10**10)
+            fecha_recepcion = int(recepcion.fecha.timestamp())
+            try:
+                tx_hash = distribuidor_contracto.functions.registerRecepcionCliente(
+                    recepcion.id,
+                    recepcion.caja.id,
+                    fecha_recepcion,
+                    latitude_conversion,
+                    longitude_conversion
+                ).transact({'from': web3.eth.accounts[1]})
+                tx_receipt = web3.eth.wait_for_transaction_receipt(tx_hash)
+                print("Transacción exitosa:", tx_hash.hex())
+            except Exception as e:
+                print("Error al registrar en la blockchain:", e) 
 
             Caja.objects.filter(id=caja_id).update(estado_envio='entregado')
 
@@ -1219,6 +1359,16 @@ def asignar_cliente(request):
                         caja = Caja.objects.get(id=caja_id)
                         caja.cliente = cliente  # Asigna el cliente o deja None
                         caja.save()  # Guarda la caja actualizada
+                        distribuidor_contract = get_distribuidor_contract()
+                        try: 
+                                tx_hash = distribuidor_contract.functions.asignarClienteACaja(
+                                    caja.id,
+                                    caja.cliente.id            
+                                ).transact({'from': web3.eth.accounts[2]})
+                                tx_receipt = web3.eth.wait_for_transaction_receipt(tx_hash.hex())
+                                print("Transaccion exitosa:",tx_hash.hex())
+                        except ValueError as e:
+                                print("Error al registrar recepción:",e)
                 return redirect('dashboard_distribuidor')  # Redirige al confirmar
             except Exception as e:
                 errores.append(f"Error al asignar cliente a las cajas: {str(e)}")
@@ -1232,7 +1382,8 @@ def asignar_cliente(request):
     })
 @csrf_exempt
 def actualizar_pallet(request):
-    pallets = Pallet.objects.all()  # Obtener todos los pallets para mostrarlos
+    predio_id = request.session.get('user_id')
+    pallets = Pallet.objects.filter(predio=predio_id,estado_envio='pendiente')
 
     if request.method == 'POST':
         # Aquí podrías manejar la lógica para actualizar según la opción seleccionada
@@ -1261,15 +1412,45 @@ def actualizar_datos_pallet(request, pallet_id):
 
     if request.method == 'POST':
         form = PalletForm(request.POST, instance=pallet)
-        
+
         if form.is_valid():
             # Guardar los datos del pallet
-            form.save()
-            
-            # Inicializar nuevo_peso_pallet
+            pallet_actualizado = form.save()
+            pallet_contract = get_pallet_contract()
+
+            # Obtener los datos necesarios para actualizar el pallet en la blockchain
+            id_pallet = pallet_actualizado.id
+            id_predio = pallet_actualizado.predio.id  # Asumiendo que hay una relación con Predio
+            producto = pallet_actualizado.producto
+            fecha_cosecha_datetime = datetime(pallet_actualizado.fecha_cosecha.year, pallet_actualizado.fecha_cosecha.month, pallet_actualizado.fecha_cosecha.day)
+            fecha_cosecha_timestamp = int(fecha_cosecha_datetime.timestamp())
+            factor_escala = 10
+            peso_pallet = int(Decimal(pallet_actualizado.peso) * factor_escala)  # Escalado del peso
+
+            # Transacción para actualizar el pallet en la blockchain
+            try:
+                tx_hash = pallet_contract.functions.updatePallet(
+                    id_pallet,
+                    id_predio,
+                    producto,
+                    fecha_cosecha_timestamp,
+                    peso_pallet
+                ).transact({'from': web3.eth.accounts[0]})
+
+                tx_receipt = web3.eth.wait_for_transaction_receipt(tx_hash)
+                print("Transacción exitosa:", tx_hash.hex())
+            except ValueError as e:
+                print("Error al registrar el pallet en la blockchain:", e)
+
+            # Si no hay distribuidores, redirigir después de guardar
+            if not distribuidores.exists():
+                messages.success(request, 'Pallet actualizado correctamente. No hay distribuidores asociados.')
+                return redirect('actualizar_pallet')
+
+            # Si hay distribuidores, proceder a actualizar pesos
             nuevo_peso_pallet = form.cleaned_data['peso']
             total_peso_distribuidores = 0
-            
+
             # Actualizar pesos de los distribuidores
             for distribuidor in distribuidores:
                 distribuidor_peso_field = f"peso_enviado_{distribuidor.id}"
@@ -1278,15 +1459,38 @@ def actualizar_datos_pallet(request, pallet_id):
                 if nuevo_peso_distribuidor:
                     try:
                         distribuidor.peso_enviado = float(nuevo_peso_distribuidor)
-                        distribuidor.save()  # Guardar cambios en el distribuidor
+                        distribuidor.save()  # Guardar cambios en el DistribuidorPallet
                         total_peso_distribuidores += float(nuevo_peso_distribuidor)
+
+                        # Convertir el peso a entero aplicando factor_escala para enviarlo a la blockchain
+                        peso_distribuidor_escalado = int(float(nuevo_peso_distribuidor) * factor_escala)
+
+                        # Actualizar el distribuidor en la blockchain
+                        try:
+                            # Acceder al ID del distribuidor desde la clave foránea
+                            distribuidor_id = distribuidor.distribuidor.id  # Obtener el ID del distribuidor
+                            print(f"ID Distribuidor: {distribuidor_id}")
+
+                            tx_hash = pallet_contract.functions.updateDistribuidorPallet(
+                                distribuidor.id,  # ID del DistribuidorPallet
+                                pallet.id,  # ID del pallet
+                                distribuidor_id,  # ID del distribuidor (usando distribuidor.id)
+                                peso_distribuidor_escalado  # Nuevo peso de envío escalado
+                            ).transact({'from': web3.eth.accounts[0]})
+
+                            # Esperar la transacción
+                            tx_receipt = web3.eth.wait_for_transaction_receipt(tx_hash)
+                            print(f"Transacción exitosa para distribuidor {distribuidor.id}: {tx_hash.hex()}")
+                        except Exception as e:
+                            print(f"Error al actualizar DistribuidorPallet {distribuidor.id} en la blockchain:", e)
+
                     except ValueError:
                         messages.error(request, "El peso ingresado no es válido.")
                         return redirect('actualizar_datos_pallet', pallet_id=pallet_id)
 
             # Validar que el peso total de los distribuidores coincida con el peso del pallet
             if total_peso_distribuidores != nuevo_peso_pallet:
-                messages.error(request, "El peso total de los distribuidores debe ser igual al peso del pallet.")
+                messages.error(request, f"El peso total de los distribuidores ({total_peso_distribuidores}) debe ser igual al peso del pallet ({nuevo_peso_pallet}).")
                 return redirect('actualizar_datos_pallet', pallet_id=pallet_id)
 
             messages.success(request, 'Pallet y pesos de distribuidores actualizados correctamente.')
@@ -1295,8 +1499,7 @@ def actualizar_datos_pallet(request, pallet_id):
     else:
         form = PalletForm(instance=pallet)
         # Convertir la fecha y el peso a los formatos correctos para el formulario
-        pallet.fecha_cosecha = pallet.fecha_cosecha.strftime('%Y-%m-%d')  # Asegúrate de que 'fecha' sea un campo de fecha en tu modelo
-        
+        pallet.fecha_cosecha = pallet.fecha_cosecha.strftime('%Y-%m-%d')
 
     context = {
         'form': form,
@@ -1304,6 +1507,9 @@ def actualizar_datos_pallet(request, pallet_id):
         'pallet': pallet,
     }
     return render(request, 'actualizar_datos_pallet.html', context)
+
+
+
 @csrf_exempt
 def eliminar_distribuidores(request, pallet_id):
     """Vista para eliminar distribuidores de un pallet específico."""
@@ -1320,68 +1526,99 @@ def eliminar_distribuidores(request, pallet_id):
     })
 @csrf_exempt
 def eliminar_distribuidor_pallet(request, distribuidor_pallet_id):
-     
     if request.method == 'POST' and request.headers.get('x-requested-with') == 'XMLHttpRequest':
         try:
-            # Obtener el distribuidor_pallet que se desea eliminar
+            # Obtener el distribuidor_pallet que se desea eliminar y el pallet asociado
             distribuidor_pallet = get_object_or_404(DistribuidorPallet, id=distribuidor_pallet_id)
             pallet = distribuidor_pallet.pallet
-            peso_pallet = pallet.peso  # Guardar el peso original del pallet
-            
-            # Obtener todos los distribuidores asociados al pallet
-            distribuidores = DistribuidorPallet.objects.filter(pallet=pallet)
-            
-            # Eliminar el distribuidor
+            peso_pallet_original = pallet.peso  # Guardar el peso original del pallet
+
+            # Obtener el contrato de la blockchain
+            pallet_contract = get_pallet_contract()
+
+            # Eliminar el distribuidor dentro de una transacción atómica
             with transaction.atomic():
                 distribuidor_pallet.delete()
 
-                # Obtener los distribuidores restantes después de eliminar
+                # Obtener los distribuidores restantes
                 distribuidores_restantes = DistribuidorPallet.objects.filter(pallet=pallet)
-                
+
                 if distribuidores_restantes.exists():
-                    # Suma de los pesos restantes
+                    # Sumar los pesos restantes y calcular la diferencia
                     peso_restante = sum(d.peso_enviado for d in distribuidores_restantes)
+                    diferencia = peso_pallet_original - peso_restante
 
-                    # Verificar si la suma de los pesos es menor que el peso total del pallet
-                    diferencia = peso_pallet - peso_restante
-
+                    # Redistribuir la diferencia proporcionalmente entre los distribuidores restantes
                     if diferencia != 0:
-                        # Redistribuir la diferencia proporcionalmente entre los distribuidores restantes
                         for distribuidor in distribuidores_restantes:
                             proporcion = distribuidor.peso_enviado / peso_restante
-                            distribuidor.peso_enviado += round(proporcion * diferencia, 2)
+                            redistribuido = round(proporcion * diferencia, 2)
+                            distribuidor.peso_enviado += redistribuido
                             distribuidor.save()
+
+                            # Convertir peso a entero aplicando factor de escala
+                            factor_escala = 10
+                            peso_distribuidor_escalado = int(float(distribuidor.peso_enviado) * factor_escala)
+
+                            # Actualizar el distribuidor en la blockchain
+                            try:
+                                distribuidor_id = distribuidor.distribuidor.id
+                                tx_hash = pallet_contract.functions.updateDistribuidorPallet(
+                                    distribuidor.id,
+                                    pallet.id,
+                                    distribuidor_id,
+                                    peso_distribuidor_escalado
+                                ).transact({'from': web3.eth.accounts[0]})
+
+                                # Esperar la transacción--
+                                web3.eth.wait_for_transaction_receipt(tx_hash)
+                                print(f"Transacción exitosa para redistribuir el peso de distribuidor {distribuidor.id}: {tx_hash.hex()}")
+                            except Exception as e:
+                                print(f"Error al actualizar DistribuidorPallet {distribuidor.id} en la blockchain:", e)
                 else:
-                    # Si no quedan distribuidores, el pallet recupera su peso original
-                    pallet.peso = peso_pallet
+                    # Si no quedan distribuidores, restaurar el peso original del pallet
+                    pallet.peso = peso_pallet_original
                     pallet.save()
 
-            # Retornar respuesta JSON de éxito
-            return JsonResponse({'success': True})
-        
+                # Emitir evento de eliminación en la blockchain
+                try:
+                    tx_hash = pallet_contract.functions.eliminarDistribuidorPallet(
+                        pallet.id,
+                        distribuidor_pallet_id
+                    ).transact({'from': web3.eth.accounts[0]})
+                    web3.eth.wait_for_transaction_receipt(tx_hash)
+                    print("Transacción de eliminación exitosa:", tx_hash.hex())
+                except Exception as blockchain_error:
+                    print("Error en la transacción de blockchain:", blockchain_error)
+                    return JsonResponse({'success': False, 'error': 'Error en la blockchain: ' + str(blockchain_error)})
+
+            # Responder con éxito si todo el proceso se completó sin errores
+            return JsonResponse({'success': True, 'mensaje': 'DistribuidorPallet eliminado correctamente.'})
+
         except Exception as e:
             # Retornar respuesta de error en caso de excepción
             return JsonResponse({'success': False, 'error': str(e)})
     else:
         return JsonResponse({'success': False, 'error': 'Método no permitido o no es una solicitud AJAX.'})
-
 @csrf_exempt
 def añadir_distribuidor(request, pallet_id):
     pallet = get_object_or_404(Pallet, id=pallet_id)
     distribuidores = Distribuidor.objects.all()
     distribuidor_pallets = DistribuidorPallet.objects.filter(pallet=pallet)
     errores = []
+    pallet_contract = get_pallet_contract()
+    factor_escala = 1000  # Factor de escala para convertir pesos
 
     if request.method == 'POST':
-        # Recoger el peso del distribuidor existente y el nuevo distribuidor
+        # Recoger el peso de distribuidores existentes y el nuevo distribuidor
         total_peso = 0
         distribuidor_pallets_data = []
-        
+
         # Sumar pesos de distribuidores existentes y recoger nuevos datos
         for distribuidor_pallet in distribuidor_pallets:
             distribuidor_id = distribuidor_pallet.distribuidor.id
             peso_enviado = request.POST.get(f'distribuidor_{distribuidor_id}-peso_enviado', distribuidor_pallet.peso_enviado)
-            
+
             try:
                 peso_enviado_float = float(peso_enviado)
                 total_peso += peso_enviado_float  # Sumar peso del distribuidor existente
@@ -1393,7 +1630,7 @@ def añadir_distribuidor(request, pallet_id):
         # Recoger los datos del nuevo distribuidor
         nuevo_distribuidor_id = request.POST.get('nuevo_distribuidor')
         nuevo_peso = request.POST.get('nuevo_peso')
-        
+
         if nuevo_distribuidor_id and nuevo_peso:
             try:
                 nuevo_peso_float = float(nuevo_peso)
@@ -1407,14 +1644,51 @@ def añadir_distribuidor(request, pallet_id):
         if total_peso != pallet.peso:
             errores.append("La suma de los pesos de los distribuidores debe ser igual al peso del pallet.")
 
-        # Si no hay errores, guardar los cambios
+        # Si no hay errores, procesar transacciones en la blockchain y guardar los cambios
         if not errores:
-            # Limpiar los DistribuidorPallet existentes (esto puede no ser necesario si sólo actualizas)
+            # Limpiar los DistribuidorPallet existentes
             DistribuidorPallet.objects.filter(pallet=pallet).delete()
-            # Actualizar o crear los DistribuidorPallet
-            for distribuidor, peso in distribuidor_pallets_data:
-                DistribuidorPallet.objects.create(pallet=pallet, distribuidor=distribuidor, peso_enviado=peso)
+            for distribuidor_pallet in distribuidor_pallets:
+                distribuidor_pallet_id = distribuidor_pallet.id
+                try:
+                    # Emitir evento de eliminación en la blockchain
+                    tx_hash = pallet_contract.functions.eliminarDistribuidorPallet(
+                        pallet.id,
+                        distribuidor_pallet_id
+                    ).transact({'from': web3.eth.accounts[0]})
+                    web3.eth.wait_for_transaction_receipt(tx_hash)
+                    print("Transacción de eliminación exitosa:", tx_hash.hex())
+                except Exception as blockchain_error:
+                    errores.append(f"Error en la transacción de blockchain al eliminar: {blockchain_error}")
+                    return JsonResponse({'success': False, 'error': 'Error en la blockchain: ' + str(blockchain_error)})
 
+            # Crear los nuevos DistribuidorPallet y registrar en la blockchain
+            for distribuidor, peso in distribuidor_pallets_data:
+                distribucion = DistribuidorPallet.objects.create(
+                    pallet=pallet,
+                    distribuidor=distribuidor,
+                    peso_enviado=peso
+                )
+                id_distribuidor_pallet = distribucion.id
+                id_pallet = distribucion.pallet.id
+                id_distribuidor = distribucion.distribuidor.id
+                peso_envio = int(Decimal(peso) * factor_escala)
+
+                try:
+                    # Emitir evento de registro en la blockchain
+                    tx_hash = pallet_contract.functions.registerDistribuidorPallet(
+                        id_distribuidor_pallet,
+                        id_pallet,
+                        id_distribuidor,
+                        peso_envio
+                    ).transact({'from': web3.eth.accounts[0]})
+                    web3.eth.wait_for_transaction_receipt(tx_hash)
+                    print(f"DistribuidorPallet registrado exitosamente en la blockchain: {tx_hash.hex()}")
+                except Exception as blockchain_error:
+                    errores.append(f"Error en la transacción de blockchain al añadir: {blockchain_error}")
+                    return JsonResponse({'success': False, 'error': 'Error en la blockchain: ' + str(blockchain_error)})
+
+            # Redirigir si todo el proceso se completó sin errores
             return redirect('dashboard_predio')
 
     return render(request, 'añadir_distribuidor.html', {
@@ -1423,7 +1697,6 @@ def añadir_distribuidor(request, pallet_id):
         'distribuidor_pallets': distribuidor_pallets,
         'errores': errores,
     })
-
 def detalles_caja(request, secure_id):
     # Valida y recupera el ID de la caja usando el secure_id
     caja_id = validate_and_recover_id(secure_id, 'Caja')
@@ -1454,6 +1727,31 @@ def detalles_caja(request, secure_id):
     }
 
     return render(request, 'detalles_caja.html', context)
+
+@login_required_for_model(Cliente)
+@csrf_exempt
+def historial_pago(request):
+    cliente_id = request.session.get('user_id')  # Suponiendo que user_id es el ID del cliente autenticado
+    if not cliente_id:
+        # Si no hay un cliente autenticado, redirigir o mostrar un mensaje adecuado
+        return render(request, 'error.html', {'message': 'No ha iniciado sesión como Cliente.'})
+    
+    # Obtener todas las recepciones asociadas a las cajas del cliente
+    recepciones_cliente = RecepcionCliente.objects.filter(caja__cliente_id=cliente_id)
+    
+    if not recepciones_cliente:
+        # Si no se encuentran recepciones asociadas a las cajas del cliente, mostrar un mensaje adecuado
+        mensaje = "No se encontraron recepciones asociadas a su cuenta."
+    else:
+        mensaje = ""
+    
+    # Pasar las recepciones y el mensaje a la plantilla
+    return render(request, 'historial_cliente.html', {
+        'recepciones_cliente': recepciones_cliente,  # Recepciones asociadas a las cajas del cliente
+        'mensaje': mensaje,
+    })
+
+
 """""
 def ingreso_trabajador(request):
     if request.method == 'POST':

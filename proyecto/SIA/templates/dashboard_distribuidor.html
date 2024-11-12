@@ -7,6 +7,7 @@
     <title>Dashboard Distribuidor</title>
 </head>
 <body>
+    <a href="{% url 'custom_logout' %}" class="btn-home">Salir</a>
     <h1>Dashboard Distribuidor</h1>
     <div class="contenedor-lista-d">
         <ul>
@@ -16,9 +17,8 @@
             <li><a href="{% url 'asignar_cliente' %}" class="lista-d">Asignar Cliente</a>
             <li><a href="{% url 'cajas_view' %}" class="lista-d">Caja Lista</a></li>
         </ul>
-        <button id="connectButton" class="btn btn-primary">Conectar MetaMask</button>
-        <p id="walletAddress">No conectado</p>
-        <a href="{% url 'custom_logout' %}" class="btn-logout">Salir</a>
+        <button id="connectButton" class="btn-metamask">Conectar MetaMask</button>
+        <p class="connect" id="walletAddress">No conectado</p>
     </div>
 
     <!-- Scripts de Bootstrap y MetaMask -->

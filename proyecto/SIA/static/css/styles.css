@@ -25,7 +25,6 @@ table {
     box-shadow: 0 2px 10px rgba(109, 76, 65, 0.4); 
 }
 
-
 th, td {
     border: 1px solid rgb(187, 187, 187); 
     text-align: center; 
@@ -48,40 +47,27 @@ tr:hover {
     height: auto;
 }
 
-/* Barra de navegación superior */
-.header {
-    background-color: #6D4C41; /* Café oscuro */
-    padding: 15px 20px;
-    font-family: 'Verdana', sans-serif;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
+/* botones */
+
+.btn-submit {
+    display: block;
+    margin: 5px auto;
+    padding: 10px;
+    background-color: #4CAF50; 
     color: white;
-    box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
-    width: 100%;
-    position: fixed;
-    top: 0;
-    left: 0;
-    z-index: 1000;
-}
-.sidebar-header {
-    display: none; /* Oculta el header dentro del sidebar por defecto */
-    padding: 15px; /* Espaciado para el header dentro del sidebar */
-    text-align: center; /* Centra el texto del header en el sidebar */
-}
-
-.header h2 {
-    flex-grow: 1;
+    font-weight: bold;
     text-align: center;
-    margin: 0;
+    text-decoration: none;
+    border-radius: 5px;
+    margin-top: 10px;
+    font-size: 18px;
+    box-shadow: 0px 4px 8px rgba(109, 76, 65, 0.4); 
+    transition: background-color 0.3s ease, transform 0.2s ease;
 }
 
-.logout-form {
-    display: inline;
-    margin: 0;
-    padding: 0;
-    background-color: transparent;
-    border: none;
+.btn-submit:hover {
+    background-color: #1e7d21; 
+    transform: translateY(-3px); 
 }
 
 .btn-logout {
@@ -102,6 +88,51 @@ tr:hover {
     background-color: rgba(109, 76, 65); /* Café medio */
 }
 
+.btn-metamask {
+    display: block;
+    color: white;
+    text-align: center;
+    text-decoration: none;
+    padding: 8px 15px;
+    border-radius: 20px;
+    background-color: #4CAF50; /* Color verde de tu paleta */
+    transition: background-color 0.3s, box-shadow 0.3s;
+}
+
+.btn-metamask:hover {
+    background-color: #388E3C; /* Color verde más oscuro para hover */
+    box-shadow: 0px 0px 10px rgba(56, 142, 60, 0.5); /* Sombra verde */
+}
+.btn-metamask.inactive {
+    background-color: rgb(0, 0, 0, 0.00001);
+    color: white; 
+}
+
+/* MAIN AÑADIDO POR IVAN PARA PRUEBA*/
+
+main {
+    margin-top: 90px; /* Asegura que el contenido no toque el navbar */
+    padding-bottom: 20px; /* Espacio adicional en la parte inferior */
+}
+
+/* Ajustes para pantallas pequeñas */
+@media (max-width: 768px) {
+    main {
+        margin-top: 70px; /* Margen superior ajustado en pantallas pequeñas */
+        padding-bottom: 15px; /* Espacio inferior menor en pantallas pequeñas */
+    }
+}
+
+
+/* Ajustes para pantallas muy pequeñas */
+@media (max-width: 480px) {
+    main {
+        margin-top: 60px; /* Aún menos margen superior en pantallas muy pequeñas */
+        padding-bottom: 10px; /* Espacio inferior aún menor en pantallas pequeñas */
+    }
+}
+
+
 /* Ajuste del contenido */
 .main-container {
     display: flex;
@@ -110,67 +141,17 @@ tr:hover {
     max-width: 1200px;
     margin: 0 auto;
     flex-grow: 1;
-    height: calc(100vh - 80px);
+    height: calc(100vh - 200px);
     overflow: auto;
-}
-
-/* Barra lateral (sidebar) */
-.wrapper .sidebar {
-    background-color: rgba(109, 76, 65, 0.6); 
-    padding: 15px;
-    width: 250px;
-    left: 0;
-    border-radius: 0px;
-    box-shadow: 0px 0px 6px rgba(109, 76, 65, 0.9);
-    position: fixed;
-    top: 0px; 
-    bottom: 0;
-    height: 100vh;
-    transition: left 0.3s ease;
-}
-
-
-.sidebar a {
-    color: white; /* Texto blanco para enlaces */
-    text-decoration: none;
-    padding: 10px;
-    display: block;
-    border-radius: 5px;
-    transition: background-color 0.3s;
-}
-
-.sidebar a:hover {
-    background-color: #6D4C41; 
-}
-
-.sidebar ul {
-    list-style: none;
-    padding: 0;
-    margin: 0;
-}
-
-.sidebar li {
-    margin: 10px 0;
-    padding: 10px;
-    cursor: pointer;
-    border-radius: 5px;
-    transition: background-color 0.3s ease;
-}
-
-.sidebar li:hover {
-    background-color: #A1887F; /* Café claro al pasar el mouse */
-    color: white;
 }
 
 .contenedor-dist {
     background-color: rgb(29, 122, 24, 0.5);
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    margin: 20px 0;
-    gap: 20px; 
+    max-width: 80vh;
+    margin: 2opx auto;
+    padding: 25px;
     border-radius: 15px;
-    padding: 25px; 
+    position: relative;
 }
 
 .contenedor-dist ul {
@@ -219,6 +200,36 @@ tr:hover {
     transform: scale(1.05);
 }
 
+.contenedor-act {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin: 0;
+    gap: 20px; 
+    border-radius: 15px;
+    padding: 25px; 
+}
+.opc-act {
+    padding: 20px 30px;
+    text-decoration: none;
+    text-align: center;
+    color: black;
+    background-color: rgba(255, 255, 255, 0.4);
+    border-radius: 5px;
+    margin: 2px 0; 
+    display: block; 
+    box-shadow: 0px 4px 6px rgba(109, 76, 65, 0.5);
+    transition: background-color 0.3s ease, color 0.3s ease;
+}
+.opc-act:hover{
+    background-color: rgb(29, 122, 24, 0.5);
+    color: white;
+    box-shadow: 0px 4px 8px rgba(109, 76, 65, 0.7);
+    transform: scale(1.05);
+}
+
+
+
 /* Contenedor de tablas */
 .container-tablas {
     max-width: 800px; 
@@ -227,7 +238,27 @@ tr:hover {
     background-color: rgba(255, 255, 255, 0.9); 
     border-radius: 10px; 
     box-shadow: 0 2px 10px rgba(109, 76, 65, 0.9); 
+    overflow-y: auto;
 }
+
+/*contenedor de info para dashboard*/
+.info-cont {
+    display: flex;
+    flex-direction: column; 
+    list-style: none;
+    align-items: center; 
+    background-color: rgba(255, 255, 255, 0.4);
+    padding: 15px;
+    border-radius: 15px;
+}
+.connect {
+    background-color: rgba(255,255,255, 0.4);
+    border: 3px solid #2E7031; 
+    padding: 5px; 
+    border-radius: 5px; 
+    display: inline-block; 
+}
+
 /* Encabezados y párrafos */
 h1 {
     font-size: 2.2em;
@@ -244,10 +275,17 @@ h2{
     background-color:rgba(255,255,255, 0.6);
     border-radius: 15px;
     padding: 5px;
+    text-align: center;
 }
 
 h3 {
     font-size: 1.8em;
+    font-weight: 700;
+    color: #56352b;
+    text-align: center;
+}
+h4 {
+    font-size: 4.0em;
     font-weight: 700;
     color: #2E7D32;
     text-align: center;
@@ -304,29 +342,6 @@ p {
     font-size: 1em;
 }
 
-/* Estilo para el botón */
-.btn-submit {
-    display: block;
-    margin: 5px auto;
-    padding: 10px;
-    background-color: #4CAF50; /* Verde */
-    color: white;
-    text-align: center;
-    text-decoration: none;
-    border-radius: 5px;
-    margin-top: 10px;
-    font-size: 18px;
-    transition: background-color 0.3s; /* Transición suave */
-}
-
-
-.btn-submit:hover {
-    background-color: #1e7d21; /* Verde más oscuro al pasar el mouse */
-}
-
-.btn-submit:active {
-    background-color: #388E3C; /* Verde oscuro al hacer clic */
-}
 
 /* Estilo para el recuadro de descripciones */
 .descripcion-box {
@@ -355,17 +370,21 @@ p {
 
 
 /* Estilo general del formulario */
-form {
+.cosito{
+    /*margin-top: 200px;*/
     width: 100%;
     max-width: 400px;
-    margin: 20px auto;
+    padding-top: 250px;
+}
+
+form {
+    max-height: 80vh;
+    overflow-y: auto;
     padding: 20px;
-    background-color: rgba(255, 255, 255, 0.4); 
+    background-color: rgba(255, 255, 255, 0.4);
     border-radius: 10px;
     box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-    box-sizing: border-box;
-    max-height: 100vh; /* Limita la altura del formulario */
-    overflow-y: auto; /* Permite scroll si el contenido es muy largo */
+    position: relative;
 }
 
 form label {
@@ -439,27 +458,6 @@ form select:focus {
     gap: 15px;
 }
 
-/* Estilo de los botones */
-.boton-home {
-    display: block;
-    width: 60px; /* Asegura que los botones ocupen el ancho completo */
-    padding: 12px; /* Aumento del padding para mayor comodidad */
-    color: white;
-    text-align: center;
-    text-decoration: none;
-    border-radius: 5px;
-    margin-top: 10px;
-    font-size: 18px;
-    transition: background-color 0.3s; /* Transición suave */
-}
-
-.btn-trabajador {
-    background-color: #4CAF50; /* Verde */
-}
-
-.btn-trabajador:hover {
-    background-color: #388E3C; /* Verde oscuro */
-}
 
 /* Estilos generales del contenedor */
 .container-ingreso {
@@ -511,7 +509,7 @@ form select:focus {
 /* Estilo del botón de enviar */
 .btn-add {
     display: block;
-    margin: 5px auto;
+    margin: auto;
     padding: 10px;
     background-color: #c8e6c9; /* Verde */
     color: black;
@@ -527,6 +525,7 @@ form select:focus {
 .btn-add:hover {
     background-color: #196400; 
     transform: translateY(-2px);
+    color: white;
 }
 
 .btn-home {
@@ -535,7 +534,7 @@ form select:focus {
     left: 20px;
     margin: 10px auto;
     padding: 10px;
-    background-color: #5D4037; /* Café oscuro */
+    background-color: #5d4037d9; /* Café oscuro */
     color: white;
     text-align: center;
     text-decoration: none;
@@ -876,35 +875,60 @@ form select:focus {
     .sidebar {
         display: block; /* Oculta la barra lateral */
     }
+
     .content {
         margin-left: 0; /* Elimina el margen izquierdo */
     }
+}
+@media (max-width: 991px) {
     .header {
-        display: none; /* Oculta el header original */
+        display: none; /* Oculta el header original en pantallas pequeñas */
     }
+
     .sidebar-header {
         display: block; /* Muestra el header dentro del sidebar */
     }
-}
 
-/* Estilo para dispositivos muy pequeños */
-@media (max-width: 767px) {
-    .header {
-        flex-direction: column; /* Cambia la dirección a columna */
-        align-items: flex-start; /* Alinea a la izquierda */
-        padding: 10px; /* Ajuste el espaciado */
+    .sidebar-header h1 {
+        font-size: 1.2em; /* Ajusta el tamaño del h1 dentro del sidebar */
     }
 }
 
-/* Ajustes para móviles */
+@media (max-width: 767px) {
+    .header {
+        flex-direction: column; /* Cambia la dirección de la flexbox a columna */
+        align-items: flex-start; /* Alinea los elementos a la izquierda */
+        padding: 10px; /* Ajusta el espaciado */
+    }
+
+    .main-container {
+        padding: 60px 10px 10px; /* Espaciado ajustado */
+    }
+}
+
 @media (max-width: 320px) {
+    .header {
+        padding: 10px; /* Espaciado en el header */
+    }
+
+    .main-container {
+        padding: 50px 10px 10px; /* Espaciado ajustado */
+    }
+
     h1 {
         font-size: 1.4em; /* Tamaño de h1 reducido */
     }
+
     h3 {
         font-size: 1em; /* Tamaño de h3 reducido */
     }
+
     p {
         font-size: 10px; /* Tamaño de párrafo reducido */
+    }
+
+    .btn-submit {
+        width: 100%; /* Ancho completo para el botón de envío */
+        padding: 10px; /* Espaciado interior */
     }
 }

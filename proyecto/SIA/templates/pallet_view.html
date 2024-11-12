@@ -1,16 +1,8 @@
 <!DOCTYPE html>
-<html lang="es">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    {% load static %}
-    <title>Información de Pallet</title>
-</head>
-<body>
+{% extends 'base.html' %}
 
-<div class="container">
-    <h1>Gestión de Pallets</h1>
-    <a href="{% url 'dashboard_predio' %}" class="btn-home">Inicio</a>
+{% block content %}
+<div class="contenedor">
     
     <form method="get" action="{% url 'pallet_view' %}" class="form-select">
         <label for="pallet_select">Selecciona un Pallet:</label>
@@ -84,7 +76,4 @@
         </div>
     {% endif %}
 </div>
-</body>
-</html>
-
-<link rel="stylesheet" href="{% static 'css/styles.css' %}">
+{% endblock %}

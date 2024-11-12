@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    {% load static %}
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Historial de Pagos</title>
+    <link rel="stylesheet" href="{% static 'css/styles.css' %}">  <!-- Vincula tu archivo CSS -->
+</head>
+<body>
+    <header>
+        <h1>Historial de Pagos</h1>
+    </header>
+
+    <div class="container">
+        <h2>Lista de Cajas</h2>
+        {% if recepciones_cliente %}
+        <table>
+            <thead>
+                <tr>
+                    <th>ID de Caja</th>
+                    <th>Producto</th>
+                    <th>Fecha de Recepción</th>
+                    <th>Predio</th>
+                    <th>Distribuidor</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for recepcion in recepciones_cliente %}
+                    <tr>
+                        <td>{{ recepcion.caja.id }}</td>
+                        <td>{{ recepcion.caja.recepcion.envio_pallet.pallet.producto }}</td>  <!-- Asumiendo que tipo_caja tiene un campo nombre -->
+                        <td>{{ recepcion.fecha }}</td>
+                        <td>{{ recepcion.caja.recepcion.envio_pallet.pallet.predio.nombre }}</td> <!-- Asumiendo que predio es un campo en Recepcion -->
+                        <td>{{ recepcion.caja.recepcion.distribuidor.nombre }}</td> <!-- Asumiendo que distribuidor es un campo en Recepcion -->
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        {% else %}
+            <p>{{ mensaje }}</p>
+        {% endif %}
+    </div>
+
+    <footer>
+        <p>© 2024 Sistema de Gestión de Cajas</p>
+    </footer>
+</body>
+</html>

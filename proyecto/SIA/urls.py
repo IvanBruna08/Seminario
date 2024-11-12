@@ -55,5 +55,6 @@ urlpatterns = [
     path('recibir_caja/<str:secure_id>/', views.recibir_caja, name='recibir_caja'),
     path('asignar_cliente/', views.asignar_cliente, name='asignar_cliente'),
     path('crear_caja/', views.tipocaja, name='crear_caja'),
-     path('detalles-caja/<str:secure_id>/', views.detalles_caja, name='detalles_caja'),
+    path('detalles-caja/<str:secure_id>/', views.detalles_caja, name='detalles_caja'),
+    path('historial_cliente/', views.historial_pago, name='historial_cliente'),
 ]

@@ -1,19 +1,15 @@
-<!DOCTYPE html>
-<html lang="es">
-<head>
-    <meta charset="UTF-8">
-    {% load static %}
-    <link rel="stylesheet" href="{% static 'css/styles.css' %}">
-    <title>Crear Pallet</title>
-</head>
-<body>
+{% extends 'base.html' %}
+
+{% block title %}Crear Pallet{% endblock %}
+
+{% block content %}
+<div class="contenedor-dist">
     <form method="POST">
         {% csrf_token %}
         {{ form.as_p }}
         <button type="submit" class="btn-submit">Crear Pallet</button>
-        <a href="{% url 'dashboard_predio' %}" class="btn-home">Inicio</a>
     </form>
-</body>
+</div>
 <script>
     document.addEventListener('DOMContentLoaded', function() {
         const productoField = document.querySelector('#id_producto');
@@ -52,4 +48,4 @@
         productoField.addEventListener('change', actualizarClasificacion);
     });
 </script>
-</html>
+{% endblock %}

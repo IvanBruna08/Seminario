@@ -8,6 +8,7 @@
     <link rel="stylesheet" href="{% static 'css/styles.css' %}"> <!-- Vincula tu CSS si es necesario -->
 </head>
 <body>
+    <a href="{% url 'dashboard_distribuidor' %}" class="btn-home">Inicio</a>
     <div class="container">
         <h1>Crear Tipo de Caja</h1>
         
@@ -43,7 +44,6 @@
             </div>
 
             <button type="submit" class="btn btn-primary">Crear Tipo de Caja</button>
-            <a href="{% url 'dashboard_distribuidor' %}" class="btn-home">Inicio</a>
         </form>
     </div>
 </body>

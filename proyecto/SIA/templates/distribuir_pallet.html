@@ -1,21 +1,9 @@
-<!DOCTYPE html>
-<html lang="es">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Distribuir Pallet </title>
-    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
-    {% load static %}
-    <link rel="stylesheet" href="{% static 'css/styles.css' %}">
-</head>
-<body>
-    <!-- Botón "Inicio" flotante -->
-    <a href="{% url 'dashboard_predio' %}" class="btn-home">Inicio</a>
+{% extends 'base.html' %}
 
-    <div class="contenedor-dist">
-        <h1>Distribuir Pallet</h1>
-        <form method="post" action="{% url 'distribuir_pallet' %}">
-            {% csrf_token %}
+{% block content %}
+<div class="contenedor-dist">
+    <form method="post" action="{% url 'distribuir_pallet' %}">
+        {% csrf_token %}
 
             <!-- Seleccionar el Pallet -->
             <div class="form-group">
@@ -85,5 +73,4 @@
             });
         });
     </script>
-</body>
-</html>
+{% endblock %}

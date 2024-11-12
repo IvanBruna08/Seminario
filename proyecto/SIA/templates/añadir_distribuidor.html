@@ -1,5 +1,7 @@
-{% load static %}
-    <link rel="stylesheet" href="{% static 'css/styles.css' %}"> <!-- Asegúrate de tener el archivo CSS -->
+<!DOCTYPE html>
+{% extends 'base.html' %}
+
+{% block content %}
 <form method="post" action="{% url 'añadir_distribuidor' pallet.id %}">
     {% csrf_token %}
     <h2>Añadir Distribuidor para el Pallet</h2>
@@ -42,3 +44,4 @@
 
     <button type="submit" class="btn btn-primary">Guardar Cambios</button>
 </form>
+{% endblock %}

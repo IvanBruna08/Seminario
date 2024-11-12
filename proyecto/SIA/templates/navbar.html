@@ -1,0 +1,133 @@
+<header> 
+    <nav class="barrita">
+        <a class="menu" href="{% url 'dashboard_predio' %}">Menú de Opciones</a>
+        <ul>
+            <li>
+                <a id="connectButton" class="btn-metamask {% if request.resolver_match.url_name == 'registrar_pallet' or request.resolver_match.url_name == 'distribuir_pallet' or request.resolver_match.url_name == 'pallet_view' or request.resolver_match.url_name == 'actualizar_pallet' or request.resolver_match.url_name == 'custom_logout' %}inactive{% endif %}" href="#">Conectar MetaMask</a>
+            </li>
+            <li>
+                <a href="{% url 'registrar_pallet' %}" class="nav-link {% if request.resolver_match.url_name == 'registrar_pallet' %}active{% endif %}">Registrar Pallet</a>
+            </li>
+            <li>
+                <a href="{% url 'distribuir_pallet' %}" class="nav-link {% if request.resolver_match.url_name == 'distribuir_pallet' %}active{% endif %}">Distribuir Pallet</a>
+            </li>
+            <li>
+                <a href="{% url 'pallet_view' %}" class="nav-link {% if request.resolver_match.url_name == 'pallet_view' %}active{% endif %}">Ver Pallet</a>
+            </li>
+            <li> 
+                <a href="{% url 'actualizar_pallet' %}" class="nav-link {% if request.resolver_match.url_name == 'actualizar_pallet' %}active{% endif %}">Actualizar</a>
+            </li>
+            <li>
+                <a href="{% url 'custom_logout' %}" class="btn-barrita {% if request.resolver_match.url_name == 'custom_logout' %}active{% endif %}">Salir</a>
+            </li>
+        </ul>
+    </nav>
+</header>
+
+<style>
+
+    header {
+        width: 100%;
+        position: fixed;
+        top: 0;
+        left: 0;
+        z-index: 1001;
+    }
+    .barrita {
+        background-color: rgba(109, 76, 65, 0.8); 
+        padding: 15px; 
+        width: 100%; 
+        left: 0; 
+        border-radius: 0px; 
+        box-shadow: 0px 0px 6px rgba(109, 76, 65, 0.9); 
+        position: fixed; 
+        top: 0; 
+        height: 80px; 
+        display: flex; 
+        justify-content: space-between; 
+        align-items: center; 
+        box-sizing: border-box;
+}
+.nav-link.active {
+    background-color: #D7CCC8; 
+    color: #4E342E; 
+    padding: 10px 10px;
+    border-radius: 20px; 
+}
+
+.barrita .menu {
+    font-size: 24px;
+    color: white;
+    text-decoration: none;
+    padding: 0px 15px; 
+    border-radius: 5px;
+    transition: ease 0.3s;
+}
+.barrita a {
+    font-size: 18px;
+    font-weight: bold;
+    color: white; /* Texto blanco para enlaces */
+    text-decoration: none;
+    padding: 0px 15px; /* Añade padding a los enlaces */
+    border-radius: 5px;
+    transition: ease 0.3s;
+    line-height: 1;
+    height: auto;
+}
+
+.barrita a:hover {
+    color: white;
+}
+
+
+.barrita ul li{
+    display: inline-block;
+    line-height: 80px;
+    margin: 0 5px;
+}
+
+.barrita li {
+    margin: 0 10px; /* Espacio horizontal entre los elementos de la lista */
+}
+
+.barrita li:hover {
+    color: white;
+}
+
+.barrita .btn-metamask {
+    display: block;
+    color: white;
+    text-align: center;
+    text-decoration: none;
+    padding: 8px 15px;
+    border-radius: 20px;
+    background-color: #4CAF50; /* Color verde de tu paleta */
+    transition: background-color 0.3s, box-shadow 0.3s;
+}
+
+.btn-metamask:hover {
+    background-color: #388E3C; /* Color verde más oscuro para hover */
+    box-shadow: 0px 0px 10px rgba(56, 142, 60, 0.5); /* Sombra verde */
+}
+.btn-metamask.inactive {
+    background-color: rgb(0, 0, 0, 0.00001);
+    color: white; 
+}
+
+.barrita .btn-barrita {
+    display: block;
+    color: white;
+    text-align: center;
+    text-decoration: none;
+    padding: 8px 15px;
+    border-radius: 20px;
+    background-color: #A1887F;
+    transition: background-color 0.3s, box-shadow 0.3s;
+}
+
+.btn-barrita:hover {
+    background-color: rgba(109, 76, 65);
+    box-shadow: 0px 0px 10px rgba(109, 76, 65, 0.5); /* Sombra verde */
+}
+
+</style>

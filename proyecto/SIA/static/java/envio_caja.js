@@ -16,10 +16,10 @@ function errorGeoLocation(error) {
     }
 }
 
-// Variable para almacenar las coordenadas de transporte
+// Variables globales para almacenar las coordenadas de transporte y estado de caja
 let coordenadasTransporte = [];
 let transporteMarker = null;
-let idcaja = null;
+let idCaja = null;
 let enviocaja_id = null;
 
 // Función para manejar el inicio de entrega y almacenar coordenadas iniciales
@@ -48,13 +48,16 @@ function iniciarEntrega() {
                 },
                 success: function(response) {
                     console.log('Coordenadas iniciales enviadas:', response);
+                    
                     if (response.success) {
                         idCaja = response.caja_id;
-                        enviocaja_id = response.enviocaja_id;
-                        console.log(idCaja)
-                        console.log(enviocaja_id)
+                        enviocaja_id = response.envio_caja_id;
+                        console.log("ID Caja:", idCaja);
+                        console.log("ID EnvioCaja:", enviocaja_id);
+                        
+                        // Deshabilitar el botón de inicio de entrega
                         document.getElementById('startDelivery').disabled = true;
-                        // Acceder a los valores almacenados en localStorage para el log
+                        
                         // Inicia el seguimiento de ubicación
                         iniciarSeguimientoDeCoordenadas();
                     }

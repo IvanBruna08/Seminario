@@ -1,71 +1,186 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.0;
 
-contract SupplyChain {
+contract PalletRegistry {
     struct Pallet {
-        uint256 idPallet;
-        uint256 idPredio;
-        string producto;
-        uint256 fecha;
-        uint256 peso;
-        bool existe;
+        uint256 idPallet;         
+        uint256 idPredio;         
+        string producto;          
+        uint256 fechaCosecha;     
+        uint256 pesoPallet;       
     }
 
     struct DistribuidorPallet {
-        uint256 idDistribuidorPallet;
-        uint256 idPallet;
-        uint256 idDistribuidor;
-        uint256 pesoEnviado;
+        uint256 idDistribuidorPallet;  
+        uint256 idPallet;              
+        uint256 idDistribuidor;        
+        uint256 pesoEnvio;             
     }
 
-    mapping(uint256 => Pallet) public pallets;
-    mapping(uint256 => DistribuidorPallet) public distribuidorPallets;
+    mapping(uint256 => Pallet) public pallets;  
+    mapping(uint256 => DistribuidorPallet[]) public distribuidorPallets;  
+    uint256 public palletCount;                  
+    
+    event PalletRegistered(
+        uint256 idPallet,
+        uint256 idPredio,
+        string producto,
+        uint256 fechaCosecha,
+        uint256 pesoPallet
+    );
 
-    uint256 public palletCount;
-    uint256 public distribuidorPalletCount;
+    event DistribuidorPalletRegistered(
+        uint256 idDistribuidorPallet,
+        uint256 idPallet,
+        uint256 idDistribuidor,
+        uint256 pesoEnvio
+    );
 
-    event PalletCreado(uint256 indexed idPallet, uint256 idPredio, string producto, uint256 fecha, uint256 peso);
-    event DistribuidorAsignado(uint256 indexed idDistribuidorPallet, uint256 idPallet, uint256 idDistribuidor, uint256 pesoEnviado);
+    event PalletUpdated(uint256 idPallet);
+    event DistribuidorPalletUpdated(uint256 idDistribuidorPallet);
 
-    // Función para crear un nuevo pallet
-    function crearPallet(
+    // Función para registrar un nuevo pallet
+    function registerPallet(
+        uint256 _idPallet,
         uint256 _idPredio,
         string memory _producto,
-        uint256 _fecha,
-        uint256 _peso
+        uint256 _fechaCosecha,
+        uint256 _pesoPallet
     ) public {
+        // Asegurarse de que el pallet no se haya registrado previamente
+        require(pallets[_idPallet].idPallet == 0, "Pallet ya registrado");
+
+        // Crear y almacenar el nuevo pallet
+        pallets[_idPallet] = Pallet({
+            idPallet: _idPallet,
+            idPredio: _idPredio,
+            producto: _producto,
+            fechaCosecha: _fechaCosecha,
+            pesoPallet: _pesoPallet
+        });
+
         palletCount++;
-        pallets[palletCount] = Pallet(palletCount, _idPredio, _producto, _fecha, _peso, true);
-        emit PalletCreado(palletCount, _idPredio, _producto, _fecha, _peso);
+
+        // Emitir el evento de registro
+        emit PalletRegistered(_idPallet, _idPredio, _producto, _fechaCosecha, _pesoPallet);
     }
 
-    // Función para asignar un distribuidor a un pallet
-    function asignarDistribuidor(uint256 _idDistribuidor, uint256 _idPallet, uint256 _pesoEnviado) public {
-        distribuidorPalletCount++;
-        distribuidorPallets[distribuidorPalletCount] = DistribuidorPallet(distribuidorPalletCount, _idPallet, _idDistribuidor, _pesoEnviado);
-        emit DistribuidorAsignado(distribuidorPalletCount, _idPallet, _idDistribuidor, _pesoEnviado);
+    // Función para obtener la información de un pallet
+    function getPallet(uint256 _idPallet) public view returns (Pallet memory) {
+        return pallets[_idPallet];
     }
 
-    // Función para añadir o actualizar el peso enviado por un distribuidor
-    function agregarDistribuidor(uint256 _idDistribuidorPallet, uint256 _pesoEnviado) public {
-        distribuidorPallets[_idDistribuidorPallet].pesoEnviado = _pesoEnviado;
-        emit DistribuidorAsignado(_idDistribuidorPallet, distribuidorPallets[_idDistribuidorPallet].idPallet, distribuidorPallets[_idDistribuidorPallet].idDistribuidor, _pesoEnviado);
-    }
-
-    // Función para actualizar los detalles de un pallet
-    function actualizarPallet(
+    // Función para registrar un nuevo DistribuidorPallet asociado a un pallet específico
+    function registerDistribuidorPallet(
+        uint256 _idDistribuidorPallet,
         uint256 _idPallet,
-        string memory _producto,
-        uint256 _fecha,
-        uint256 _peso
+        uint256 _idDistribuidor,
+        uint256 _pesoEnvio
     ) public {
-        pallets[_idPallet].producto = _producto;
-        pallets[_idPallet].fecha = _fecha;
-        pallets[_idPallet].peso = _peso;
+        // Validar que el pallet existe antes de registrar un DistribuidorPallet
+        require(pallets[_idPallet].idPallet != 0, "Pallet no encontrado");
+
+        // Asegurarse de que el ID de DistribuidorPallet no esté en uso
+        for (uint256 i = 0; i < distribuidorPallets[_idPallet].length; i++) {
+            require(distribuidorPallets[_idPallet][i].idDistribuidorPallet != _idDistribuidorPallet, "ID de DistribuidorPallet ya existe");
+        }
+
+        // Crear y almacenar el nuevo DistribuidorPallet con el ID proporcionado
+        distribuidorPallets[_idPallet].push(DistribuidorPallet({
+            idDistribuidorPallet: _idDistribuidorPallet,
+            idPallet: _idPallet,
+            idDistribuidor: _idDistribuidor,
+            pesoEnvio: _pesoEnvio
+        }));
+
+        // Emitir el evento de registro de DistribuidorPallet
+        emit DistribuidorPalletRegistered(_idDistribuidorPallet, _idPallet, _idDistribuidor, _pesoEnvio);
     }
 
-    // Función para eliminar la asignación de un distribuidor a un pallet
-    function eliminarDistribuidorPallet(uint256 _idDistribuidorPallet) public {
-        delete distribuidorPallets[_idDistribuidorPallet];
+    // Función para actualizar un pallet existente
+    function updatePallet(
+        uint256 _idPallet,
+        uint256 _idPredio,
+        string memory _producto,
+        uint256 _fechaCosecha,
+        uint256 _pesoPallet
+    ) public {
+        // Validar que el pallet existe
+        require(pallets[_idPallet].idPallet != 0, "Pallet no encontrado.");
+
+        // Actualizar los datos del pallet
+        pallets[_idPallet] = Pallet({
+            idPallet: _idPallet,
+            idPredio: _idPredio,
+            producto: _producto,
+            fechaCosecha: _fechaCosecha,
+            pesoPallet: _pesoPallet
+        });
+
+        // Emitir el evento de actualización
+        emit PalletUpdated(_idPallet);
+    }
+
+    // Función para actualizar un DistribuidorPallet existente
+    function updateDistribuidorPallet(
+        uint256 _idDistribuidorPallet,
+        uint256 _idPallet,
+        uint256 _idDistribuidor,
+        uint256 _pesoEnvio
+    ) public {
+        // Validar que el DistribuidorPallet existe en la lista del pallet
+        bool found = false;
+        for (uint256 i = 0; i < distribuidorPallets[_idPallet].length; i++) {
+            if (distribuidorPallets[_idPallet][i].idDistribuidorPallet == _idDistribuidorPallet) {
+                // Asegurarse de que el distribuidor es el correcto
+                require(distribuidorPallets[_idPallet][i].idDistribuidor == _idDistribuidor, "Distribuidor incorrecto para este pallet.");
+
+                // Actualizar el peso de envío
+                distribuidorPallets[_idPallet][i].pesoEnvio = _pesoEnvio;
+                found = true;
+
+                // Emitir el evento de actualización
+                emit DistribuidorPalletUpdated(_idDistribuidorPallet);
+                break;
+            }
+        }
+
+        require(found, "DistribuidorPallet no encontrado.");
+    }
+
+    // Función para obtener todos los DistribuidorPallets asociados a un pallet
+    function getDistribuidorPalletsByPallet(uint256 _idPallet) public view returns (DistribuidorPallet[] memory) {
+        return distribuidorPallets[_idPallet];
+    }
+
+        event DistribuidorPalletEliminado(uint256 idDistribuidorPallet, uint256 idPallet);
+
+    // Función para eliminar un DistribuidorPallet por idDistribuidorPallet y idPallet
+    function eliminarDistribuidorPallet(uint256 _idPallet, uint256 _idDistribuidorPallet) public {
+        // Encontrar el índice del distribuidor a eliminar
+        bool found = false;
+        uint256 index;
+
+        for (uint256 i = 0; i < distribuidorPallets[_idPallet].length; i++) {
+            if (distribuidorPallets[_idPallet][i].idDistribuidorPallet == _idDistribuidorPallet) {
+                index = i;
+                found = true;
+                break;
+            }
+        }
+
+        require(found, "DistribuidorPallet no encontrado.");
+
+        // Intercambiar el elemento a eliminar con el último y luego hacer pop
+        uint256 lastIndex = distribuidorPallets[_idPallet].length - 1;
+
+        if (index != lastIndex) {
+            distribuidorPallets[_idPallet][index] = distribuidorPallets[_idPallet][lastIndex];
+        }
+        
+        distribuidorPallets[_idPallet].pop();
+
+        // Emitir evento de eliminación
+        emit DistribuidorPalletEliminado(_idDistribuidorPallet, _idPallet);
     }
 }
