@@ -25,11 +25,14 @@
         .container {
             display: flex;
             flex-direction: row;
-            width: 100%;
-            height: 100%;
+            min-height: 400px;
+            min-width: 400px;
             padding: 20px;
             gap: 20px;
             overflow: hidden;
+            background-color: rgba(255, 255, 255, 0.9); 
+            box-shadow: 0 2px 10px rgba(109, 76, 65, 0.9); 
+            border-radius: 10px; 
         }
 
         /* Columna de información, se adapta al espacio disponible */
@@ -58,11 +61,11 @@
     <!-- Información -->
     <div class="info">
         <h1>Detalles del Producto</h1>
-        <p><strong>Producto:</strong> {{ caja.recepcion.envio_pallet.pallet.producto }}</p>
-        <p><strong>Clasificación:</strong> {{ caja.recepcion.envio_pallet.pallet.clasificacion }}</p>
-        <p><strong>Fecha de Cosecha:</strong> {{ caja.recepcion.envio_pallet.pallet.fecha_cosecha }}</p>
-        <p><strong>Tipo de Empaque:</strong> {{ caja.tipo_caja.Material}}</p>
-        <p><strong>Reciclable:</strong> {% if caja.tipo_caja.reciclable %}Sí{% else %}No{% endif %}</p>
+        <p><strong>Producto:</strong> {{ pallet_block.producto_blockchain }}</p>
+        <p><strong>Clasificación:</strong> {{ pallet.clasificacion }}</p>
+        <p><strong>Fecha de Cosecha:</strong> {{ pallet.fecha_cosecha }}</p>
+        <p><strong>Tipo de Empaque:</strong> {{ caja_nor.tipo_caja.Material}}</p>
+        <p><strong>Reciclable:</strong> {% if caja_nor.tipo_caja.recicable %}Sí{% else %}No{% endif %}</p>
         <h1>Información de Origen</h1>
         <p><strong>Predio:</strong> {{ predio.nombre }}</p>
         <p><strong>Ubicación:</strong> {{ predio.direccion }}</p>
@@ -70,18 +73,18 @@
         <h2>Ruta a Centro de Distribución</h2>
         <ul>
             <li><strong>Desde:</strong> {{ predio.nombre }}</li>
-            <li><strong>Enviado al Centro de Distribución por:</strong> {{ envio_pallet.transporte.nombre}}</li>
-            <li><strong>Fecha y hora del envío:</strong> {{ envio_pallet.fecha_inicio }}</li>
-            <li><strong>Vehículo:</strong> {{ envio_pallet.vehiculo.marca }}-{{envio_pallet.vehiculo.patente}}</li> 
-            <li><strong>Centro de Distribución:</strong> {{ recepcion.distribuidor.nombre }}</li>
+            <li><strong>Enviado al Centro de Distribución por:</strong> {{ transporte_pallet.nombre}}</li>
+            <li><strong>Fecha y hora del envío:</strong> {{ recepcion.envio_pallet.fecha_inicio }}</li>
+            <li><strong>Vehículo:</strong> {{ vehiculo_pallet.marca }}-{{vehiculo_pallet.patente}}</li> 
+            <li><strong>Centro de Distribución:</strong> {{ distribuidor.nombre }}</li>
         </ul>
 
         {% if envio_caja %}
         <h2>Ruta Entrega</h2>
         <ul>
-            <li><strong>Enviado por:</strong> {{ envio_caja.transporte.nombre }}</li>
-            <li><strong>Vehículo:</strong> {{ envio_caja.vehiculo.marca }}-{{envio_caja.vehiculo.patente}}</li>
-            <li><strong>Fecha de Envío:</strong> {{ envio_caja.fecha_inicio}}</li>
+            <li><strong>Enviado por:</strong> {{ transporte_caja.nombre }}</li>
+            <li><strong>Vehículo:</strong> {{ vehiculo_caja.marca }}-{{vehiculo_caja.patente}}</li>
+            <li><strong>Fecha de Envío:</strong> {{ enviocajanor.fecha_inicio}}</li>
         </ul>
         {% endif %}
         
@@ -96,11 +99,11 @@
   <script>
       mapboxgl.accessToken = 'pk.eyJ1IjoiaXZhYjk4IiwiYSI6ImNtMHlwdGR4bTBxemYyc3EzeWlweTB4b3UifQ.SqDs4IzkxrtKlWqrbDfNXw';
       
-      // Coordenadas iniciales y datos
-      const predioLat = parseFloat("{{ predio.latitude }}".replace(',', '.'));
+// Coordenadas iniciales y datos
+const predioLat = parseFloat("{{ predio.latitude }}".replace(',', '.'));
       const predioLng = parseFloat("{{ predio.longitude }}".replace(',', '.'));
-      const recepcionDistribuidorLat = parseFloat("{{ recepcion.distribuidor.latitude }}".replace(',', '.'));
-      const recepcionDistribuidorLng = parseFloat("{{ recepcion.distribuidor.longitude }}".replace(',', '.'));
+      const recepcionDistribuidorLat = parseFloat("{{ distribuidor.latitude }}".replace(',', '.'));
+      const recepcionDistribuidorLng = parseFloat("{{ distribuidor.longitude }}".replace(',', '.'));
       const recepcionClienteLat = parseFloat("{{ recepcion_cliente.latitude }}".replace(',', '.'));
       const recepcionClienteLng = parseFloat("{{ recepcion_cliente.longitude }}".replace(',', '.'));
 
@@ -115,70 +118,60 @@
 
       map.addControl(new mapboxgl.NavigationControl(), 'top-right');
 
+      // Marcadores de los puntos
       const coordinates = [
           [predioLng, predioLat],
+          [recepcionDistribuidorLng, recepcionDistribuidorLat],
+          [recepcionClienteLng, recepcionClienteLat]
       ];
 
-      const envioPalletCoords = [
-          {% for coord in envio_pallet.coordenadas %}
-              {"latitud": parseFloat("{{ coord.latitud }}".replace(',', '.')), "longitud": parseFloat("{{ coord.longitud }}".replace(',', '.'))},
-          {% endfor %}
-      ];
-
-      envioPalletCoords.forEach(coord => {
-          coordinates.push([coord.longitud, coord.latitud]);
+      // Etiquetas de los puntos
+      const pointLabels = ['Predio', 'Distribuidor', 'Cliente'];
+      coordinates.forEach((coord, index) => {
+          new mapboxgl.Marker()
+              .setLngLat(coord)
+              .setPopup(new mapboxgl.Popup().setHTML(`<strong>${pointLabels[index]}</strong>`))
+              .addTo(map);
       });
 
-      coordinates.push([recepcionDistribuidorLng, recepcionDistribuidorLat]);
-      coordinates.push([recepcionClienteLng, recepcionClienteLat]);
+      // Solicitar la ruta usando la Directions API
+      const routeUrl = `https://api.mapbox.com/directions/v5/mapbox/driving/${predioLng},${predioLat};${recepcionDistribuidorLng},${recepcionDistribuidorLat};${recepcionClienteLng},${recepcionClienteLat}?geometries=geojson&access_token=${mapboxgl.accessToken}`;
 
-      map.on('load', () => {
-          const pointLabels = ['Predio', 'Distribuidor', 'Cliente'];
-          coordinates.forEach((coord, index) => {
-              new mapboxgl.Marker()
-                  .setLngLat(coord)
-                  .setPopup(new mapboxgl.Popup().setHTML(`<strong>${pointLabels[index]}</strong>`))
-                  .addTo(map);
-          });
-
-          map.addSource('route', {
-              'type': 'geojson',
-              'data': {
-                  'type': 'Feature',
-                  'properties': {},
-                  'geometry': {
-                      'type': 'LineString',
-                      'coordinates': coordinates
+      fetch(routeUrl)
+          .then(response => response.json())
+          .then(data => {
+              const route = data.routes[0].geometry;
+              
+              map.addSource('route', {
+                  'type': 'geojson',
+                  'data': {
+                      'type': 'Feature',
+                      'properties': {},
+                      'geometry': route
                   }
-              }
-          });
+              });
 
-          map.addLayer({
-              'id': 'route',
-              'type': 'line',
-              'source': 'route',
-              'layout': {
-                  'line-join': 'round',
-                  'line-cap': 'round'
-              },
-              'paint': {
-                  'line-color': '#888',
-                  'line-width': 6
-              }
-          });
+              map.addLayer({
+                  'id': 'route',
+                  'type': 'line',
+                  'source': 'route',
+                  'layout': {
+                      'line-join': 'round',
+                      'line-cap': 'round'
+                  },
+                  'paint': {
+                      'line-color': '#888',
+                      'line-width': 6
+                  }
+              });
 
-          const bounds = coordinates.reduce((bounds, coord) => {
-              return bounds.extend(coord);
-          }, new mapboxgl.LngLatBounds(coordinates[0], coordinates[0]));
+              const bounds = coordinates.reduce((bounds, coord) => {
+                  return bounds.extend(coord);
+              }, new mapboxgl.LngLatBounds(coordinates[0], coordinates[0]));
 
-          map.fitBounds(bounds, {
-              padding: 50
-          });
-      });
-
-      map.on('error', (e) => {
-          console.error('Error al cargar el mapa:', e);
-      });
+              map.fitBounds(bounds, { padding: 50 });
+          })
+          .catch(error => console.error('Error al cargar la ruta:', error));
   </script>
 </body>
 </html>

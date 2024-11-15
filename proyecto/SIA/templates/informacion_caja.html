@@ -77,7 +77,9 @@
         <p><strong>ID Caja:</strong> {{ caja.id }}</p>
         <p><strong>Fecha de Creación:</strong> {{ caja.fecha_caja }}</p>
         <p><strong>Peso de la Caja (KG):</strong> {{ caja.tipo_caja.capacidad }}</p>
-        <p><strong>Tipo de Caja:</strong> {{ caja.tipo_caja }}</p>
+        <p><strong>Tipo de Caja:</strong> {{ caja.tipo_caja.Material}}</p>
+        <p><strong>Es Reciclable:</strong> {% if caja.tipo_caja.recicable %}Sí{% else %}No{% endif %}</p>
+
 
 
         <h2>Información del Pallet</h2>

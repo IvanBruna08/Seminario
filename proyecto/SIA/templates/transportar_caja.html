@@ -11,7 +11,68 @@
 
     <!-- Estilos para la interfaz -->
     <style>
-        body { margin: 0; padding: 0; }
+                body {
+            font-family: 'Arial', sans-serif;
+            background-image: url('/static/css/ag1.jpg');
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+            color: black; 
+            padding: 20px; 
+            margin: 0; 
+        }
+
+        h1, h2 {
+            color: #2E7D32; 
+        }
+
+        .container {
+            max-width: 800px; 
+            margin: 0 auto; 
+            padding: 20px; 
+            background-color: rgba(255, 255, 255, 0.9); 
+            border-radius: 10px; 
+            box-shadow: 0 2px 10px rgba(109, 76, 65, 0.9); 
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse; 
+            margin-top: 20px; 
+            border-radius: 10px; 
+            overflow: hidden; 
+            box-shadow: 0 2px 10px rgba(109, 76, 65, 0.4); 
+        }
+        th, td {
+            border: 1px solid rgb(187, 187, 187); 
+            text-align: center; 
+            padding: 12px; 
+        }
+        th {
+            background-color: #4CAF50;
+            color: white; 
+        }
+
+        .info-section {
+            margin-top: 20px; 
+        }
+        .btn-logout {
+            position: absolute; 
+            top: 20px;
+            left: 20px;
+            background-color: #A1887F; 
+            color: white;
+            padding: 10px 20px;
+            text-align: center;
+            text-decoration: none;
+            border-radius: 5px;
+            font-size: 18px;
+            transition: background-color 0.3s;
+            z-index: 1000;
+        }
+        .btn-logout:hover {
+            background-color: rgba(109, 76, 65); /* Café medio */
+        }
         #map { height: 400px; width: 100%; }
         h1 { text-align: center; }
         .info { margin: 20px; }
@@ -23,29 +84,31 @@
     {% load static %}
 </head>
 <body>
-    <h1>Transportar Caja</h1>
-    
-    <div class="info">
-        <p><strong>Transportista:</strong> {{ transporte.nombre }}</p>
-        <p><strong>ID Caja:</strong> {{ caja.id }}</p>
-        <p><strong>Cliente:</strong> {{ cliente.nombre }}</p>
-        <p>Coordenadas del cliente: Latitud: {{ cliente.latitude }}, Longitud: {{ cliente.longitude }}</p>
-    </div>
-    
-    <h2>Selecciona un Vehículo:</h2>
-    <label for="vehicleSelect">Selecciona un Vehículo:</label>
-    <select id="vehicleSelect" name="vehiculo_id">
-        <option value="">-- Selecciona un vehículo --</option>
-        {% for vehiculo in vehiculos %}
-            <option value="{{ vehiculo.id }}">{{ vehiculo.marca }} - {{ vehiculo.patente }}</option>
-        {% endfor %}
-    </select>
-    
-    <div id="map"></div>
 
-    <div class="buttons">
-        <button id="startDelivery" class="start-btn">Iniciar Entrega</button>
+    <div class="container">
+        <h1>Transportar Caja</h1>
+        <div class="info">
+            <p><strong>ID Caja:</strong> {{ caja.id }}</p>
+            <p><strong>Cliente:</strong> {{ cliente.nombre }}</p>
+            <p><strong>Dirección Cliente:</strong> {{ cliente.direccion }}</p>
+        </div>
+        
+        <h2>Selecciona un Vehículo:</h2>
+        <label for="vehicleSelect">Selecciona un Vehículo:</label>
+        <select id="vehicleSelect" name="vehiculo_id">
+            <option value="">-- Selecciona un vehículo --</option>
+            {% for vehiculo in vehiculos %}
+                <option value="{{ vehiculo.id }}">{{ vehiculo.marca }} - {{ vehiculo.patente }}</option>
+            {% endfor %}
+        </select>
+        <div class="buttons">
+            <button id="startDelivery" class="start-btn">Iniciar Entrega</button>
+        </div>
+        
+        <div id="map"></div>
+
     </div>
+    
 
     <form id="startDeliveryForm" method="POST" action="{% url 'iniciar_entrega_caja' secure_id %}">
         {% csrf_token %}

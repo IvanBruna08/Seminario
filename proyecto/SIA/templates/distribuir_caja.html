@@ -73,7 +73,7 @@
                             <select class="form-control" id="tipo_caja_${i}" name="caja_${i}-tipo_caja" required>
                                 {% if tipocaja|length > 0 %}
                                     {% for tipo in tipocaja %}
-                                        <option value="{{ tipo.id }}">{{ tipo.Material }} - Peso: {{ tipo.capacidad }} kg</option>
+                                        <option value="{{ tipo.id }}">{{ tipo.Material }} - Peso: {{ tipo.capacidad }} kg -reciclable: {% if tipo.recicable %}Sí{% else %}No{% endif %}</option>
                                     {% endfor %}
                                 {% else %}
                                     <option value="">No hay tipos de caja registrados</option>

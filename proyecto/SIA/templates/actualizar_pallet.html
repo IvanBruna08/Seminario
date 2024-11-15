@@ -5,20 +5,25 @@
 {% block content %}
 <h2>Actualizar Pallet</h2>
 
-    <form method="POST">
-        {% csrf_token %}
-        <label for="pallet_id">Seleccionar Pallet:</label>
-        <select name="pallet_id" id="pallet_id" required>
-            {% for pallet in pallets %}
-                <option value="{{ pallet.id }}">{{ pallet.producto }} - {{ pallet.peso }} kg</option>
-            {% empty %}
-                <option value="">No hay pallets disponibles</option>
-            {% endfor %}
-        </select>
+<form method="POST">
+    {% csrf_token %}
+    
+    <label for="pallet_id">Seleccionar Pallet:</label>
+    <select name="pallet_id" id="pallet_id" required>
+        {% for pallet in pallets %}
+            <option value="{{ pallet.id }}">{{ pallet.producto }} - {{ pallet.peso }} kg</option>
+        {% empty %}
+            <option value="">No hay pallets disponibles</option>
+        {% endfor %}
+    </select>
 
+    <!-- Contenedor para Opciones de Actualización -->
+    <div class="contenedor-act">
         <h3>Opciones de Actualización</h3>
-        <button type="submit" name="action" value="actualizar_datos">Actualizar Datos del Pallet</button>
-        <button type="submit" name="action" value="eliminar_distribuidor">Eliminar Distribuidor</button>
-        <button type="submit" name="action" value="añadir_distribuidor">Añadir Distribuidor</button>
-    </form>
-    {% endblock %}
+        <button type="submit" name="action" value="actualizar_datos" class="opc-act">Actualizar Datos del Pallet</button>
+        <button type="submit" name="action" value="eliminar_distribuidor" class="opc-act">Eliminar Distribuidor</button>
+        <button type="submit" name="action" value="añadir_distribuidor" class="opc-act">Añadir Distribuidor</button>
+    </div>
+</form>
+
+{% endblock %}

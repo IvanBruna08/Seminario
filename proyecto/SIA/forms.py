@@ -255,7 +255,7 @@ class PalletForm(forms.ModelForm):
         self.fields['fecha_cosecha'].label = "Fecha de Cosecha"
         self.fields['cantidad'].label = "Cantidad Cajas"
         self.fields['peso'].label = "Peso Total (kg)"
-        self.fields['precio_venta'].label = "Precio de Venta"
+        self.fields['precio_venta'].label = "Precio de Venta por (Kg)"
 
     def clean(self):
         cleaned_data = super().clean()

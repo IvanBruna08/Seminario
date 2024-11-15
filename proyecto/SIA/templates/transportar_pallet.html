@@ -19,46 +19,114 @@
             height: 400px;
             margin-top: 20px;
         }
+        body {
+            font-family: 'Arial', sans-serif;
+            background-image: url('/static/css/ag1.jpg');
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+            color: black; 
+            padding: 20px; 
+            margin: 0; 
+        }
+
+        h1, h2 {
+            color: #2E7D32; 
+        }
+
+        .container {
+            max-width: 800px; 
+            margin: 0 auto; 
+            padding: 20px; 
+            background-color: rgba(255, 255, 255, 0.9); 
+            border-radius: 10px; 
+            box-shadow: 0 2px 10px rgba(109, 76, 65, 0.9); 
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse; 
+            margin-top: 20px; 
+            border-radius: 10px; 
+            overflow: hidden; 
+            box-shadow: 0 2px 10px rgba(109, 76, 65, 0.4); 
+        }
+        th, td {
+            border: 1px solid rgb(187, 187, 187); 
+            text-align: center; 
+            padding: 12px; 
+        }
+        th {
+            background-color: #4CAF50;
+            color: white; 
+        }
+
+        .info-section {
+            margin-top: 20px; 
+        }
+        .btn-logout {
+            position: absolute; 
+            top: 20px;
+            left: 20px;
+            background-color: #A1887F; 
+            color: white;
+            padding: 10px 20px;
+            text-align: center;
+            text-decoration: none;
+            border-radius: 5px;
+            font-size: 18px;
+            transition: background-color 0.3s;
+            z-index: 1000;
+        }
+        .btn-logout:hover {
+            background-color: rgba(109, 76, 65); /* Café medio */
+        }
     </style>
     
     {% load static %}
+    
 </head>
 <body>
-    <h1>Transportar Pallet</h1>
+    <div class ="container">
+        <h1>Transportar Pallet</h1>
     
-    <!-- Información del pallet -->
-    <p><strong>ID del Pallet:</strong> {{ pallet.id }}</p>
-    <p><strong>Producto:</strong> {{ pallet.producto }}</p>
-    <p><strong>Cantidad:</strong> {{ pallet.cantidad }}</p>
-    <p><strong>Peso:</strong> {{ pallet.peso }}</p>
+        <!-- Información del pallet -->
+        <p><strong>ID del Pallet:</strong> {{ pallet.id }}</p>
+        <p><strong>Producto:</strong> {{ pallet.producto }}</p>
+        <p><strong>Cantidad:</strong> {{ pallet.cantidad }}</p>
+        <p><strong>Peso:</strong> {{ pallet.peso }}</p>
 
-    <!-- Selección de vehículo -->
-    <h2>Selecciona un Vehículo:</h2>
-    <label for="vehicleSelect">Selecciona un Vehículo:</label>
-    <select id="vehicleSelect" name="vehiculo_id">
-        <option value="">-- Selecciona un vehículo --</option>
-        {% for vehiculo in vehiculos %}
-            <option value="{{ vehiculo.id }}">{{ vehiculo.marca }} - {{ vehiculo.patente }}</option>
-        {% endfor %}
-    </select>
+        <!-- Selección de vehículo -->
+        <h2>Selecciona un Vehículo:</h2>
+        <label for="vehicleSelect">Selecciona un Vehículo:</label>
+        <select id="vehicleSelect" name="vehiculo_id">
+            <option value="">-- Selecciona un vehículo --</option>
+            {% for vehiculo in vehiculos %}
+                <option value="{{ vehiculo.id }}">{{ vehiculo.marca }} - {{ vehiculo.patente }}</option>
+            {% endfor %}
+        </select>
 
-    <div class="buttons">
-        <button id="startDelivery" class="start-btn">Iniciar Entrega</button>
+        <div class="buttons">
+            <button id="startDelivery" class="btn-submit">Iniciar Entrega</button>
+        </div>
+
+        <!-- Información de destinos -->
+        <h1>Destinos</h1>
+        <ul>
+            {% for distribucion in distribuidores_info %}
+                <li>
+                    <strong>Distribuidor:</strong> {{ distribucion.distribuidor }}<br>
+                    <strong>Peso Enviado:</strong> {{ distribucion.peso_enviado }} kg<br>
+                </li>
+            {% endfor %}
+        </ul>
+
+        <!-- Mapa para mostrar rutas -->
+        <div id="map"></div>
+
+
     </div>
-
-    <!-- Información de destinos -->
-    <h1>Destinos</h1>
-    <ul>
-        {% for distribucion in distribuidores_info %}
-            <li>
-                <strong>Distribuidor:</strong> {{ distribucion.distribuidor }}<br>
-                <strong>Peso Enviado:</strong> {{ distribucion.peso_enviado }} kg<br>
-            </li>
-        {% endfor %}
-    </ul>
-
-    <!-- Mapa para mostrar rutas -->
-    <div id="map"></div>
+    
 
     <!-- Formulario oculto para iniciar la entrega -->
     <form id="startDeliveryForm" method="POST" action="{% url 'iniciar_entrega' secure_id %}" style="display:none;">

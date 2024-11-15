@@ -236,15 +236,25 @@ class Recepcion(models.Model):
 
 
 class TipoCaja(models.Model):
-
-    Material = models.CharField(max_length=20,choices=[
-        ('carton', 'Cartón'),
-        ('madera', 'Madera'),
-    ],default='carton',blank=False)
-    capacidad = models.DecimalField(max_digits=10, decimal_places=2,blank=False)
+    Material = models.CharField(
+        max_length=20,
+        choices=[
+            ('carton', 'Cartón'),
+            ('madera', 'Madera'),
+            ('plastico', 'Plastico')
+        ],
+        default='carton',
+        blank=False
+    )
+    capacidad = models.DecimalField(max_digits=10, decimal_places=2, blank=False)
     recicable = models.BooleanField(default=False)
+
+    class Meta:
+        unique_together = ('Material', 'capacidad', 'recicable')  # Asegura que cada combinación de Material, capacidad y recicable sea única
+
     def __str__(self):
-        return self.Material  # Mostrar el nombre del distribuidor
+        reciclable_str = "Reciclable" if self.recicable else "No reciclable"
+        return f"{self.Material} - {self.capacidad} kg ({reciclable_str})"
 
 
 class Caja(models.Model):

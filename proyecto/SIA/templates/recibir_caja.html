@@ -15,6 +15,10 @@
             padding: 20px; 
             margin: 0; 
         }
+        html, body {
+    height: 100%; /* Asegura que ambos tengan la altura completa */
+    margin: 0; /* Eliminar márgenes predeterminados */
+}
 
         h1, h2 {
             color: #2E7D32; 
@@ -68,35 +72,55 @@
             background-color: rgba(109, 76, 65); /* Café medio */
 }
     </style>
+        {% load static %}
 <body>
+    <div class="container">
+        <h2>Detalle Caja</h2>
 
-    <h2>Detalle Caja</h2>
+
+
+        <p>Predio: {{ caja.recepcion.envio_pallet.pallet.predio.nombre }}</p>
+        <p>Producto: {{ caja.recepcion.envio_pallet.pallet.producto }}</p>
+        <p>Clasificación: {{ caja.recepcion.envio_pallet.pallet.clasificacion }}</p>
+        <p>Cantidad: {{ caja.tipo_caja.capacidad }}</p>
+        <p>Material: {{ caja.tipo_caja.Material }}</p> 
+
+        <h2>Trazabilidad</h2>
+        <p>Centro de Distribución: {{ caja.recepcion.distribuidor.nombre }}</p>
+        <p>Ubicación: {{ caja.recepcion.distribuidor.direccion }}</p>
+        <p>Recibido por el Centro de Distribución: {{ caja.recepcion.fecha_recepcion}}</p>
+        <p>Origen del predio: {{ caja.recepcion.envio_pallet.pallet.predio.nombre }}</p>
+        <p>Dirección: {{ caja.recepcion.envio_pallet.pallet.predio.direccion }}</p>
 
 
 
-<p>Predio: {{ caja.recepcion.envio_pallet.pallet.predio.nombre }}</p>
-<p>Producto: {{ caja.recepcion.envio_pallet.pallet.producto }}</p>
-<p>Clasificación: {{ caja.recepcion.envio_pallet.pallet.clasificacion }}</p>
-{% load static %}
-<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 
-{% if hay_envio %}
+        {% load static %}
+        <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+        
+        {% if hay_envio %}
+        
+            <!-- Ejecutar finalizarEntrega para enviocaja antes de recepcioncliente -->
+            <button id="endDelivery" class="end-btn btn btn-danger">Finalizar</button>
+            <!-- Formulario para finalizar la entrega (oculto) -->
+            <form id="endDeliveryForm" method="POST" action="{% url 'finalizar_entrega_caja' secure_id %}" style="display: none;">
+            {% csrf_token %}
+                {% csrf_token %}
+                <input type="hidden" name="ruta_final_latitude" id="ruta_final_latitude">
+                <input type="hidden" name="ruta_final_longitude" id="ruta_final_longitude">
+                <input type="hidden" name="transporte_latitude" id="transporte_latitude">
+                <input type="hidden" name="transporte_longitude" id="transporte_longitude">
+                <input type="hidden" name="enviocaja_id" id="enviocaja_id" value="{{ envio_caja.id }}">
+                <input type="hidden" id="id_caja" value="{{ caja.id }}">
+                <input type="hidden" name="coordenadasTransporte" id="coordenadasTransporte">
+                <!-- Otros campos ocultos de enviocaja -->
+            </form>
 
-    <!-- Ejecutar finalizarEntrega para enviocaja antes de recepcioncliente -->
-    <button id="endDelivery" class="end-btn btn btn-danger">Finalizar</button>
-    <!-- Formulario para finalizar la entrega (oculto) -->
-    <form id="endDeliveryForm" method="POST" action="{% url 'finalizar_entrega_caja' secure_id %}" style="display: none;">
-    {% csrf_token %}
-        {% csrf_token %}
-        <input type="hidden" name="ruta_final_latitude" id="ruta_final_latitude">
-        <input type="hidden" name="ruta_final_longitude" id="ruta_final_longitude">
-        <input type="hidden" name="transporte_latitude" id="transporte_latitude">
-        <input type="hidden" name="transporte_longitude" id="transporte_longitude">
-        <input type="hidden" name="enviocaja_id" id="enviocaja_id" value="{{ envio_caja.id }}">
-        <input type="hidden" id="id_caja" value="{{ caja.id }}">
-        <input type="hidden" name="coordenadasTransporte" id="coordenadasTransporte">
-        <!-- Otros campos ocultos de enviocaja -->
-    </form>
+
+
+    </div>
+
+   
     <script src="{% static 'java/envio_caja.js' %}"></script>
     <script>
         $(document).ready(function() {

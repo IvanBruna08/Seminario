@@ -31,7 +31,7 @@
             <tr>
                 <td>{{ caja.id }}</td>
                 <td>{{ caja.cliente }}</td>
-                <td>{{ caja.tipo_caja }}</td>
+                <td>{{ caja.tipo_caja.Material}} {{caja.tipo_caja.capacidad}}Kg</td>
                 <td>{{ caja.tipo_caja.capacidad }}</td>
                 <td>
                     {% if caja.qr_caja %}

@@ -6,9 +6,9 @@
     <h3>Seleccionar Cajas</h3>
     <ul>
         {% for caja in cajas %}
-            <li>
+            <li style="color: black;">
                 <input type="checkbox" name="cajas" value="{{ caja.id }}">
-                {{ caja.tipo_caja }} - id: {{ caja.id }}
+                {{ caja.tipo_caja.Material }}- Capacidad (Kg) {{caja.tipo_caja.capacidad}} - id: {{ caja.id }}
             </li>
         {% endfor %}
     </ul>

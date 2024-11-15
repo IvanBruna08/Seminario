@@ -9,13 +9,79 @@
     <link rel="stylesheet" href="{% static 'css/styles.css' %}">
     <style>
         body {
-            margin: 20px;
+            font-family: 'Arial', sans-serif;
+            background-image: url('/static/css/ag1.jpg');
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+            color: black; 
+            padding: 20px; 
+            margin: 0; 
+        }
+
+        h1, h2 {
+            color: #2E7D32; 
+        }
+        h4{
+            font-size: 24px;
+
+        }
+
+        .container {
+            max-width: 600px; 
+            margin: 0 auto; 
+            padding: 20px; 
+            background-color: rgba(255, 255, 255, 0.9); 
+            border-radius: 10px; 
+            box-shadow: 0 2px 10px rgba(109, 76, 65, 0.9); 
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse; 
+            margin-top: 20px; 
+            border-radius: 10px; 
+            overflow: hidden; 
+            box-shadow: 0 2px 10px rgba(109, 76, 65, 0.4); 
+        }
+        th, td {
+            border: 1px solid rgb(187, 187, 187); 
+            text-align: center; 
+            padding: 12px; 
+        }
+        th {
+            background-color: #4CAF50;
+            color: white; 
+        }
+
+        .info-section {
+            margin-top: 20px; 
+        }
+
+        .btn-logout {
+            position: absolute; 
+            top: 20px;
+            left: 20px;
+            background-color: #A1887F; 
+            color: white;
+            padding: 10px 20px;
+            text-align: center;
+            text-decoration: none;
+            border-radius: 5px;
+            font-size: 18px;
+            transition: background-color 0.3s;
+            z-index: 1000;
+        }
+
+        .btn-logout:hover {
+            background-color: rgba(109, 76, 65);
         }
     </style>
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 </head>
 <body>
     <div class="container">
+        
         <h1>Registrar Recepción</h1>
 
         <div class="card mt-3">
@@ -23,10 +89,11 @@
                 <h4 class="card-title">Detalles del Pallet</h4>
                 <p><strong>ID del Pallet:</strong> {{ pallet.id }}</p>
                 <p><strong>Producto:</strong> {{ pallet.producto }}</p>
-                <p><strong>Cantidad:</strong> {{ pallet.cantidad }}</p>
                 <p><strong>Peso:</strong> {{ pallet.peso }}</p>
                 <p><strong>Peso Recibido:</strong> {{ dp.peso_enviado }}</p>
                 <p><strong>Fecha de Envío:</strong> {{ envio_pallet.fecha_inicio }}</p>
+                <p><strong>Patente del Vehículo:</strong> {{ envio_pallet.vehiculo.patente }}</p>
+
             </div>
         </div>
 
@@ -35,10 +102,9 @@
             <form method="post" action="{% url 'registrar_recepcion' secure_id %}" id="recepcionForm">
                 {% csrf_token %}
                 {{ form.as_p }} 
-                <button id="confirmar" type="submit" class="btn btn-secondary mt-2">Confirmar Pesaje y Finalizar Entrega</button>
+                <button id="confirmar" type="submit" class="btn-submit">Confirmar Pesaje y Finalizar Entrega</button>
             </form>
 
-            <!-- Formulario para finalizar la entrega (oculto) -->
             <form id="endDeliveryForm" method="POST" action="{% url 'finalizar_entrega' secure_id %}" style="display: none;">
                 {% csrf_token %}
                 <input type="hidden" name="ruta_final_latitude" id="ruta_final_latitude">
@@ -55,11 +121,8 @@
     <script src="{% static 'java/transporte_caja.js' %}"></script>
     <script>
         $(document).ready(function() {
-            // Al enviar el formulario de recepción
             $('#recepcionForm').on('submit', function(e) {
-                e.preventDefault();  // Evitar el envío inmediato del formulario
-                
-                // Confirmar Pesaje
+                e.preventDefault();
                 const form = $(this);
                 $.ajax({
                     type: form.attr('method'),
@@ -67,8 +130,6 @@
                     data: form.serialize(),
                     success: function(response) {
                         console.log("Pesaje confirmado exitosamente");
-    
-                        // Llamamos a la función finalizarEntrega para gestionar las coordenadas y finalizar la entrega
                         finalizarEntrega();
                     },
                     error: function(xhr, status, error) {
@@ -78,7 +139,5 @@
             });
         });
     </script>
-   
-    
 </body>
 </html>
